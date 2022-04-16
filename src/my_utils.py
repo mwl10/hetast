@@ -1,18 +1,17 @@
 import pandas as pd
 import numpy as np
 
-# read tsv to numpy array, each one will have the length of 
-# what kind of exceptions do we want to catch down the line?
-    # more or less than 3 col
+'''read tsv to numpy array for each light curve, return them as a python list
 
-# time column, flux values, errors 
+
+
+what kind of exceptions do we want to catch down the line?
+'''
 def file_to_np(*args):
     light_curves = []
-    # find longest file in terms of lines in the files, set that to the array lengths
     for file in args:
          with open(file, 'r') as f:
              light_curve = pd.read_csv(file, sep='\t').to_numpy()
-    
              # visually check there are three columns for each file 
              print(f"dims of {file}:\t{light_curve.shape}")
              light_curves.append(light_curve)
@@ -21,13 +20,70 @@ def file_to_np(*args):
 
 
 
-# could also just load an entire directory of lcs
-# or pickles? whatever becomes obvious eventually really...
+'''if individual light curves have more than one of the same time point, get rid of row 
+-----average them -> later :)
+'''
+def handle_dups(lcs):
+  for index, lc in enumerate(lcs):
+    unique, i = np.unique(lc[:,0], return_index=True)
+    lcs[index] = lc[i]
+  return lcs
 
 
-# want to convert to torch dataloader now...
-# just set the length to the max length of the light curves?
-# it'll 
+
+'''get all the time points across the list of light curves
+---------------------------------------------------
+input
+---------------------------------------------------
+lcs-------> python list of np light curves
+---------------------------------------------------
+return
+---------------------------------------------------
+union_tp--> 1-d numpy array of of all the time points across the light curves
+'''
+def union_timepoints(lcs):
+  lc_lengths = np.array([len(lc) for lc in lcs])
+  print(lc_lengths)
+  union_tp = np.zeros((sum(lc_lengths)))
+  print(union_tp.shape)
+  acc = 0
+  for i, lc in enumerate(lcs):
+    #lc[:,0] = lc[:,0] - lc[0,0]
+    union_tp[acc:acc + len(lc)] = lc[:,0]
+    print(len(lc))
+    acc += len(lc)
+  
+  union_tp = np.unique(union_tp)
+  union_tp.sort()
+ 
+  return union_tp # list of all time values for every light curve
+
+
+'''reorient the light curves to include all of the time points, setting 0 for the flux & error values of the new tps
+---------------------------------------------------
+input
+---------------------------------------------------
+lcs -----> python list of np light curves 
+union_tp-> np 1-d array of all the time points across the light curves
+---------------------------------------------------
+return
+---------------------------------------------------
+new_lcs--> new light curves with consistent time points dims are (len(lcs), len(union_tp), 3)
+
+'''
+def include_union_tp(lcs, union_tp):
+  new_lcs = np.zeros((len(lcs), len(union_tp), 3))
+  for i, lc in enumerate(lcs):
+    # get all the time points that aren't already in this light curve
+    new_tps = np.setdiff1d(union_tp, lc[:,0])
+    new_tps = np.expand_dims(new_tps, axis=1)
+    # add columns of zeros to the new time points for the flux vals and error
+    new_tps = np.append(new_tps, np.zeros((len(new_tps), 2)), axis=1)
+    lc = np.append(lc, new_tps, axis=0) # add the new rows of time points
+    lc.sort(axis=0) # reorder based on time 
+    new_lcs[i] = lc 
+  return new_lcs
+
 
 
 def main():

@@ -76,8 +76,9 @@ def include_union_tp(lcs, union_tp):
     # add columns of zeros to the new time points for the flux vals and error
     new_tps = np.append(new_tps, np.zeros((len(new_tps), 2)), axis=1)
     lc = np.append(lc, new_tps, axis=0) # add the new rows of time points
-    lc.sort(axis=0) # reorder based on time 
-    new_lcs[i] = lc 
+    # sort by time along the rows
+    sorted_indexes = lc[:,0].argsort()
+    new_lcs[i] = lc[sorted_indexes]
   return new_lcs
 
 

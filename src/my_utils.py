@@ -43,16 +43,12 @@ union_tp--> 1-d numpy array of of all the time points across the light curves
 '''
 def union_timepoints(lcs):
   lc_lengths = np.array([len(lc) for lc in lcs])
-  print(lc_lengths)
   union_tp = np.zeros((sum(lc_lengths)))
-  print(union_tp.shape)
   acc = 0
   for i, lc in enumerate(lcs):
     #lc[:,0] = lc[:,0] - lc[0,0]
     union_tp[acc:acc + len(lc)] = lc[:,0]
-    print(len(lc))
     acc += len(lc)
-  
   union_tp = np.unique(union_tp)
   union_tp.sort()
  

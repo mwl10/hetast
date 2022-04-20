@@ -7,10 +7,10 @@ import numpy as np
 
 what kind of exceptions do we want to catch down the line?
 '''
-def file_to_np(*args):
+def file_to_np(glob):
     max_len = 0
     light_curves = []
-    for file in args:
+    for file in glob:
         with open(file, 'r') as f:
             light_curve = pd.read_csv(file, sep='\t').to_numpy()
             # visually check there are three columns for each file 

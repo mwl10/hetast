@@ -79,7 +79,7 @@ def include_union_tp(lcs, max_len):
         need_to_append = max_len - length
         lc = np.append(lc, np.zeros((need_to_append, 3)), axis=0)
         lcs[i] = lc
-    return numpy.array(lcs)
+    return np.array(lcs)
 
  
   # new_lcs = np.zeros((len(lcs), len(union_tp), 3))

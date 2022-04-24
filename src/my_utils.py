@@ -34,6 +34,20 @@ def handle_dups(lcs):
 
 
 
+'''
+
+'''
+def zero_start(lcs):
+  starts = np.zeros(len(lcs))
+  max_len = 0
+  for i, lc in enumerate(lcs):
+    starts[i] = lc[0,0]
+    lc[:,0] = lc[:,0] - starts[i]
+    if len(lc) > max_len: max_len = len(lc)
+  return lcs, starts, max_len
+
+
+
 '''get all the time points across the list of light curves
 ---------------------------------------------------
 input
@@ -96,6 +110,26 @@ def include_union_tp(lcs, max_len):
 
     #return new_lcs
 
+
+
+# make the masks beforehand...
+def make_masks(lcs, batch_size=64):
+    # will depend on dimensions later
+    subsampled_mask = np.zeros_like(lcs[:,:,1])
+    recon_mask = np.zeros_like(lcs[:,:,1])
+    for i,lc in enumerate(lcs):
+        indexes = lc[:,1].nonzero()[0]
+        # this should vary to some extent
+        length = int(np.round(len(indexes) * .7))
+        obs_points = np.sort(np.random.choice(indexes, size=length, replace=False))
+        subsampled_mask[i, obs_points] = 1
+    #recon_mask[i] = np.logical_not(subsampled_mask[i])
+
+        recon_mask[i] = np.logical_xor(lc[:,1], subsampled_mask[i])
+
+    recon_mask = np.split(recon_mask, len(subsampled_mask) / batch_size)
+    subsampled_mask = np.split(subsampled_mask, len(subsampled_mask) / batch_size)
+    return subsampled_mask, recon_mask
 
 
 def main():

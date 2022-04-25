@@ -110,7 +110,7 @@ def include_union_tp(lcs, max_len):
 
 
 # make the masks beforehand...
-def make_masks(lcs, batch_size=64):
+def make_masks(lcs):
     # will depend on dimensions later
     subsampled_mask = np.zeros_like(lcs[:,:,1])
     recon_mask = np.zeros_like(lcs[:,:,1])

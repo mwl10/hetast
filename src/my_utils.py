@@ -3,8 +3,6 @@ import numpy as np
 
 '''read tsv to numpy array for each light curve, return them as a python list
 
-
-
 what kind of exceptions do we want to catch down the line?
 '''
 def file_to_np(*args):
@@ -45,7 +43,6 @@ def zero_start(lcs):
     lc[:,0] = lc[:,0] - starts[i]
     if len(lc) > max_len: max_len = len(lc)
   return lcs, starts, max_len
-
 
 
 '''get all the time points across the list of light curves
@@ -123,8 +120,6 @@ def make_masks(lcs, batch_size=64):
         length = int(np.round(len(indexes) * .7))
         obs_points = np.sort(np.random.choice(indexes, size=length, replace=False))
         subsampled_mask[i, obs_points] = 1
-    #recon_mask[i] = np.logical_not(subsampled_mask[i])
-
         recon_mask[i] = np.logical_xor(lc[:,1], subsampled_mask[i])
 
     recon_mask = np.split(recon_mask, len(subsampled_mask) / batch_size)

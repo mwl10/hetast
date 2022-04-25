@@ -122,8 +122,8 @@ def make_masks(lcs, batch_size=64):
         subsampled_mask[i, obs_points] = 1
         recon_mask[i] = np.logical_xor(lc[:,1], subsampled_mask[i])
 
-    recon_mask = np.split(recon_mask, len(subsampled_mask) / batch_size)
-    subsampled_mask = np.split(subsampled_mask, len(subsampled_mask) / batch_size)
+    #recon_mask = np.split(recon_mask, len(subsampled_mask) / batch_size)
+    #subsampled_mask = np.split(subsampled_mask, len(subsampled_mask) / batch_size)
     return subsampled_mask, recon_mask
 
 

@@ -48,11 +48,10 @@ def normal_kl(mu1, lv1, mu2, lv2):
 def mean_squared_error(orig, pred, mask, error_bars=1.):
     error_bars = error_bars * mask
     print(error_bars.shape, pred.shape, mask.shape)
-
-
+    print(error_bars[0,0,0], pred[0,0,0,0], mask[0,0,0])
     error = ((orig - pred) / error_bars) ** 2
 
-    
+
     #error = (orig - pred) ** 2
     
     error = error * mask

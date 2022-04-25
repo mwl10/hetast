@@ -198,14 +198,14 @@ class TVAE(nn.Module):
 
     def compute_mean_mse(self, target_y, pred):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
-        return utils.mean_squared_error(target, pred.mean(0), mask, error_bars=None)
+        return utils.mean_squared_error(target, pred.mean(0), mask, error_bars=1.)
 
     def compute_mean_mae(self, target_y, pred):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
         return utils.mean_absolute_error(target, pred.mean(0), mask)
 
     def compute_unsupervised_loss(
-        self, context_x, context_y, target_x, target_y, num_samples=1, beta=1., error_bars=None
+        self, context_x, context_y, target_x, target_y, num_samples=1, beta=1., error_bars=1.
     ):
         loss_info = LossInfo()
         px, qz = self.get_reconstruction(context_x, context_y, target_x, num_samples)

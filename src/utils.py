@@ -50,7 +50,9 @@ def mean_squared_error(orig, pred, mask, error_bars=1.):
     print(error_bars.shape, pred.shape, mask.shape, orig.shape)
     print(error_bars[0,0,0], pred[0,0,0,0], mask[0,0,0], orig[0,0,0])
     error = ((orig - pred) / error_bars) ** 2
-    print(error)
+    # shape is 1,8,267,1
+    error = torch.nan_to_num(error, posinf=0.0)
+
     # need 0.0000000000001 in values to not divide by zero 
 
     #error = (orig - pred) ** 2

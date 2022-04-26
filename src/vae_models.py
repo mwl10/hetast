@@ -171,8 +171,6 @@ class TVAE(nn.Module):
 
         log_p2 = utils.log_normal_pdf(
             target, px.mean, px.logvar, mask, error_bars=0.).sum(-1).sum(-1)     
-        print(log_p2, 'before')
-        print(log_p, 'now')
         if norm:
             return log_p / mask.sum(-1).sum(-1)
 

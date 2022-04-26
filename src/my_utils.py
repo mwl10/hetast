@@ -99,7 +99,7 @@ def include_union_tp(lcs, max_len):
 
 def resample_lc(lc):
     fluxes = lc[:,1]
-    error_bars = lc[:,2].reshape
+    error_bars = lc[:,2]
     lc[:,1] = fluxes + np.random.normal(0, error_bars)
     return lc
 

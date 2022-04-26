@@ -92,20 +92,22 @@ def include_union_tp(lcs, max_len):
         lcs[i] = lc
     return np.array(lcs)
 
- 
-  # new_lcs = np.zeros((len(lcs), len(union_tp), 3))
-  # for i, lc in enumerate(lcs):
-  #   # get all the time points that aren't already in this light curve
-  #   new_tps = np.setdiff1d(union_tp, lc[:,0])
-  #   new_tps = np.expand_dims(new_tps, axis=1)
-  #   # add columns of zeros to the new time points for the flux vals and error
-  #   new_tps = np.append(new_tps, np.zeros((len(new_tps), 2)), axis=1)
-  #   lc = np.append(lc, new_tps, axis=0) # add the new rows of time points
-  #   # sort by time along the rows
-  #   sorted_indexes = lc[:,0].argsort()
-  #   new_lcs[i] = lc[sorted_indexes]
 
-    #return new_lcs
+# function for data augmentation using noise properties 
+# sample new light curve by adding N(0,error_bars) to flux values 
+
+
+def resample_lc(lc):
+    fluxes = lc[:,1]
+    error_bars = lc[:,2].reshape
+    lc[:,1] = fluxes + np.random.normal(0, error_bars)
+    return lc
+
+def resample_lcs(lcs):
+    fluxes = lcs[:,:,1]
+    error_bars = lcs[:,:,2]
+    lcs[:,:,1] = fluxes + np.random.normal(0, error_bars)
+    return lcs
 
 
 

@@ -21,11 +21,17 @@ def union_time(data_loader, classif=False):
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-
+# log of the probability according to a normal distribution
 def log_normal_pdf(x, mean, logvar, mask):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
     return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
+
+# to include error bars 
+def log_normal_pdf(x, mean, logvar, mask, error_bars=0.):
+    const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
+    const = torch.log(const)
+    return -0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar) + error_bars)) * mask
 
 
 def mog_log_pdf(x, mean, logvar, mask):
@@ -44,33 +50,19 @@ def normal_kl(mu1, lv1, mu2, lv2):
     kl = lstd2 - lstd1 + ((v1 + (mu1 - mu2) ** 2.0) / (2.0 * v2)) - 0.5
     return kl
 
-# function for data augmentation using noise properties 
-# sample new light curve by adding N(0,error_bars) to flux values 
 
 
-def resample_lc(lc):
-    fluxes = lc[:,1]
-    error_bars = lc[:,2].reshape
-    lc[:,1] = fluxes + np.random.normal(0, error_bars)
-    return lc
+# def mean_squared_error(orig, pred, mask, error_bars=1.):
+#     error = (orig - pred) ** 2
+#     error = error * mask
+#     return error.sum() / mask.sum()
 
-def resample_lcs(lcs):
-    fluxes = lcs[:,:,1]
-    error_bars = lcs[:,:,2]
-    lcs[:,:,1] = fluxes + np.random.normal(0, error_bars)
-    return lcs
-
-
-
-def mean_squared_error(orig, pred, mask, error_bars=1.):
-    error_bars = error_bars + 0.000001
+# my mse for error bars
+def mean_squared_error(orig, pred, mask, error_bars):
+    error_bars = error_bars + 1.000001
     new_error = ((orig - pred)**2) / (error_bars**2)
-    error = (orig - pred) ** 2
-    error = error * mask
     new_error = new_error * mask
-    mask_sum = mask.sum()
-    old_return = error.sum() / mask_sum
-    new_return = new_error.sum() / mask_sum
+    new_return = new_error.sum() / mask.sum()
     return new_return
 
 

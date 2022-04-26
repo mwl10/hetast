@@ -67,8 +67,6 @@ def mean_squared_error(orig, pred, mask, error_bars=1.):
     # the higher the error bars, the lower the loss
     #new_error = ((orig - pred) / error_bars) ** 2
     new_error = ((orig - pred)**2) / (error_bars**2)
-
-
     error = (orig - pred) ** 2
     # shape is 1,8,267,1
     new_error = torch.nan_to_num(new_error, posinf=0.0)
@@ -83,7 +81,7 @@ def mean_squared_error(orig, pred, mask, error_bars=1.):
     #print(new_error.sum() / mask_sum, 'now')
     # need 0.0000000000001 in values to not divide by zero 
 
-    return (new_error.sum() / mask_sum) * 5
+    return old_return
 
 
 def mean_absolute_error(orig, pred, mask):

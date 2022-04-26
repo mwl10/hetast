@@ -44,12 +44,32 @@ def normal_kl(mu1, lv1, mu2, lv2):
     kl = lstd2 - lstd1 + ((v1 + (mu1 - mu2) ** 2.0) / (2.0 * v2)) - 0.5
     return kl
 
+# function for data augmentation using noise properties 
+# sample new light curve by adding N(0,error_bars) to flux values 
+
+
+def resample_lc(lc):
+    fluxes = lc[:,1]
+    error_bars = lc[:,2].reshape
+    lc[:,1] = fluxes + np.random.normal(0, error_bars)
+    return lc
+
+def resample_lcs(lcs):
+    fluxes = lcs[:,:,1]
+    error_bars = lcs[:,:,2]
+    lcs[:,:,1] = fluxes + np.random.normal(0, error_bars)
+    return lcs
+
+
+
+
 
 def mean_squared_error(orig, pred, mask, error_bars=1.):
 
 
     # the higher the error bars, the lower the loss
-    new_error = ((orig - pred) / error_bars) ** 2
+    #new_error = ((orig - pred) / error_bars) ** 2
+    new_error = ((orig - pred)**2) / (error_bars**2)
     error = (orig - pred) ** 2
     # shape is 1,8,267,1
     new_error = torch.nan_to_num(new_error, posinf=0.0)

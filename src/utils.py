@@ -83,7 +83,7 @@ def mean_squared_error(orig, pred, mask, error_bars=1.):
     #print(new_error.sum() / mask_sum, 'now')
     # need 0.0000000000001 in values to not divide by zero 
 
-    return old_return
+    return error.sum() / mask_sum
 
 
 def mean_absolute_error(orig, pred, mask):

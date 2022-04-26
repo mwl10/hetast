@@ -46,19 +46,23 @@ def normal_kl(mu1, lv1, mu2, lv2):
 
 
 def mean_squared_error(orig, pred, mask, error_bars=1.):
-    error_bars = error_bars * mask
+
+
+    # the higher the error bars, the lower the loss
     new_error = ((orig - pred) / error_bars) ** 2
     error = (orig - pred) ** 2
     # shape is 1,8,267,1
     new_error = torch.nan_to_num(new_error, posinf=0.0)
     
+    error = error * mask
+    new_error = new_error * mask
     print(error.sum(), 'before', error.shape)
     print(new_error.sum(), 'now', new_error.shape)
     # need 0.0000000000001 in values to not divide by zero 
 
     #error = (orig - pred) ** 2
     
-    error = error * mask
+    #error = error * mask
     return error.sum() / mask.sum()
 
 

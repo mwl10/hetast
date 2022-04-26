@@ -78,10 +78,10 @@ def mean_squared_error(orig, pred, mask, error_bars=1.):
     mask_sum = mask.sum()
 
     print(error.sum() / mask_sum, 'before')
-    print(new_error.sum() / mask_sum, 'now')
+    #print(new_error.sum() / mask_sum, 'now')
     # need 0.0000000000001 in values to not divide by zero 
 
-    return error.sum() / mask.sum()
+    return new_error.sum() / mask_sum
 
 
 def mean_absolute_error(orig, pred, mask):

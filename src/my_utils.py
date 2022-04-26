@@ -4,7 +4,6 @@ import numpy as np
 
 # light curves are all modified in place...
 
-
 '''read tsv to numpy array for each light curve, return them as a python list
 
 what kind of exceptions do we want to catch down the line?

@@ -52,8 +52,8 @@ def mean_squared_error(orig, pred, mask, error_bars=1.):
     new_error = ((orig - pred) / error_bars) ** 2
     error = (orig - pred) ** 2
     # shape is 1,8,267,1
-    new_error = torch.nan_to_num(new_error, posinf=0.0)
-    
+    #new_error = torch.nan_to_num(new_error, posinf=0.0)
+
     error = error * mask
     new_error = new_error * mask
     print(error.sum(), 'before', error.shape)

@@ -22,15 +22,17 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 # log of the probability according to a normal distribution
-def log_normal_pdf(x, mean, logvar, mask):
-    const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
-    const = torch.log(const)
-    return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
+# def log_normal_pdf(x, mean, logvar, mask):
+#     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
+#     const = torch.log(const)
+#     return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
 
 # to include error bars 
 def log_normal_pdf(x, mean, logvar, mask, error_bars=0.):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
+    print(-0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar) + error_bars)) * mask, 'now')
+    print(-0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar))) * mask, 'before')
     return -0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar) + error_bars)) * mask
 
 
@@ -59,7 +61,13 @@ def normal_kl(mu1, lv1, mu2, lv2):
 
 # my mse for error bars
 def mean_squared_error(orig, pred, mask, error_bars):
-    error_bars = error_bars + 1.000001
+    # if error bars are set to 0 then we need to add 1.00001, otherwise need to add .0000001
+    if torch.is_tensor(error_bars):
+        error_bars = error_bars + 0.000001
+    else:
+        error_bars = error_bars + 1.000001
+
+
     new_error = ((orig - pred)**2) / (error_bars**2)
     new_error = new_error * mask
     new_return = new_error.sum() / mask.sum()

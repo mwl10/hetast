@@ -190,10 +190,8 @@ class TVAE(nn.Module):
     def compute_mse(self, target_y, pred, error_bars):
         # error should just be a dim of target_y 
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
-        print(pred.size(0))
-        want = utils.mean_squared_error(target, pred, mask, error_bars) / pred.size(0)
-        print(want)
-        return want
+        return utils.mean_squared_error(target, pred, mask, error_bars) / pred.size(0)
+
 
     def compute_mae(self, target_y, pred):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]

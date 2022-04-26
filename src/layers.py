@@ -90,7 +90,8 @@ class UnTAN(nn.Module):
             assert self.union_tp is not None
             un_key = self.linears[1](self.time_emb(self.union_tp)).view(
                 1, self.h, -1, self.embed_time_k)
-            un_scores = torch.matmul(query, un_key.transpose(-2, -1)) / math.sqrt(d_k)
+            un_scores = torch.matmul(
+                query, un_key.transpose(-2, -1)) / math.sqrt(d_k)
             # normalizer = torch.logsumexp(un_scores.unsqueeze(-1), dim=-2)
             # intensity = torch.exp(torch.logsumexp(scores, dim=-2) - normalizer)
             normalizer = torch.max(un_scores.unsqueeze(-1), dim=-2)[0]

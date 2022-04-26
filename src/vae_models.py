@@ -27,6 +27,7 @@ class LossInfo:
 
 class TVAE(nn.Module):
     '''Temporal Variational Autoencoder'''
+
     def __init__(
         self,
         input_dim,
@@ -94,7 +95,8 @@ class TVAE(nn.Module):
         if self.mixing == 'concat_and_mix':
             hidden = torch.cat((hidden[:, :, :, 0], hidden[:, :, :, 1]), -1)
             q = self.h2z(hidden)
-            qz.mean, qz.logvar = q[:, :, :self.latent_dim], q[:, :, self.latent_dim:]
+            qz.mean, qz.logvar = q[:, :,
+                                   :self.latent_dim], q[:, :, self.latent_dim:]
         elif self.mixing == 'concat':
             hidden = torch.cat((hidden[:, :, :, 0], hidden[:, :, :, 1]), -1)
             qz.mean = self.h2z_mean(hidden)
@@ -159,7 +161,8 @@ class TVAE(nn.Module):
 
     def kl_div(self, qz, mask=None, norm=True):
         pz_mean = pz_logvar = torch.zeros(qz.mean.size()).to(self.device)
-        kl = utils.normal_kl(qz.mean, qz.logvar, pz_mean, pz_logvar).sum(-1).sum(-1)
+        kl = utils.normal_kl(qz.mean, qz.logvar, pz_mean,
+                             pz_logvar).sum(-1).sum(-1)
         if norm:
             return kl / mask.sum(-1).sum(-1)
         return kl
@@ -167,7 +170,7 @@ class TVAE(nn.Module):
     def compute_loglik(self, target_y, px, error_bars, norm=True):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
         log_p = utils.log_normal_pdf(
-            target, px.mean, px.logvar, mask, error_bars).sum(-1).sum(-1) 
+            target, px.mean, px.logvar, mask, error_bars).sum(-1).sum(-1)
         if norm:
             return log_p / mask.sum(-1).sum(-1)
 
@@ -184,7 +187,8 @@ class TVAE(nn.Module):
     def compute_elbo(
         self, context_x, context_y, target_x, target_y, error_bars, num_samples=1, beta=1.
     ):
-        px, qz = self.get_reconstruction(context_x, context_y, target_x, num_samples)
+        px, qz = self.get_reconstruction(
+            context_x, context_y, target_x, num_samples)
         mask = target_y[:, :, self.dim:]
         # we're just augmenting loglik to include error bars
         loglik = self.compute_loglik(target_y, px, error_bars, self.norm)
@@ -193,10 +197,9 @@ class TVAE(nn.Module):
             torch.logsumexp(loglik - beta * kl, dim=0).mean(0) - np.log(num_samples))
 
     def compute_mse(self, target_y, pred, error_bars):
-        # error should just be a dim of target_y 
+        # error should just be a dim of target_y
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
         return utils.mean_squared_error(target, pred, mask, error_bars) / pred.size(0)
-
 
     def compute_mae(self, target_y, pred):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
@@ -214,7 +217,8 @@ class TVAE(nn.Module):
         self, context_x, context_y, target_x, target_y, num_samples=1, beta=1., error_bars=0.
     ):
         loss_info = LossInfo()
-        px, qz = self.get_reconstruction(context_x, context_y, target_x, num_samples)
+        px, qz = self.get_reconstruction(
+            context_x, context_y, target_x, num_samples)
         mask = target_y[:, :, self.dim:]
         loglik = self.compute_loglik(target_y, px, error_bars, self.norm)
         kl = self.kl_div(qz, mask, self.norm)
@@ -225,7 +229,8 @@ class TVAE(nn.Module):
         loss_info.loglik = loglik.mean()
         loss_info.mse = self.compute_mse(target_y, px.mean, error_bars)
         loss_info.mae = self.compute_mae(target_y, px.mean)
-        loss_info.mean_mse = self.compute_mean_mse(target_y, px.mean, error_bars)
+        loss_info.mean_mse = self.compute_mean_mse(
+            target_y, px.mean, error_bars)
         loss_info.mean_mae = self.compute_mean_mae(target_y, px.mean)
         loss_info.mogloglik = self.compute_mog_loglik(target_y, px)
         loss_info.composite_loss = self.elbo_weight * loss_info.elbo \
@@ -235,6 +240,7 @@ class TVAE(nn.Module):
 
 class HeTVAE_DET(TVAE):
     '''Heteroscedastic Temporal Variational Autoencoder without deterministic pathway'''
+
     def __init__(
         self, embed_time, intensity, union_tp, *args, **kwargs
     ):
@@ -261,6 +267,7 @@ class HeTVAE_DET(TVAE):
 
 class HeTVAE_PROB(HeTVAE_DET):
     '''Heteroscedastic Temporal Variational Autoencoder without probabilistic pathway'''
+
     def __init__(self, *args, **kwargs):
         super(HeTVAE_PROB, self).__init__(*args, **kwargs)
 
@@ -270,6 +277,7 @@ class HeTVAE_PROB(HeTVAE_DET):
 
 class HeTVAE(HeTVAE_DET):
     '''Heteroscedastic Temporal Variational Autoencoder'''
+
     def __init__(
         self, *args, **kwargs
     ):

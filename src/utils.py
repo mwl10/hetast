@@ -27,7 +27,9 @@ def count_parameters(model):
 #     const = torch.log(const)
 #     return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
 
-# to include error bars 
+# to include error bars
+
+
 def log_normal_pdf(x, mean, logvar, mask, error_bars=0.):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
@@ -38,7 +40,8 @@ def mog_log_pdf(x, mean, logvar, mask):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
     const2 = torch.from_numpy(np.array([mean.size(0)])).float().to(x.device)
-    loglik = -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
+    loglik = -0.5 * (const + logvar + (x - mean) **
+                     2.0 / torch.exp(logvar)) * mask
     return torch.logsumexp(loglik - torch.log(const2), 0)
 
 
@@ -49,7 +52,6 @@ def normal_kl(mu1, lv1, mu2, lv2):
     lstd2 = lv2 / 2.0
     kl = lstd2 - lstd1 + ((v1 + (mu1 - mu2) ** 2.0) / (2.0 * v2)) - 0.5
     return kl
-
 
 
 # def mean_squared_error(orig, pred, mask, error_bars=1.):
@@ -64,7 +66,6 @@ def mean_squared_error(orig, pred, mask, error_bars):
         error_bars = error_bars + 0.000001
     else:
         error_bars = error_bars + 1.000001
-
 
     new_error = ((orig - pred)**2) / (error_bars**2)
     new_error = new_error * mask
@@ -189,7 +190,8 @@ def get_mimiciii_data(batch_size, test_batch_size=5, filter_anomalies=True):
             # print(data_min, data_max)
             if data_max == 0:
                 data_max = 1
-            observed_vals[:, :, k] = (observed_vals[:, :, k] - data_min) / data_max
+            observed_vals[:, :, k] = (
+                observed_vals[:, :, k] - data_min) / data_max
         # set masked out elements back to zero
         observed_vals[observed_mask == 0] = 0
 
@@ -211,8 +213,10 @@ def get_mimiciii_data(batch_size, test_batch_size=5, filter_anomalies=True):
     val_data = torch.from_numpy(val_data).float()
     test_data = torch.from_numpy(test_data).float()
 
-    train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=False)
-    test_dataloader = DataLoader(test_data, batch_size=test_batch_size, shuffle=False)
+    train_dataloader = DataLoader(
+        train_data, batch_size=batch_size, shuffle=False)
+    test_dataloader = DataLoader(
+        test_data, batch_size=test_batch_size, shuffle=False)
     val_dataloader = DataLoader(val_data, batch_size=100, shuffle=False)
 
     data_objects = {
@@ -236,8 +240,10 @@ def get_physionet_data(batch_size, test_batch_size=5):
     )
     print(train_data.shape, test_data.shape)
 
-    train_dataloader = DataLoader(train_data, batch_size=batch_size, shuffle=False)
-    test_dataloader = DataLoader(test_data, batch_size=test_batch_size, shuffle=False)
+    train_dataloader = DataLoader(
+        train_data, batch_size=batch_size, shuffle=False)
+    test_dataloader = DataLoader(
+        test_data, batch_size=test_batch_size, shuffle=False)
     val_dataloader = DataLoader(val_data, batch_size=100, shuffle=False)
 
     data_objects = {
@@ -271,7 +277,8 @@ def get_synthetic_data(
         query_values = np.dot(weights, key_values)
         ground_truth.append(query_values)
         if add_noise:
-            noisy_query_values = query_values + 0.1 * np.random.randn(total_points)
+            noisy_query_values = query_values + \
+                0.1 * np.random.randn(total_points)
         observed_values.append(noisy_query_values)
         ground_truth_tp.append(query_points)
 

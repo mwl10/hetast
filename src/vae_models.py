@@ -168,8 +168,14 @@ class TVAE(nn.Module):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
         log_p = utils.log_normal_pdf(
             target, px.mean, px.logvar, mask, error_bars).sum(-1).sum(-1)
+
+        log_p2 = utils.log_normal_pdf(
+            target, px.mean, px.logvar, mask, error_bars=0.).sum(-1).sum(-1)     
+        print(log_p2, 'before')
+        print(log_p, 'now')
         if norm:
             return log_p / mask.sum(-1).sum(-1)
+
         return log_p
 
     def compute_mog_loglik(self, target_y, px):

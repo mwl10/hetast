@@ -73,8 +73,9 @@ def mean_squared_error(orig, pred, mask, error_bars=1.):
 
     error = error * mask
     new_error = new_error * mask
-    #print(error.sum(), 'before', error.shape)
-    #print(new_error.sum(), 'now', new_error.shape)
+    
+    print(error.sum() / mask.sum(), 'before')
+    print(new_error.sum() / mask.sum(), 'now')
     # need 0.0000000000001 in values to not divide by zero 
 
     #error = (orig - pred) ** 2

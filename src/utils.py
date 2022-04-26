@@ -62,10 +62,7 @@ def resample_lcs(lcs):
 
 
 
-
-
 def mean_squared_error(orig, pred, mask, error_bars=1.):
-
 
     # the higher the error bars, the lower the loss
     #new_error = ((orig - pred) / error_bars) ** 2
@@ -76,14 +73,14 @@ def mean_squared_error(orig, pred, mask, error_bars=1.):
 
     error = error * mask
     new_error = new_error * mask
-    print(error.sum(), 'before', error.shape)
-    print(new_error.sum(), 'now', new_error.shape)
+    #print(error.sum(), 'before', error.shape)
+    #print(new_error.sum(), 'now', new_error.shape)
     # need 0.0000000000001 in values to not divide by zero 
 
     #error = (orig - pred) ** 2
     
     #error = error * mask
-    return error.sum() / mask.sum()
+    return new_error.sum() / mask.sum()
 
 
 def mean_absolute_error(orig, pred, mask):

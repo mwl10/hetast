@@ -31,8 +31,9 @@ def count_parameters(model):
 def log_normal_pdf(x, mean, logvar, mask, error_bars=0.):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
-    print(-0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar) + error_bars)) * mask, 'now')
-    print(-0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar))) * mask, 'before')
+    print(logvar.shape, error_bars.shape)
+    #print(-0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar) + error_bars)) * mask, 'now')
+    #print(-0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar))) * mask, 'before')
     return -0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar) + error_bars)) * mask
 
 

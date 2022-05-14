@@ -25,6 +25,29 @@ def file_to_np(*args):
     return light_curves, max_len
 
 
+
+def normalize(lcs, by='all'): # think about rounding time, normalizing time, but keep that separate for now
+    if by == 'all':
+        flux_std = np.std(lcs[:,:,1])
+        flux_mean = np.mean(lcs[:,:,1])
+        lcs[:,:,1] = (lcs[:,:,1] - flux_mean) / flux_std
+        lcs[:,:,2] = lcs[:,:,2] / flux_std
+        means_stds = np.array([flux_std, flux_mean])
+        
+    elif by == 'individual':
+        means_stds = np.zeros((len(lcs), 2))
+        for i, lc in enumerate(lcs):
+            flux_mean = np.mean(lc[:,1])
+            flux_std = np.std(lc[:,1])
+            lc[:,1] = (lc[:,1] - flux_mean) / flux_std
+            lc[:,2] = lc[:,2] / flux_std
+            means_stds[i] = flux_std, flux_mean
+            
+    return lcs, means_stds
+
+
+
+
 '''if individual light curves have more than one of the same time point, get rid of row 
 -----average them -> later :)
 '''

@@ -4,12 +4,13 @@ import numpy as np
 
 
 class DataSet:
-    def __init__(self, data_files):
-        self.data_files = data_files
+    def add_files(self, files):
+        self.files = files
+        return self
     
     def files_to_numpy(self):
         dataset = []
-        for file in self.data_files:
+        for file in self.files:
             with open(file, 'r') as f:
                 example = pd.read_csv(file, sep='\t').to_numpy()
             print(f'dims of {file}:\t{example.shape}')
@@ -161,7 +162,7 @@ class DataSet:
             recon_mask[i] = np.logical_xor(example[:, 1], subsampled_mask[i])
         self.subsampled_mask = subsampled_mask
         self.recon_mask = recon_mask
-        print('created subsampled_mask & recon_mask attributes')
+        print('created subsampled_mask & recon_mask instance attributes')
         return self
 
     

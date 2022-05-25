@@ -14,6 +14,7 @@ class DataSet:
                 example = pd.read_csv(file, sep='\t').to_numpy()
             print(f'dims of {file}:\t{example.shape}')
             example = example[example[:,0].argsort()]
+
             dataset.append(example)
         self.dataset = dataset
 
@@ -100,8 +101,9 @@ class DataSet:
         union_x = np.unique(union_x)
         union_x.sort()
 
-        self.union_x = union_x
+        self.union_x = union_x.astype(np.float32)
         print(f'created union_x attribute of length {len(self.union_x)}')
+        
         return self
 
     def zero_fill(self):
@@ -114,7 +116,7 @@ class DataSet:
             need_to_append = max_len - length
             example = np.append(example, np.zeros((need_to_append, 3)), axis=0)
             self.dataset[i] = example
-        self.dataset = np.array(self.dataset)
+        self.dataset = np.array(self.dataset).astype(np.float32)
         print(f'zero fill all the examples up to the length of longest one given, dataset is also now a numpy array w shape: {self.dataset.shape}, instead of a list of numpy arrays')
         return self
 

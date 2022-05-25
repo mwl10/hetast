@@ -121,10 +121,23 @@ class DataSet:
 
     @staticmethod
     def resample_example(example, num_samples=1):
-        y = example[:, 1]
-        y_err = example[:, 2]
-        new_sample = y + np.random.normal(0, y_err)
-        return new_sample
+        new_samples = []
+        for _ in range(num_samples):
+            y = example[:, 1]
+            y_err = example[:, 2]
+            new_sample = y + np.random.normal(0, y_err)
+            new_samples.append(new_sample)
+
+        return new_samples
+
+    def resample_dataset(self, num_samples=1):
+        for _ in range(num_samples):
+            for example in self.dataset:
+                y = example[:,1]
+                y_err = example[:,2]
+                new_sample = y + np.random.normal(0,y_err)
+                self.dataset.append(new_sample)
+        return self
 
 
     # make the masks beforehand...

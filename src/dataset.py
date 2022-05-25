@@ -132,15 +132,15 @@ class DataSet:
 
     def resample_dataset(self, num_samples=1):
         print(f'generating {num_samples} new samples of each example in the dataset & appending them')
-        dataset = self.dataset
+        new_samples = []
         for _ in range(num_samples):
-            for example in dataset:
+            for example in self.dataset:
                 print(example.shape)
                 y = example[:,1]
                 y_err = example[:,2]
                 new_sample = np.array([example[:,0], y + np.random.normal(0,y_err), y_err]).T
-                self.dataset.append(new_sample)
-
+                new_samples.append(new_sample)
+        self.dataset.extend(new_samples)
         return self
 
 

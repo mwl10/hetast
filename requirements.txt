@@ -21,7 +21,7 @@ prettytable==3.3.0
 pyparsing==3.0.9
 pyperclip==1.8.2
 PyYAML==6.0
-scipy==1.8.1
+scipy==1.7.3
 setuptools==62.3.2
 SQLAlchemy==1.4.36
 stevedore==3.5.0

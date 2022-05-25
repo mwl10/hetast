@@ -131,7 +131,7 @@ class DataSet:
         return new_samples
 
     def resample_dataset(self, num_samples=1):
-        print(f'generating {num_samples=} new samples of each example in the dataset & appending them')
+        print(f'generating {num_samples} new samples of each example in the dataset & appending them')
         for _ in range(num_samples):
             for example in self.dataset:
                 print(example.shape)

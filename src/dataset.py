@@ -131,7 +131,7 @@ class DataSet:
         return new_samples
 
     def resample_dataset(self, num_samples=1):
-        print(f'generating {num_samples} new samples of each example in the dataset & appending them')
+        print(f'generating {num_samples} new sample of each example in the dataset & appending them \n old dataset length: {len(self.dataset)}')
         new_samples = []
         for _ in range(num_samples):
             for example in self.dataset:
@@ -141,6 +141,7 @@ class DataSet:
                 new_sample = np.array([example[:,0], y + np.random.normal(0,y_err), y_err]).T
                 new_samples.append(new_sample)
         self.dataset.extend(new_samples)
+        print(f'new dataset length: {len(self.dataset)}')
         return self
 
 

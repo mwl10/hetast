@@ -115,7 +115,7 @@ class DataSet:
             example = np.append(example, np.zeros((need_to_append, 3)), axis=0)
             self.dataset[i] = example
         self.dataset = np.array(self.dataset)
-        print(f'zero fill all the examples up to the length of longest one given, dataset is also now \
+        print(f'zero fill all the examples up to the length of longest one given, dataset is also now\n\
             a numpy array (shape: {self.dataset.shape}) instead of a list of numpy arrays')
         return self
 
@@ -135,7 +135,6 @@ class DataSet:
         new_samples = []
         for _ in range(num_samples):
             for example in self.dataset:
-                print(example.shape)
                 y = example[:,1]
                 y_err = example[:,2]
                 new_sample = np.array([example[:,0], y + np.random.normal(0,y_err), y_err]).T

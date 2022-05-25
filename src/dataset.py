@@ -133,6 +133,7 @@ class DataSet:
     def resample_dataset(self, num_samples=1):
         for _ in range(num_samples):
             for example in self.dataset:
+                print(example.shape)
                 y = example[:,1]
                 y_err = example[:,2]
                 new_sample = y + np.random.normal(0,y_err)

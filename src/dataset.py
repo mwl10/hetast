@@ -137,11 +137,10 @@ class DataSet:
                 y = example[:,1]
                 y_err = example[:,2]
                 new_sample = y + np.random.normal(0,y_err)
-                print(new_sample)
-                print(new_sample.shape, example[:,0].shape)
-                new_sample = np.array([example[:,0],new_sample,example[:,2]])
-                print(new_sample)
-                self.dataset.append(new_sample)
+                #print(new_sample.shape, example[:,0].shape)
+                #new_sample = np.array([example[:,0],new_sample,example[:,2]])
+                #print(new_sample)
+                #self.dataset.append(new_sample)
         return self
 
 

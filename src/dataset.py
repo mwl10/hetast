@@ -115,8 +115,7 @@ class DataSet:
             example = np.append(example, np.zeros((need_to_append, 3)), axis=0)
             self.dataset[i] = example
         self.dataset = np.array(self.dataset)
-        print(f'zero fill all the examples up to the length of longest one given, dataset is also now\n\
-            a numpy array (shape: {self.dataset.shape}) instead of a list of numpy arrays')
+        print(f'zero fill all the examples up to the length of longest one given, dataset is also now a numpy array w shape: {self.dataset.shape}, instead of a list of numpy arrays')
         return self
 
     @staticmethod

@@ -136,7 +136,7 @@ class DataSet:
                 print(example.shape)
                 y = example[:,1]
                 y_err = example[:,2]
-                new_sample = [example[:,0], y + np.random.normal(0,y_err), y_err]
+                new_sample = np.array([example[:,0], y + np.random.normal(0,y_err), y_err])
                 print("created sample", new_sample.shape)
                 #print(new_sample.shape, example[:,0].shape)
                 #new_sample = np.array([example[:,0],new_sample,example[:,2]])

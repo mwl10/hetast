@@ -1,6 +1,28 @@
-numpy
-sklearn
-pandas
-torch==1.8.1
-torchvision
-
+alembic @ file:///home/conda/feedstock_root/build_artifacts/alembic_1647367721563/work
+attrs @ file:///home/conda/feedstock_root/build_artifacts/attrs_1640799537051/work
+autopage @ file:///home/conda/feedstock_root/build_artifacts/autopage_1642834347039/work
+backports.functools-lru-cache @ file:///home/conda/feedstock_root/build_artifacts/backports.functools_lru_cache_1618230623929/work
+cliff @ file:///home/conda/feedstock_root/build_artifacts/cliff_1645470499396/work
+cmaes @ file:///home/conda/feedstock_root/build_artifacts/cmaes_1613785714721/work
+cmd2 @ file:///Users/runner/miniforge3/conda-bld/cmd2_1644164382733/work
+colorama @ file:///home/conda/feedstock_root/build_artifacts/colorama_1602866480661/work
+colorlog==6.6.0
+greenlet @ file:///Users/runner/miniforge3/conda-bld/greenlet_1648882470730/work
+importlib-metadata @ file:///Users/runner/miniforge3/conda-bld/importlib-metadata_1653252869256/work
+importlib-resources @ file:///home/conda/feedstock_root/build_artifacts/importlib_resources_1652715758048/work
+Mako @ file:///home/conda/feedstock_root/build_artifacts/mako_1649097013621/work
+MarkupSafe @ file:///Users/runner/miniforge3/conda-bld/markupsafe_1648737588665/work
+numpy @ file:///Users/runner/miniforge3/conda-bld/numpy_1653325538915/work
+optuna @ file:///home/conda/feedstock_root/build_artifacts/optuna_1633337702246/work
+packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1637239678211/work
+pbr @ file:///home/conda/feedstock_root/build_artifacts/pbr_1651753189980/work
+prettytable @ file:///home/conda/feedstock_root/build_artifacts/prettytable_1651787307815/work
+pyparsing @ file:///home/conda/feedstock_root/build_artifacts/pyparsing_1652235407899/work
+pyperclip @ file:///home/conda/feedstock_root/build_artifacts/pyperclip_1622337600177/work
+PyYAML @ file:///Users/runner/miniforge3/conda-bld/pyyaml_1648757143544/work
+scipy @ file:///Users/runner/miniforge3/conda-bld/scipy_1653074036673/work
+SQLAlchemy @ file:///Users/runner/miniforge3/conda-bld/sqlalchemy_1651018027924/work
+stevedore @ file:///Users/runner/miniforge3/conda-bld/stevedore_1649932784662/work
+tqdm @ file:///home/conda/feedstock_root/build_artifacts/tqdm_1649051611147/work
+wcwidth @ file:///home/conda/feedstock_root/build_artifacts/wcwidth_1600965781394/work
+zipp @ file:///home/conda/feedstock_root/build_artifacts/zipp_1649012893348/work

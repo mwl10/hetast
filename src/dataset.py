@@ -28,6 +28,21 @@ class DataSet:
         return self
 
 
+    # function to purge low variability light curves from the dataset? 
+
+
+    def prune_outliers(self, std_threshold=3):
+        for i, example in enumerate(self.dataset):
+            y = example[:,1]
+            y_std = np.std(y)
+            y_mean = np.mean(y)
+            outlier_indexes = np.where((y > (y_mean + y_std*std_threshold)) | (y < (y_mean - y_std*std_threshold)))[0]
+            self.dataset[i] = np.delete(example, outlier_indexes, axis=0)
+
+
+        return self
+
+
     # this feels ugly
     def normalize(self, normalize_y_by='all', normalize_time=False): # we will treat how we normalize the ys as a hyperparameter
         dataset = self.dataset

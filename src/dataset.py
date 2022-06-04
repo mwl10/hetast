@@ -37,6 +37,7 @@ class DataSet:
             y_std = np.std(y)
             y_mean = np.mean(y)
             outlier_indexes = np.where((y > (y_mean + y_std*std_threshold)) | (y < (y_mean - y_std*std_threshold)))[0]
+            print(outlier_indexes)
             self.dataset[i] = np.delete(example, outlier_indexes, axis=0)
 
 

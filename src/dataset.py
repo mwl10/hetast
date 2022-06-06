@@ -76,6 +76,7 @@ class DataSet:
                 y_err = (y_err) / union_y_std
                 example[:,1] = y
                 example[:,2] = y_err
+                # keep nice order
             means_stds = np.array([union_y_mean,union_y_std])
 
         # normalize ys in each example
@@ -104,8 +105,12 @@ class DataSet:
         # dt[i] = d+start+dt[:i].sum()
         return self
 
+    def reorder(self):
+        for example in self.dataset:
+            example[:] = example[example[:,0].argsort()]
+        return self
 
-
+        
     def set_union_x(self):
 
         example_lengths = np.array([len(example) for example in self.dataset])

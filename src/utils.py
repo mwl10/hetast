@@ -72,7 +72,7 @@ def mean_squared_error(orig, pred, mask, error_bars):
 
 
     new_error = (((orig - pred) / error_bars) **2)  
-    new_error[torch.isinf(new_error)] = 0.0      # (error_bars**2)
+    new_error[torch.isinf(new_error)] = 100      # (error_bars**2)
 
     print(new_error, 'new_error')
     new_error = new_error * mask

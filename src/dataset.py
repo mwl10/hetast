@@ -73,7 +73,7 @@ class DataSet:
                 y = example[:,1]
                 y_err = example[:,2]
                 y = (y - union_y_mean) / union_y_std
-                y_err = (y_err - union_y_mean) / union_y_std
+                y_err = (y_err) / union_y_std
                 example[:,1] = y
                 example[:,2] = y_err
             means_stds = np.array([union_y_mean,union_y_std])
@@ -88,7 +88,7 @@ class DataSet:
                 y_std  = np.std(y)
                 y_err = example[:,2]
                 y = (y - y_mean) / y_std
-                y_err = (y_err - y_mean) / y_std
+                y_err = (y_err) / y_std
                 example[:,1] = y
                 example[:,2] = y_err  
                 means_stds[i] = y_mean, y_std

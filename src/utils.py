@@ -71,7 +71,7 @@ def mean_squared_error(orig, pred, mask, error_bars):
     # if error is big, loss should be less than it would be otherwise 
 
 
-    new_error = ((orig - pred)**2) / (error_bars**2)
+    new_error = ((orig - pred)**2) / error_bars# (error_bars**2)
     print(new_error, 'new_error')
     new_error = new_error * mask
     new_return = new_error.sum() / mask.sum()

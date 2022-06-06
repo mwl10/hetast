@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 import numpy as np
 from sklearn import model_selection
-
+import sys
 
 def union_time(data_loader, classif=False):
     tu = []
@@ -31,6 +31,7 @@ def count_parameters(model):
 
 
 def log_normal_pdf(x, mean, logvar, mask, error_bars=0.):
+    
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
     return -0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar) + error_bars)) * mask
@@ -63,9 +64,11 @@ def normal_kl(mu1, lv1, mu2, lv2):
 def mean_squared_error(orig, pred, mask, error_bars):
     # if error bars are set to 0 then we need to add 1.00001, otherwise need to add .0000001
     if torch.is_tensor(error_bars):
-        error_bars = error_bars + 0.0000000001
+        error_bars = error_bars + sys.float_info.min
     else:
-        error_bars = error_bars + 1.0000000001
+        error_bars = error_bars + 1
+
+    # 
 
     new_error = ((orig - pred)**2) / (error_bars**2)
     new_error = new_error * mask

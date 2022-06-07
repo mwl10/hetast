@@ -162,7 +162,7 @@ class TVAE(nn.Module):
     def kl_div(self, qz, sample_weight, mask=None, norm=True):
         pz_mean = pz_logvar = torch.zeros(qz.mean.size()).to(self.device)
         kl = utils.normal_kl(qz.mean, qz.logvar, pz_mean,
-                             pz_logvar).sum(-1).sum(-1)
+                             pz_logvar, sample_weight).sum(-1).sum(-1)
         if norm:
             return kl / mask.sum(-1).sum(-1)
         return kl

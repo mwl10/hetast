@@ -49,8 +49,8 @@ def mog_log_pdf(x, mean, logvar, mask):
     return torch.logsumexp(loglik - torch.log(const2), 0)
 
 
-def normal_kl(mu1, lv1, mu2, lv2):
-    print(mu1.shape, lv1.shape, 'pay attention!')
+def normal_kl(mu1, lv1, mu2, lv2, sample_weights):
+    print(mu1.shape, lv1.shape, sample_weights.shape, 'pay attention!')
     v1 = torch.exp(lv1)
     v2 = torch.exp(lv2)
     lstd1 = lv1 / 2.0

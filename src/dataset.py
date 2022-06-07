@@ -62,11 +62,12 @@ class DataSet:
             example[:,0] = dt
 
         # normalizing y
-        y = dataset[:,:,1]
-        union_y = np.vstack([example[:,1] for example in y])
+        union_y = np.vstack([example[:,1] for example in dataset])
         std_y = np.std(union_y)
         mean_y = np.mean(union_y)
-        dataset[:,:,1] = (dataset[:,:,1] - mean_y) / std_y
+        for example in dataset:
+            example[:,1] = (example[:,1] - mean_y) / std_y
+            
         return self
 
         # normalize ys across the dataset

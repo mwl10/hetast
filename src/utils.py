@@ -34,7 +34,17 @@ def log_normal_pdf(x, mean, logvar, mask, error_bars=0.):
     
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
-    return -0.5 * (const + logvar + (x - mean) ** 2.0 / (torch.exp(logvar) + error_bars)) * mask
+    if torch.is_tensor(error_bars):
+        sample_weight = 1. / (error_bars ** 2)
+        sample_weight[torch.isinf(sample_weight)] = 0.0
+
+        error = -0.5 * (const + logvar + ((x - mean) ** 2.0 / torch.exp(logvar)) * sample_weight) 
+
+        error = error * mask
+    else:
+        return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
+    
+    return error
 
 
 def mog_log_pdf(x, mean, logvar, mask):
@@ -62,14 +72,13 @@ def normal_kl(mu1, lv1, mu2, lv2):
 
 # my mse for error bars
 def mean_squared_error(orig, pred, mask, error_bars):
-    # if error bars are set to 0 then we need to add 1.00001, otherwise need to add .0000001
     if torch.is_tensor(error_bars):
         #error_bars = error_bars + sys.float_info.min
         sample_weight = 1. / (error_bars ** 2)
         sample_weight[torch.isinf(sample_weight)] = 0.0
         new_error = ((orig - pred) ** 2) * sample_weight
     else:
-        error_bars = error_bars + 1
+        #error_bars = error_bars + 1
         new_error = (orig - pred) ** 2
     # if error is big, loss should be less than it would be otherwise 
 

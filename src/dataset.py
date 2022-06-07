@@ -51,28 +51,30 @@ class DataSet:
     def normalize(self, normalize_time=False): 
         dataset = self.dataset
         starts = np.zeros(len(dataset))
+        union_x = np.hstack([example[:,0] for example in dataset])
+        std_x = np.std(union_x)
 
+        union_y = np.hstack([example[:,1] for example in dataset])
+        std_y = np.std(union_y)
+        mean_y = np.mean(union_y)
         # time start at zero 
         for i,example in enumerate(dataset):
             
             starts[i] = example[0,0]
             example[:,0] = example[:,0] - example[0,0]
-            # if normalize_time:
-            #     example[:,0] = np.std(example[:,0])
-            
+            example[:,0] = example[:,0] / std_x
 
-        # normalizing y
-        union_y = np.hstack([example[:,1] for example in dataset])
-        std_y = np.std(union_y)
-        mean_y = np.mean(union_y)
-        for example in dataset:
             example[:,1] = (example[:,1] - mean_y) / std_y
+ 
+
+        for example in dataset:
+            
 
         return self
 
         # normalize ys across the dataset
         
-        
+    
     def denormalize(self):
         # for i, d in enumerate(dt):
         # dt[i] = d+start+dt[:i].sum()
@@ -83,17 +85,8 @@ class DataSet:
             example[:] = example[example[:,0].argsort()]
         return self
 
-
     def set_union_x(self):
-
-        example_lengths = np.array([len(example) for example in self.dataset])
-        union_x = np.zeros((sum(example_lengths)))
-        acc = 0
-        for i, example in enumerate(self.dataset):
-
-            union_x[acc:acc + len(example)] = example[:, 0]
-            acc += len(example)
-        union_x = np.unique(union_x)
+        union_x = np.hstack([example[:,0] for example in self.dataset])
         union_x.sort()
 
         self.union_x = union_x.astype(np.float32)

@@ -71,7 +71,7 @@ def mean_squared_error(orig, pred, mask, error_bars):
     # if error is big, loss should be less than it would be otherwise 
 
     sample_weight = 1. / (error_bars ** 2)
-    sample_weight[np.isinf(sample_weight)] = 0.0
+    sample_weight[torch.isinf(sample_weight)] = 0.0
     new_error = (orig - pred) * sample_weight
     #new_error = (((orig - pred) / error_bars) **2)  
 

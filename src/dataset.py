@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from regex import D
 
 
 
@@ -44,12 +45,14 @@ class DataSet:
         return self
 
 
+
+
     # this feels ugly
-    def normalize(self, normalize_y_by='all', normalize_time=False): # we will treat how we normalize the ys as a hyperparameter
+    def normalize(self, normalize_time=False): 
         dataset = self.dataset
         starts = np.zeros(len(dataset))
 
-        # handle time first
+        # time to lag
         for i,example in enumerate(dataset):
             time = example[:,0]
             starts[i] = time[0]
@@ -58,47 +61,16 @@ class DataSet:
                 dt = dt / np.std(dt)
             example[:,0] = dt
 
-        # normalize ys across the dataset
-        if normalize_y_by == 'all':
-            
-            union_y = np.array([])
-            for example in dataset:
-                y = example[:,1]
-                union_y = np.append(union_y, y)
-
-            union_y_mean = np.mean(union_y)
-            union_y_std = np.std(union_y)
-
-            for example in dataset:
-                y = example[:,1]
-                y_err = example[:,2]
-                y = (y - union_y_mean) / union_y_std
-                y_err = (y_err) / union_y_std
-                example[:,1] = y
-                example[:,2] = y_err
-                # keep nice order
-            means_stds = np.array([union_y_mean,union_y_std])
-
-        # normalize ys in each example
-        if normalize_y_by == 'individual':
-            means_stds = np.zeros((len(dataset),2))
-
-            for i,example in enumerate(dataset):
-                y = example[:,1]
-                y_mean = np.mean(y)
-                y_std  = np.std(y)
-                y_err = example[:,2]
-                y = (y - y_mean) / y_std
-                y_err = (y_err) / y_std
-                example[:,1] = y
-                example[:,2] = y_err  
-                means_stds[i] = y_mean, y_std
-
-        self.dataset = dataset
-        self.means_stds = means_stds
-
+        # normalizing y
+        y = dataset[:,:,1]
+        union_y = np.vstack([example[:,1] for example in y])
+        std_y = np.std(union_y)
+        mean_y = np.mean(union_y)
+        dataset[:,:,1] = (dataset[:,:,1] - mean_y) / std_y
         return self
 
+        # normalize ys across the dataset
+        
         
     def denormalize(self):
         # for i, d in enumerate(dt):
@@ -110,7 +82,7 @@ class DataSet:
             example[:] = example[example[:,0].argsort()]
         return self
 
-        
+
     def set_union_x(self):
 
         example_lengths = np.array([len(example) for example in self.dataset])

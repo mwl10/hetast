@@ -49,12 +49,12 @@ def mog_log_pdf(x, mean, logvar, mask):
     return torch.logsumexp(loglik - torch.log(const2), 0)
 
 
-def normal_kl(mu1, lv1, mu2, lv2):
+def normal_kl(mu1, lv1, mu2, lv2, sample_weight):
     v1 = torch.exp(lv1)
     v2 = torch.exp(lv2)
     lstd1 = lv1 / 2.0
     lstd2 = lv2 / 2.0
-    kl = lstd2 - lstd1 + ((v1 + (mu1 - mu2) ** 2.0) / (2.0 * v2)) - 0.5
+    kl = lstd2 - lstd1 + (((v1 + (mu1 - mu2) ** 2.0) / (2.0 * v2)) * sample_weight) - 0.5
     return kl
 
 

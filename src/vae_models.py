@@ -159,10 +159,10 @@ class TVAE(nn.Module):
             return sigma
         return 2 * torch.log(sigma).to(self.device)
 
-    def kl_div(self, qz, mask=None, norm=True):
+    def kl_div(self, qz, sample_weight, mask=None, norm=True):
         pz_mean = pz_logvar = torch.zeros(qz.mean.size()).to(self.device)
         kl = utils.normal_kl(qz.mean, qz.logvar, pz_mean,
-                             pz_logvar).sum(-1).sum(-1)
+                             pz_logvar, sample_weight).sum(-1).sum(-1)
         if norm:
             return kl / mask.sum(-1).sum(-1)
         return kl
@@ -192,7 +192,7 @@ class TVAE(nn.Module):
         mask = target_y[:, :, self.dim:]
         # we're just augmenting loglik to include error bars
         loglik = self.compute_loglik(target_y, px, sample_weight, self.norm)
-        kl = self.kl_div(qz, mask, self.norm)
+        kl = self.kl_div(qz, sample_weight, mask, self.norm)
         return -(
             torch.logsumexp(loglik - beta * kl, dim=0).mean(0) - np.log(num_samples))
 
@@ -221,7 +221,7 @@ class TVAE(nn.Module):
             context_x, context_y, target_x, num_samples)
         mask = target_y[:, :, self.dim:]
         loglik = self.compute_loglik(target_y, px, sample_weight, self.norm)
-        kl = self.kl_div(qz, mask, self.norm)
+        kl = self.kl_div(qz, sample_weight, mask, self.norm)
         # loss_info.elbo = (- loglik + beta * kl).mean()
         loss_info.elbo = -(
             torch.logsumexp(loglik - beta * kl, dim=0).mean(0) - np.log(num_samples))

@@ -66,8 +66,6 @@ class DataSet:
 
             example[:,1] = (example[:,1] - mean_y) / std_y
  
-
-        for example in dataset:
             
 
         return self

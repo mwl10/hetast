@@ -70,7 +70,7 @@ def mean_squared_error(orig, pred, mask, sample_weight):
     return error.sum() / mask.sum()
 
 
-def mean_absolute_error(orig, pred, mask, sample_weight):
+def mean_absolute_error(orig, pred, mask):
     error = torch.abs(orig - pred)
     error = error * mask
     return error.sum() / mask.sum()

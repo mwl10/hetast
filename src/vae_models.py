@@ -201,9 +201,9 @@ class TVAE(nn.Module):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
         return utils.mean_squared_error(target, pred, mask, sample_weight) / pred.size(0)
 
-    def compute_mae(self, target_y, pred, sample_weight):
+    def compute_mae(self, target_y, pred):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
-        return utils.mean_absolute_error(target, pred, mask, sample_weight) / pred.size(0)
+        return utils.mean_absolute_error(target, pred, mask) / pred.size(0)
 
     def compute_mean_mse(self, target_y, pred, sample_weight):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
@@ -228,7 +228,7 @@ class TVAE(nn.Module):
         loss_info.kl = kl.mean()
         loss_info.loglik = loglik.mean()
         loss_info.mse = self.compute_mse(target_y, px.mean, sample_weight)
-        loss_info.mae = self.compute_mae(target_y, px.mean, sample_weight)
+        loss_info.mae = self.compute_mae(target_y, px.mean)
         loss_info.mean_mse = self.compute_mean_mse(
             target_y, px.mean, sample_weight)
         loss_info.mean_mae = self.compute_mean_mae(target_y, px.mean)

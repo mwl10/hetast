@@ -167,10 +167,10 @@ class TVAE(nn.Module):
             return kl / mask.sum(-1).sum(-1)
         return kl
 
-    def compute_loglik(self, target_y, px, error_bars, norm=True):
+    def compute_loglik(self, target_y, px, sample_weight, norm=True):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
         log_p = utils.log_normal_pdf(
-            target, px.mean, px.logvar, mask, error_bars).sum(-1).sum(-1)
+            target, px.mean, px.logvar, mask, sample_weight).sum(-1).sum(-1)
         if norm:
             return log_p / mask.sum(-1).sum(-1)
 
@@ -185,52 +185,52 @@ class TVAE(nn.Module):
     # will be in reconstruction term
 
     def compute_elbo(
-        self, context_x, context_y, target_x, target_y, error_bars, num_samples=1, beta=1.
+        self, context_x, context_y, target_x, target_y, sample_weight, num_samples=1, beta=1.
     ):
         px, qz = self.get_reconstruction(
             context_x, context_y, target_x, num_samples)
         mask = target_y[:, :, self.dim:]
         # we're just augmenting loglik to include error bars
-        loglik = self.compute_loglik(target_y, px, error_bars, self.norm)
+        loglik = self.compute_loglik(target_y, px, sample_weight, self.norm)
         kl = self.kl_div(qz, mask, self.norm)
         return -(
             torch.logsumexp(loglik - beta * kl, dim=0).mean(0) - np.log(num_samples))
 
-    def compute_mse(self, target_y, pred, error_bars):
+    def compute_mse(self, target_y, pred, sample_weight):
         # error should just be a dim of target_y
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
-        return utils.mean_squared_error(target, pred, mask, error_bars) / pred.size(0)
+        return utils.mean_squared_error(target, pred, mask, sample_weight) / pred.size(0)
 
-    def compute_mae(self, target_y, pred):
+    def compute_mae(self, target_y, pred, sample_weight):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
-        return utils.mean_absolute_error(target, pred, mask) / pred.size(0)
+        return utils.mean_absolute_error(target, pred, mask, sample_weight) / pred.size(0)
 
-    def compute_mean_mse(self, target_y, pred, error_bars):
+    def compute_mean_mse(self, target_y, pred, sample_weight):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
-        return utils.mean_squared_error(target, pred.mean(0), mask, error_bars)
+        return utils.mean_squared_error(target, pred.mean(0), mask, sample_weight)
 
     def compute_mean_mae(self, target_y, pred):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
         return utils.mean_absolute_error(target, pred.mean(0), mask)
 
     def compute_unsupervised_loss(
-        self, context_x, context_y, target_x, target_y, num_samples=1, beta=1., error_bars=0.
+        self, context_x, context_y, target_x, target_y, num_samples=1, beta=1., sample_weight=1.
     ):
         loss_info = LossInfo()
         px, qz = self.get_reconstruction(
             context_x, context_y, target_x, num_samples)
         mask = target_y[:, :, self.dim:]
-        loglik = self.compute_loglik(target_y, px, error_bars, self.norm)
+        loglik = self.compute_loglik(target_y, px, sample_weight, self.norm)
         kl = self.kl_div(qz, mask, self.norm)
         # loss_info.elbo = (- loglik + beta * kl).mean()
         loss_info.elbo = -(
             torch.logsumexp(loglik - beta * kl, dim=0).mean(0) - np.log(num_samples))
         loss_info.kl = kl.mean()
         loss_info.loglik = loglik.mean()
-        loss_info.mse = self.compute_mse(target_y, px.mean, error_bars)
-        loss_info.mae = self.compute_mae(target_y, px.mean)
+        loss_info.mse = self.compute_mse(target_y, px.mean, sample_weight)
+        loss_info.mae = self.compute_mae(target_y, px.mean, sample_weight)
         loss_info.mean_mse = self.compute_mean_mse(
-            target_y, px.mean, error_bars)
+            target_y, px.mean, sample_weight)
         loss_info.mean_mae = self.compute_mean_mae(target_y, px.mean)
         loss_info.mogloglik = self.compute_mog_loglik(target_y, px)
         loss_info.composite_loss = self.elbo_weight * loss_info.elbo \

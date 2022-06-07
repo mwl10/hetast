@@ -31,10 +31,13 @@ def count_parameters(model):
 
 
 def log_normal_pdf(x, mean, logvar, mask, sample_weight):
+
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
+
     error = -0.5 * (const + logvar + ((x - mean) ** 2.0 / torch.exp(logvar)) * sample_weight) 
     error = error * mask
+    return error
 
 
 def mog_log_pdf(x, mean, logvar, mask):

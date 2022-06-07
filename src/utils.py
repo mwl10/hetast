@@ -64,15 +64,16 @@ def normal_kl(mu1, lv1, mu2, lv2):
 def mean_squared_error(orig, pred, mask, error_bars):
     # if error bars are set to 0 then we need to add 1.00001, otherwise need to add .0000001
     if torch.is_tensor(error_bars):
-        error_bars = error_bars + sys.float_info.min
+        #error_bars = error_bars + sys.float_info.min
+        sample_weight = 1. / (error_bars ** 2)
+        sample_weight[torch.isinf(sample_weight)] = 0.0
+        new_error = ((orig - pred) ** 2) * sample_weight
     else:
         error_bars = error_bars + 1
-
+        new_error = (orig - pred) ** 2
     # if error is big, loss should be less than it would be otherwise 
 
-    sample_weight = 1. / (error_bars ** 2)
-    sample_weight[torch.isinf(sample_weight)] = 0.0
-    new_error = (orig - pred) * sample_weight
+    
     #new_error = (((orig - pred) / error_bars) **2)  
 
     print(new_error, 'new_error')

@@ -52,14 +52,14 @@ class DataSet:
         dataset = self.dataset
         starts = np.zeros(len(dataset))
 
-        # time to lag
-        for i,example in enumerate(dataset):
-            time = example[:,0]
-            starts[i] = time[0]
-            dt = np.insert(time[1:] - time[:-1], 0, 0)
-            if normalize_time:
-                dt = dt / np.std(dt)
-            example[:,0] = dt
+        # # time to lag
+        # for i,example in enumerate(dataset):
+        #     time = example[:,0]
+        #     starts[i] = time[0]
+        #     dt = np.insert(time[1:] - time[:-1], 0, 0)
+        #     if normalize_time:
+        #         dt = dt / np.std(dt)
+        #     example[:,0] = dt
 
         # normalizing y
         union_y = np.hstack([example[:,1] for example in dataset])

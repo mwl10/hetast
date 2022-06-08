@@ -1,7 +1,5 @@
 import pandas as pd
 import numpy as np
-from regex import D
-import torch
 
 
 
@@ -153,7 +151,7 @@ class DataSet:
 
     def errors_to_sample_weights(self):
         self.dataset[:,:,2] = 1. / self.dataset[:,:,2]
-        self.dataset[:,:,2][torch.isinf(self.dataset[:,:,2])] = 0.0
+        self.dataset[:,:,2][np.isinf(self.dataset[:,:,2])] = 0.0
         return self
 
     

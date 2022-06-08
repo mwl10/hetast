@@ -287,7 +287,7 @@ class HeTVAE(HeTVAE_DET):
             self.proj = nn.Linear(self.dim, self.latent_dim)
         else:
             print(f'2*self.dim, self.latent_dim: {2 * self.dim } X {self.latent_dim}')
-            self.proj = nn.Linear(2 * self.dim, self.latent_dim)
+            self.proj = nn.Linear(4, self.latent_dim)#(2 * self.dim, self.latent_dim)
         self.decoder = UnTAN(
             input_dim=2 * self.latent_dim,
             nhidden=self.nhidden,

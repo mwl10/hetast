@@ -126,15 +126,15 @@ def evaluate(net, data_loader, device="cuda"):
             mean_mae += loss_info.mean_mae * num_context_points
             avg_loglik += loss_info.mogloglik * num_context_points
             train_n += num_context_points
-    print(
-    'nll: {:.4f}, mse: {:.4f}, mae: {:.4f}, '
-    'mean_mse: {:.4f}, mean_mae: {:.4f}'.format(
-        - avg_loglik / train_n,
-        mse / train_n,
-        mae / train_n,
-        mean_mse / train_n,
-        mean_mae / train_n
-    ))
+    # print(
+    # 'nll: {:.4f}, mse: {:.4f}, mae: {:.4f}, '
+    # 'mean_mse: {:.4f}, mean_mae: {:.4f}'.format(
+    #     - avg_loglik / train_n,
+    #     mse / train_n,
+    #     mae / train_n,
+    #     mean_mse / train_n,
+    #     mean_mae / train_n
+    # ))
       
     
     return float(- avg_loglik / train_n)

@@ -65,13 +65,11 @@ class TVAE(nn.Module):
         self.device = device
         k = 2 if self.mixing == 'concat' else 1
         if self.mixing == 'concat_and_mix':
-            print(f'this layer, 2 * self.num_heads * self.dim: {2 * self.num_heads * self.dim} X {self.width}')
             self.h2z = nn.Sequential(
                 nn.Linear(2 * self.num_heads * self.dim, self.width),
                 nn.ReLU(),
                 nn.Linear(self.width, 2 * self.latent_dim))
         else:
-            print(k, self.num_heads, self.dim, self.width)
             self.h2z_mean = nn.Sequential( # 4 x 256
                 nn.Linear(k * self.num_heads * self.dim, self.width),
                 nn.ReLU(),
@@ -96,10 +94,7 @@ class TVAE(nn.Module):
         qz = Gaussian()
         if self.mixing == 'concat_and_mix':
             hidden = torch.cat((hidden[:, :, :, 0], hidden[:, :, :, 1]), -1)
-            try:
-                q = self.h2z(hidden)
-            except:
-                print('bugs here')
+            q = self.h2z(hidden)
             qz.mean, qz.logvar = q[:, :,
                                    :self.latent_dim], q[:, :, self.latent_dim:]
         elif self.mixing == 'concat':
@@ -291,6 +286,7 @@ class HeTVAE(HeTVAE_DET):
         if self.mixing == 'interp_only':
             self.proj = nn.Linear(self.dim, self.latent_dim)
         else:
+            print(f'2*self.dim, self.latent_dim: {2 * self.dim } X {self.latent_dim}')
             self.proj = nn.Linear(2 * self.dim, self.latent_dim)
         self.decoder = UnTAN(
             input_dim=2 * self.latent_dim,
@@ -312,7 +308,13 @@ class HeTVAE(HeTVAE_DET):
             hidden = self.proj(hidden[:, :, :, 0])
         else:
             hidden = torch.cat((hidden[:, :, :, 0], hidden[:, :, :, 1]), -1)
-            hidden = self.proj(hidden)
+            print(hidden.shape)
+            try:
+
+                hidden = self.proj(hidden)
+            except:
+
+                print("bugz")
         hidden = hidden.unsqueeze(0).repeat_interleave(num_samples, dim=0)
         z = torch.cat((z, hidden), -1)
         px = self.decode(z, target_x)

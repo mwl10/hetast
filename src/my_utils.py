@@ -137,7 +137,7 @@ def evaluate(net, data_loader, device="cuda"):
     # ))
       
     
-    return float(- avg_loglik / train_n)
+    return - avg_loglik / train_n
 
 
 

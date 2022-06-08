@@ -149,8 +149,8 @@ class DataSet:
         print('created subsampled_mask & recon_mask instance attributes')
         return self
 
-    def errors_to_sample_weights(self):
-        
+    def error_to_sample_weight(self):
+
         self.dataset[:,:,2] = 1. / self.dataset[:,:,2]
         self.dataset[:,:,2][np.isinf(self.dataset[:,:,2])] = 0.0
         return self

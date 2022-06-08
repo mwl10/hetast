@@ -50,7 +50,6 @@ def mog_log_pdf(x, mean, logvar, mask):
 
 
 def normal_kl(mu1, lv1, mu2, lv2, sample_weight):
-    print(mu1.shape, lv1.shape,  'pay attention!')
     v1 = torch.exp(lv1)
     v2 = torch.exp(lv2)
     lstd1 = lv1 / 2.0
@@ -77,59 +76,59 @@ def mean_absolute_error(orig, pred, mask):
     return error.sum() / mask.sum()
 
 
-def evaluate_hetvae(
-    net,
-    dim,
-    train_loader,
-    sample_tp=0.5,
-    shuffle=False,
-    k_iwae=1,
-    device='cuda',
-):
-    torch.manual_seed(seed=0)
-    np.random.seed(seed=0)
-    train_n = 0
-    avg_loglik, mse, mae = 0, 0, 0
-    mean_mae, mean_mse = 0, 0
-    with torch.no_grad():
-        for train_batch in train_loader:
-            train_batch = train_batch.to(device)
-            subsampled_mask = subsample_timepoints(
-                train_batch[:, :, dim:2 * dim].clone(),
-                sample_tp,
-                shuffle=shuffle,
-            )
-            recon_mask = train_batch[:, :, dim:2 * dim] - subsampled_mask
-            context_y = torch.cat((
-                train_batch[:, :, :dim] * subsampled_mask, subsampled_mask
-            ), -1)
-            loss_info = net.compute_unsupervised_loss(
-                train_batch[:, :, -1],
-                context_y,
-                train_batch[:, :, -1],
-                torch.cat((
-                    train_batch[:, :, :dim] * recon_mask, recon_mask
-                ), -1),
-                num_samples=k_iwae,
-            )
-            num_context_points = recon_mask.sum().item()
-            mse += loss_info.mse * num_context_points
-            mae += loss_info.mae * num_context_points
-            mean_mse += loss_info.mean_mse * num_context_points
-            mean_mae += loss_info.mean_mae * num_context_points
-            avg_loglik += loss_info.mogloglik * num_context_points
-            train_n += num_context_points
-    print(
-        'nll: {:.4f}, mse: {:.4f}, mae: {:.4f}, '
-        'mean_mse: {:.4f}, mean_mae: {:.4f}'.format(
-            - avg_loglik / train_n,
-            mse / train_n,
-            mae / train_n,
-            mean_mse / train_n,
-            mean_mae / train_n
-        )
-    )
-    return - avg_loglik / train_n
+# def evaluate_hetvae(
+#     net,
+#     dim,
+#     train_loader,
+#     sample_tp=0.5,
+#     shuffle=False,
+#     k_iwae=1,
+#     device='cuda',
+# ):
+#     torch.manual_seed(seed=0)
+#     np.random.seed(seed=0)
+#     train_n = 0
+#     avg_loglik, mse, mae = 0, 0, 0
+#     mean_mae, mean_mse = 0, 0
+#     with torch.no_grad():
+#         for train_batch in train_loader:
+#             train_batch = train_batch.to(device)
+#             subsampled_mask = subsample_timepoints(
+#                 train_batch[:, :, dim:2 * dim].clone(),
+#                 sample_tp,
+#                 shuffle=shuffle,
+#             )
+#             recon_mask = train_batch[:, :, dim:2 * dim] - subsampled_mask
+#             context_y = torch.cat((
+#                 train_batch[:, :, :dim] * subsampled_mask, subsampled_mask
+#             ), -1)
+#             loss_info = net.compute_unsupervised_loss(
+#                 train_batch[:, :, -1],
+#                 context_y,
+#                 train_batch[:, :, -1],
+#                 torch.cat((
+#                     train_batch[:, :, :dim] * recon_mask, recon_mask
+#                 ), -1),
+#                 num_samples=k_iwae,
+#             )
+#             num_context_points = recon_mask.sum().item()
+#             mse += loss_info.mse * num_context_points
+#             mae += loss_info.mae * num_context_points
+#             mean_mse += loss_info.mean_mse * num_context_points
+#             mean_mae += loss_info.mean_mae * num_context_points
+#             avg_loglik += loss_info.mogloglik * num_context_points
+#             train_n += num_context_points
+#     print(
+#         'nll: {:.4f}, mse: {:.4f}, mae: {:.4f}, '
+#         'mean_mse: {:.4f}, mean_mae: {:.4f}'.format(
+#             - avg_loglik / train_n,
+#             mse / train_n,
+#             mae / train_n,
+#             mean_mse / train_n,
+#             mean_mae / train_n
+#         )
+#     )
+#     return - avg_loglik / train_n
 
 def evaluate_hetvae(
     net,
@@ -202,7 +201,6 @@ def get_mimiciii_data(batch_size, test_batch_size=5, filter_anomalies=True):
         x[:, :, input_dim: 2 * input_dim],
         x[:, :, -1],
     )
-    print(observed_vals.shape, observed_mask.shape, observed_tp.shape)
 
     if np.max(observed_tp) != 0.0:
         observed_tp = observed_tp / np.max(observed_tp)
@@ -246,7 +244,6 @@ def get_mimiciii_data(batch_size, test_batch_size=5, filter_anomalies=True):
                     if observed_mask[i, j, k]:
                         data_min = min(data_min, observed_vals[i, j, k])
                         data_max = max(data_max, observed_vals[i, j, k])
-            # print(data_min, data_max)
             if data_max == 0:
                 data_max = 1
             observed_vals[:, :, k] = (

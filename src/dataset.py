@@ -61,7 +61,7 @@ class DataSet:
             
             starts[i] = example[0,0]
             example[:,0] = example[:,0] - example[0,0]
-            example[:,0] = example[:,0] / std_x
+            #example[:,0] = example[:,0] / std_x
 
             example[:,1] = (example[:,1] - mean_y) / std_y
  

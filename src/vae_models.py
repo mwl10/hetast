@@ -70,6 +70,7 @@ class TVAE(nn.Module):
                 nn.ReLU(),
                 nn.Linear(self.width, 2 * self.latent_dim))
         else:
+            print(k, self.num_heads, self.dim, self.width)
             self.h2z_mean = nn.Sequential(
                 nn.Linear(k * self.num_heads * self.dim, self.width),
                 nn.ReLU(),

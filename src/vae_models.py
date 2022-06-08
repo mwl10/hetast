@@ -307,7 +307,6 @@ class HeTVAE(HeTVAE_DET):
             hidden = self.proj(hidden[:, :, :, 0])
         else:
             hidden = torch.cat((hidden[:, :, :, 0], hidden[:, :, :, 1]), -1)
-            print(hidden.shape)
             hidden = self.proj(hidden)
 
         hidden = hidden.unsqueeze(0).repeat_interleave(num_samples, dim=0)

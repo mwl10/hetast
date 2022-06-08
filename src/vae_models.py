@@ -65,6 +65,7 @@ class TVAE(nn.Module):
         self.device = device
         k = 2 if self.mixing == 'concat' else 1
         if self.mixing == 'concat_and_mix':
+            print(f'this layer, 2 * self.num_heads * self.dim: {2 * self.num_heads * self.dim} X {self.width}')
             self.h2z = nn.Sequential(
                 nn.Linear(2 * self.num_heads * self.dim, self.width),
                 nn.ReLU(),

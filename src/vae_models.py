@@ -63,7 +63,7 @@ class TVAE(nn.Module):
         self.norm = norm
         self.mixing = mixing
         self.device = device
-        k = 3 if self.mixing == 'concat' else 1
+        k = 2 if self.mixing == 'concat' else 1
         if self.mixing == 'concat_and_mix':
             self.h2z = nn.Sequential(
                 nn.Linear(2 * self.num_heads * self.dim, self.width),
@@ -71,7 +71,7 @@ class TVAE(nn.Module):
                 nn.Linear(self.width, 2 * self.latent_dim))
         else:
             print(k, self.num_heads, self.dim, self.width)
-            self.h2z_mean = nn.Sequential(
+            self.h2z_mean = nn.Sequential( # 4 x 256
                 nn.Linear(k * self.num_heads * self.dim, self.width),
                 nn.ReLU(),
                 nn.Linear(self.width, self.latent_dim))

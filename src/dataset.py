@@ -50,7 +50,7 @@ class DataSet:
     def normalize(self, normalize_time=False): 
         dataset = self.dataset
         starts = np.zeros(len(dataset))
-        union_x = np.hstack([example[:,0] for example in dataset])
+        union_x = np.unique(np.hstack([example[:,0] for example in dataset]))
         std_x = np.std(union_x)
 
         union_y = np.hstack([example[:,1] for example in dataset])
@@ -83,8 +83,7 @@ class DataSet:
         return self
 
     def set_union_x(self):
-        union_x = np.hstack([example[:,0] for example in self.dataset])
-        union_x.sort()
+        union_x = np.unique(np.hstack([example[:,0] for example in self.dataset]))
 
         self.union_x = union_x.astype(np.float32)
         print(f'created union_x attribute of length {len(self.union_x)}')

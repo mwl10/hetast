@@ -284,7 +284,7 @@ class HeTVAE(HeTVAE_DET):
     ):
         super(HeTVAE, self).__init__(*args, **kwargs)
         if self.mixing == 'interp_only':
-            self.proj = nn.Linear(self.dim, self.latent_dim)
+            self.proj = nn.Linear(self.num_heads, self.latent_dim)
         else:
             self.proj = nn.Linear(2*self.num_heads, self.latent_dim)#(2 * self.dim, self.latent_dim)
         self.decoder = UnTAN(

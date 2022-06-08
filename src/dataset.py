@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from regex import D
+import torch
 
 
 
@@ -148,6 +149,11 @@ class DataSet:
         self.subsampled_mask = subsampled_mask
         self.recon_mask = recon_mask
         print('created subsampled_mask & recon_mask instance attributes')
+        return self
+
+    def errors_to_sample_weights(self):
+        self.dataset[:,:,2] = 1. / self.dataset[:,:,2]
+        self.dataset[:,:,2][torch.isinf(self.dataset[:,:,2])] = 0.0
         return self
 
     

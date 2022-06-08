@@ -35,9 +35,11 @@ def log_normal_pdf(x, mean, logvar, mask, sample_weight):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
 
-    error = -0.5 * (const + logvar + ((x - mean) ** 2.0 / torch.exp(logvar)) * 1)#sample_weight) 
-    error = error * mask
-    return error
+    # error = -0.5 * (const + logvar + ((x - mean) ** 2.0 / torch.exp(logvar)) * sample_weight) 
+    # error = error * mask
+    # return error
+    return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
+   
 
 
 def mog_log_pdf(x, mean, logvar, mask):
@@ -65,7 +67,7 @@ def normal_kl(mu1, lv1, mu2, lv2, sample_weight):
 
 # my mse for error bars
 def mean_squared_error(orig, pred, mask, sample_weight):
-    error = ((orig - pred) ** 2) * sample_weight
+    error = ((orig - pred) ** 2) #* sample_weight
     error = error * mask
     return error.sum() / mask.sum()
 

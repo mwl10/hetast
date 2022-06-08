@@ -309,12 +309,8 @@ class HeTVAE(HeTVAE_DET):
         else:
             hidden = torch.cat((hidden[:, :, :, 0], hidden[:, :, :, 1]), -1)
             print(hidden.shape)
-            try:
+            hidden = self.proj(hidden)
 
-                hidden = self.proj(hidden)
-            except:
-
-                print("bugz")
         hidden = hidden.unsqueeze(0).repeat_interleave(num_samples, dim=0)
         z = torch.cat((z, hidden), -1)
         px = self.decode(z, target_x)

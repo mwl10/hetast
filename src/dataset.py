@@ -50,7 +50,7 @@ class DataSet:
 
     # this feels ugly
 
-    def normalize(self, normalize_time=False): 
+    def normalize(self, normalize_by='all', normalize_time=False): 
         dataset = self.dataset
         starts = np.zeros(len(dataset))
         union_x = np.unique(np.hstack([example[:,0] for example in dataset]))
@@ -62,12 +62,17 @@ class DataSet:
         # time start at zero 
         for i,example in enumerate(dataset):
             
-            starts[i] = example[0,0]
-            example[:,0] = example[:,0] - example[0,0]
-            #example[:,0] = example[:,0] / std_x
+            start_time = example[0,0]
+            starts[i] = start_time
+            example[:,0] = example[:,0] - start_time
 
-            example[:,1] = (example[:,1] - mean_y) / std_y
- 
+            if normalize_by == 'all':
+                example[:,1] = (example[:,1] - mean_y) / std_y
+            
+            elif normalize_by == 'individual':
+                example[:,1] = (example[:,1] - np.std(example[:,1])) / np.mean(example[:,1])
+            
+            
             
 
         return self

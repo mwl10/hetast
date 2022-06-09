@@ -50,28 +50,31 @@ class DataSet:
 
     # this feels ugly
 
-    def normalize(self, normalize_by='all', normalize_time=False): 
+    def normalize(self, normalize_by='individual', normalize_time=False): 
         dataset = self.dataset
-        starts = np.zeros(len(dataset))
         union_x = np.unique(np.hstack([example[:,0] for example in dataset]))
         std_x = np.std(union_x)
 
         union_y = np.hstack([example[:,1] for example in dataset])
         std_y = np.std(union_y)
         mean_y = np.mean(union_y)
-        # time start at zero 
+        mean_std_start = np.zeros((len(dataset, 3))) # keep this for denormalization purposes in prediction
+     
         for i,example in enumerate(dataset):
-            
+             
             start_time = example[0,0]
-            starts[i] = start_time
-            example[:,0] = example[:,0] - start_time
+            example[:,0] = example[:,0] - start_time # start light curves at 0
 
             if normalize_by == 'all':
+                mean_std_start[i] = (mean_y, std_y, start_time)
                 example[:,1] = (example[:,1] - mean_y) / std_y
+                
             
             elif normalize_by == 'individual':
-                example[:,1] = (example[:,1] - np.std(example[:,1])) / np.mean(example[:,1])
-            
+                mean_std_start[i] = (np.mean(example[:,1]), np.std(example[:,1]), start_time)
+                example[:,1] = (example[:,1] - mean_std_start[i][0]) / mean_std_start[i][1]
+
+        self.mean_std_start = mean_std_start 
             
             
 

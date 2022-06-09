@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 
 
+# all operations are in place
+
 
 class DataSet:
     def add_files(self, files):
@@ -21,6 +23,7 @@ class DataSet:
 
         return self
 
+    
     def handle_dups(self):
         for index, example in enumerate(self.dataset):
             unique, i = np.unique(example[:, 0], return_index=True)
@@ -29,7 +32,6 @@ class DataSet:
 
 
     # function to purge low variability light curves from the dataset? 
-
 
     def prune_outliers(self, std_threshold=3):
         for i, example in enumerate(self.dataset):
@@ -47,6 +49,7 @@ class DataSet:
 
 
     # this feels ugly
+
     def normalize(self, normalize_time=False): 
         dataset = self.dataset
         starts = np.zeros(len(dataset))

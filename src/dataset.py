@@ -58,7 +58,7 @@ class DataSet:
         union_y = np.hstack([example[:,1] for example in dataset])
         std_y = np.std(union_y)
         mean_y = np.mean(union_y)
-        mean_std_start = np.zeros((len(dataset, 3))) # keep this for denormalization purposes in prediction
+        mean_std_start = np.zeros((len(dataset), 3)) # keep this for denormalization purposes in prediction
      
         for i,example in enumerate(dataset):
              

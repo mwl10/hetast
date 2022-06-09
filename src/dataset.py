@@ -50,7 +50,7 @@ class DataSet:
 
     # this feels ugly
 
-    def normalize(self, normalize_by='individual', normalize_time=False): 
+    def normalize(self, normalize_by='individual', normalize_time='none'): 
         dataset = self.dataset
         union_x = np.unique(np.hstack([example[:,0] for example in dataset]))
         std_x = np.std(union_x)
@@ -64,6 +64,10 @@ class DataSet:
              
             start_time = example[0,0]
             example[:,0] = example[:,0] - start_time # start light curves at 0
+            if normalize_time=='365':
+                example[:,0] = example[:,0] / 365
+            elif normalize_time=='to_std_1':
+                example[:,0] = example[:,0] / np.std(example[:,0])
 
             if normalize_by == 'all':
                 mean_std_start[i] = (mean_y, std_y, start_time)

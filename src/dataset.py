@@ -64,6 +64,7 @@ class DataSet:
              
             start_time = example[0,0]
             example[:,0] = example[:,0] - start_time # start light curves at 0
+
             if normalize_time=='365':
                 example[:,0] = example[:,0] / 365
             elif normalize_time=='to_std_1':
@@ -88,8 +89,11 @@ class DataSet:
         
     
     def denormalize(self):
-        # for i, d in enumerate(dt):
-        # dt[i] = d+start+dt[:i].sum()
+        for i, example in enumerate(self.dataset):
+            mean,std,start = self.mean_std_start
+            example[:,0] = example[:,0] + start
+            example[:,1] = (example[:,1] * std) + mean
+
         return self
 
     def reorder(self):

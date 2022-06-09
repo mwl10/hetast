@@ -168,10 +168,10 @@ class TVAE(nn.Module):
             return kl / mask.sum(-1).sum(-1)
         return kl
 
-    def compute_loglik(self, target_y, px, norm=True):
+    def compute_loglik(self, target_y, px, sample_weight, norm=True):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
         log_p = utils.log_normal_pdf(
-            target, px.mean, px.logvar, mask).sum(-1).sum(-1)
+            target, px.mean, px.logvar, mask, sample_weight).sum(-1).sum(-1)
         if norm:
             return log_p / mask.sum(-1).sum(-1)
 
@@ -221,7 +221,7 @@ class TVAE(nn.Module):
         px, qz = self.get_reconstruction(
             context_x, context_y, target_x, num_samples)
         mask = target_y[:, :, self.dim:]
-        loglik = self.compute_loglik(target_y, px, self.norm)
+        loglik = self.compute_loglik(target_y, px, sample_weight, self.norm)
         kl = self.kl_div(qz, mask, self.norm)
         # loss_info.elbo = (- loglik + beta * kl).mean()
         loss_info.elbo = -(

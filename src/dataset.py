@@ -52,9 +52,10 @@ class DataSet:
 
     def normalize(self, normalize_by='individual', normalize_time='none'): 
         dataset = self.dataset
-        union_x = np.unique(np.hstack([example[:,0] for example in dataset]))
+        union_x = np.hstack([example[:,0] for example in dataset])
         std_x = np.std(union_x)
-
+        union_x = np.unique(union_x)
+        
         union_y = np.hstack([example[:,1] for example in dataset])
         std_y = np.std(union_y)
         mean_y = np.mean(union_y)
@@ -67,8 +68,10 @@ class DataSet:
 
             if normalize_time=='365':
                 example[:,0] = example[:,0] / 365
-            elif normalize_time=='to_std_1':
+            elif normalize_time=='individual_std_1':
                 example[:,0] = example[:,0] / np.std(example[:,0])
+            elif normalize_time=='all_std_1':
+                example[:,0] = example[:,0] / std_x
 
             if normalize_by == 'all':
                 mean_std_start[i] = (mean_y, std_y, start_time)

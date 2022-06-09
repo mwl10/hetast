@@ -67,7 +67,7 @@ def normal_kl(mu1, lv1, mu2, lv2, sample_weight):
 
 # my mse for error bars
 def mean_squared_error(orig, pred, mask, sample_weight):
-    error = ((orig - pred) ** 2) #* sample_weight
+    error = ((orig - pred) ** 2) * sample_weight
     error = error * mask
     return error.sum() / mask.sum()
 

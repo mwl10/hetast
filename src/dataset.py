@@ -68,9 +68,9 @@ class DataSet:
 
             if normalize_x=='365':
                 example[:,0] = example[:,0] / 365
-            elif normalize_x=='individual_std_1':
+            elif normalize_x=='individual':
                 example[:,0] = example[:,0] / np.std(example[:,0])
-            elif normalize_x=='all_std_1':
+            elif normalize_x=='all':
                 example[:,0] = example[:,0] / std_x
 
             if normalize_y == 'all':

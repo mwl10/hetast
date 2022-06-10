@@ -74,14 +74,17 @@ def viz_per_example(example, net, device="cuda", k_iwae=10, fracs=[0.25,0.5,0.75
     quantile1 = np.quantile(preds, 0.141, axis=0)
     
     w = 2.0
-    plt.figure(figsize=(12.5, 1.5))
-    for j in range(3):
+    plt.figure(figsize=(25, 3))
+    for j in range(1):
         plt.subplot(1, 3, j + 1)
         plt.fill_between(tp[j], quantile1[j, :, 0], quantile2[j, :, 0], alpha=0.6, facecolor='#65c9f7', interpolate=True)
         plt.plot(tp[j], median[j, :, 0], c='b', lw=w, label='Reconstructions')
         #plt.plot(tp[n_max * j + index], gt[index], c='r', lw=w, label='Ground Truth')
         plt.scatter(tp[j], inputs[j, :, 0], c='k', lw=w, label='Observed Data')
     plt.show()
+
+
+
 
 def evaluate(net, data_loader, device="cuda"):
     train_loss = 0.

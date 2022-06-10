@@ -87,7 +87,7 @@ class DataSet:
         return self
 
         # normalize ys across the dataset
-        
+    #
     
     def denormalize(self):
         for i, example in enumerate(self.dataset):
@@ -96,6 +96,7 @@ class DataSet:
             example[:,1] = (example[:,1] * std) + mean
 
         return self
+
 
     def reorder(self):
         for example in self.dataset:

@@ -91,7 +91,7 @@ class DataSet:
     
     def denormalize(self):
         for i, example in enumerate(self.dataset):
-            mean,std,start = self.mean_std_start
+            mean,std,start = self.mean_std_start[i]
             example[:,0] = example[:,0] + start
             example[:,1] = (example[:,1] * std) + mean
 

@@ -38,7 +38,7 @@ def viz_per_example(example, net, device="cuda", k_iwae=10, fracs=[0.25,0.5,0.75
             smask, rmask = make_masks(example, frac=frac)
             example = np.concatenate((example, smask[:,:,np.newaxis], rmask[:,:,np.newaxis]), axis=-1) # format the masks 
 
-            # CUDA~
+            
             example = torch.tensor(example)
             example = example.to(device)
             

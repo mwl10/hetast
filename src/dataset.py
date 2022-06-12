@@ -121,7 +121,7 @@ class DataSet:
             target_x = np.arange(0,max_time, max_time/num_points)
             target_x = np.append(target_x, np.zeros((to_append)), axis=0)
             self.target_x[i] = target_x
-        self.target_x.astype(np.float32)
+        self.target_x = self.target_x.astype(np.float32)
         return self 
 
     def zero_fill(self):

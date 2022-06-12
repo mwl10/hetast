@@ -33,8 +33,12 @@ def count_parameters(model):
 def log_normal_pdf(x, mean, logvar, mask, sample_weight):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
-    
-    return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
+    if torch.is_tensor(sample_weight):
+        logerr = torch.log(1/ sample_weight)
+        
+        return -0.5 * (const + (logerr + logvar) + (x - mean) ** 2.0 / torch.exp(logerr+logvar)) * mask
+    else:
+        return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
    
 def mog_log_pdf(x, mean, logvar, mask):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)

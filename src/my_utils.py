@@ -47,7 +47,8 @@ def viz_per_example(example, net, device="cuda", k_iwae=10, fracs=[0.25,0.5,0.75
             # 
             context_y = torch.cat((example[:,:, 1:2] * subsampled_mask, subsampled_mask), -1)
             # probabilities per batch 
-            px, _ = net.get_reconstruction(example[:,:, 0], context_y, example[:,:, 0], num_samples=k_iwae)
+            px, qz = net.get_reconstruction(example[:,:, 0], context_y, example[:,:, 0], num_samples=k_iwae)
+            print(qz.mean.shape)
             pred_mean.append(px.mean.cpu().numpy())
             # changing from logvar to std 
             pred_std.append(torch.exp(0.5 * px.logvar).cpu().numpy())
@@ -82,6 +83,7 @@ def viz_per_example(example, net, device="cuda", k_iwae=10, fracs=[0.25,0.5,0.75
         #plt.plot(tp[n_max * j + index], gt[index], c='r', lw=w, label='Ground Truth')
         plt.scatter(tp[j], inputs[j, :, 0], c='k', lw=w, label='Observed Data')
     plt.show()
+    return qz
 
 
 

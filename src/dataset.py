@@ -111,6 +111,19 @@ class DataSet:
         
         return self
 
+
+    def set_target_x(self, num_points):
+        time = self.dataset[:,:,0]
+        to_append = time.shape[1] - num_points
+        self.target_x = np.zeros(time.shape)
+        for i,example in enumerate(time):
+            max_time = np.max(example)
+            target_x = np.arange(0,max_time, max_time/num_points)
+            target_x = np.append(target_x, np.zeros((to_append)), axis=0)
+            self.target_x[i] = target_x
+
+        return self 
+
     def zero_fill(self):
         max_len = 0
         for example in self.dataset:

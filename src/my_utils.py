@@ -21,7 +21,7 @@ def make_masks(lcs, frac=0.7):
 
 
 # visualisation for one light curve w/ increasing number of points
-def viz_per_example(example, net, device="cuda", k_iwae=10, fracs=[0.25,0.5,0.75]): 
+def viz_per_example(example, target_x, net, device="cuda", k_iwae=10, fracs=[0.25,0.5,0.75]): 
     pred_mean, pred_std = [], []
     masks = []
     targets = []
@@ -36,6 +36,7 @@ def viz_per_example(example, net, device="cuda", k_iwae=10, fracs=[0.25,0.5,0.75
 
             # make new masks relative to fraction of points we got to predict w/ 
             smask, rmask = make_masks(example, frac=frac)
+            target_x
             example = np.concatenate((example, smask[:,:,np.newaxis], rmask[:,:,np.newaxis]), axis=-1) # format the masks 
 
             

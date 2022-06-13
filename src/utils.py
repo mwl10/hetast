@@ -39,7 +39,6 @@ def log_normal_pdf(x, mean, logvar, mask, sample_weight):
         logerr[torch.isinf(logerr)] = 0.0
 
 
-        print(logerr)
         return -0.5 * (const + (logerr + logvar) + (x - mean) ** 2.0 / torch.exp(logerr+logvar)) * mask
     else:
         return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask

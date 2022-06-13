@@ -36,7 +36,7 @@ def log_normal_pdf(x, mean, logvar, mask, sample_weight):
     const = torch.log(const)
     if torch.is_tensor(sample_weight):
         logerr = torch.log(1/ sample_weight)
-        logerr[np.isinf(logerr)] = 0.0
+        logerr[torch.isinf(logerr)] = 0.0
 
 
         print(logerr)

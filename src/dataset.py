@@ -59,28 +59,40 @@ class DataSet:
         union_y = np.hstack([example[:,1] for example in dataset])
         std_y = np.std(union_y)
         mean_y = np.mean(union_y)
-        mean_std_start = np.zeros((len(dataset), 3)) # keep this for denormalization purposes in prediction
-     
+        y_mean_std = np.zeros((len(dataset), 2)) # keep this for denormalization purposes in prediction
+        x_mean_std = np.zeros((len(dataset), 2)) # keep this for denormalization purposes in prediction
+
         for i,example in enumerate(dataset):
              
             start_x = example[0,0]
+            
             example[:,0] = example[:,0] - start_x # start light curves at 0
+            x_mean_std[i,0] = start_x
 
             if normalize_x=='365':
+                
                 example[:,0] = example[:,0] / 365
+                x_mean_std[i,1] = 365
+
             elif normalize_x=='individual':
                 example[:,0] = example[:,0] / np.std(example[:,0])
+                x_mean_std[i,1] = np.std(example[:,0])
+
             elif normalize_x=='all':
                 example[:,0] = example[:,0] / std_x
+                x_mean_std[i,1] = std_x
+            else: 
+                x_mean_std[i,1] = 1
+                
 
             if normalize_y == 'all':
-                mean_std_start[i] = (mean_y, std_y, start_x)
+                y_mean_std[i] = (mean_y, std_y)
                 example[:,1] = (example[:,1] - mean_y) / std_y
             elif normalize_y == 'individual':
-                mean_std_start[i] = (np.mean(example[:,1]), np.std(example[:,1]), start_x)
-                example[:,1] = (example[:,1] - mean_std_start[i][0]) / mean_std_start[i][1]
+                y_mean_std[i] = (np.mean(example[:,1]), np.std(example[:,1]), start_x)
+                example[:,1] = (example[:,1] - y_mean_std[i,0]) / y_mean_std[i,1]
 
-        self.mean_std_start = mean_std_start 
+        self.y_mean_std = y_mean_std
             
             
 
@@ -91,9 +103,11 @@ class DataSet:
     
     def denormalize(self):
         for i, example in enumerate(self.dataset):
-            mean,std,start = self.mean_std_start[i]
-            example[:,0] = example[:,0] + start
-            example[:,1] = (example[:,1] * std) + mean
+            y_mean, y_std = self.y_mean_std[i]
+            x_mean, x_std = self.x_mean_std[i]
+
+            example[:,0] = (example[:,0] * x_std) + x_mean
+            example[:,1] = (example[:,1] * y_std) + y_mean
 
         return self
 

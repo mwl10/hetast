@@ -89,7 +89,7 @@ class DataSet:
                 y_mean_std[i] = (mean_y, std_y)
                 example[:,1] = (example[:,1] - mean_y) / std_y
             elif normalize_y == 'individual':
-                y_mean_std[i] = (np.mean(example[:,1]), np.std(example[:,1]), start_x)
+                y_mean_std[i] = (np.mean(example[:,1]), np.std(example[:,1]))
                 example[:,1] = (example[:,1] - y_mean_std[i,0]) / y_mean_std[i,1]
 
         self.y_mean_std = y_mean_std
@@ -200,6 +200,8 @@ class DataSet:
 
         self.dataset[:,:,2] = 1. / self.dataset[:,:,2]
         self.dataset[:,:,2][np.isinf(self.dataset[:,:,2])] = 0.0
+
+
         return self
 
     

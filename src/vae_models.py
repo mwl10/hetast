@@ -87,6 +87,7 @@ class TVAE(nn.Module):
     def encode(self, context_x, context_y):
         mask = context_y[:, :, self.dim:]
         value = context_y[:, :, :self.dim]
+        print(self.query)
         hidden = self.encoder(self.query, context_x, value, mask)
         return self.h2z_mixing(hidden)
 

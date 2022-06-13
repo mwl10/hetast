@@ -107,14 +107,16 @@ class DataSet:
     #
     
     def denormalize(self):
-        for i, example in enumerate(self.dataset):
+        denormalized = self.dataset.copy()
+
+        for i, example in enumerate(denormalized):
             y_mean, y_std = self.y_mean_std[i]
             x_mean, x_std = self.x_mean_std[i]
 
             example[:,0] = (example[:,0] * x_std) + x_mean
             example[:,1] = (example[:,1] * y_std) + y_mean
             example[:,2] = example[:,2] * y_std
-        return self
+        return denormalized
 
 
     def reorder(self):

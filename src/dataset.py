@@ -76,7 +76,10 @@ class DataSet:
 
             elif normalize_x=='individual':
                 x_mean_std[i,1] = np.std(example[:,0])
-                example[:,0] = example[:,0] / np.std(example[:,0])
+                x_range = np.max(example[:,0]) - np.min(example[:,0])
+
+                #example[:,0] = example[:,0] / np.std(example[:,0])
+                example[:,0] = example[:, 0] / x_range
 
             elif normalize_x=='all':
                 example[:,0] = example[:,0] / std_x

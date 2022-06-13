@@ -50,6 +50,7 @@ class DataSet:
 
     # this feels ugly
 
+    # remember x norm setting is 
     def normalize(self, normalize_y='individual', normalize_x='none'): 
         dataset = self.dataset
         union_x = np.hstack([example[:,0] for example in dataset])
@@ -115,6 +116,7 @@ class DataSet:
 
             example[:,0] = (example[:,0] * x_std) + x_mean
             example[:,1] = (example[:,1] * y_std) + y_mean
+
             example[:,2] = example[:,2] * y_std
         return denormalized
 
@@ -133,17 +135,22 @@ class DataSet:
         return self
 
 
-    def set_target_x(self, num_points=40):
+    def set_target_x(self, num_points=40, forecast=False, forecast_frac=1.2):
         time = self.dataset[:,:,0]
         to_append = time.shape[1] - num_points
         self.target_x = np.zeros(time.shape)
         for i,example in enumerate(time):
+
             max_time = np.max(example)
+            if forecast:
+                max_time =  forecast_frac * max_time
             target_x = np.arange(0,max_time, max_time/num_points)
             target_x = np.append(target_x, np.zeros((to_append)), axis=0)
             self.target_x[i] = target_x
         self.target_x = self.target_x.astype(np.float32)
         return self 
+
+    
 
     def zero_fill(self):
         max_len = 0

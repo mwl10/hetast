@@ -29,13 +29,17 @@ def count_parameters(model):
 
 # to include error bars
 
+# self.dataset[:,:,2][np.isinf(self.dataset[:,:,2])] = 0.0
 
 def log_normal_pdf(x, mean, logvar, mask, sample_weight):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
     if torch.is_tensor(sample_weight):
         logerr = torch.log(1/ sample_weight)
-        
+        logerr = logerr[np.isinf(logerr)] = 0.0
+
+
+        print(logerr)
         return -0.5 * (const + (logerr + logvar) + (x - mean) ** 2.0 / torch.exp(logerr+logvar)) * mask
     else:
         return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask

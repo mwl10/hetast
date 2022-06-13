@@ -75,8 +75,8 @@ class DataSet:
                 x_mean_std[i,1] = 365
 
             elif normalize_x=='individual':
-                example[:,0] = example[:,0] / np.std(example[:,0])
                 x_mean_std[i,1] = np.std(example[:,0])
+                example[:,0] = example[:,0] / np.std(example[:,0])
 
             elif normalize_x=='all':
                 example[:,0] = example[:,0] / std_x

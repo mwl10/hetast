@@ -93,7 +93,7 @@ class DataSet:
                 example[:,1] = (example[:,1] - y_mean_std[i,0]) / y_mean_std[i,1]
 
         self.y_mean_std = y_mean_std
-            
+        self.x_mean_std = x_mean_std
             
 
         return self

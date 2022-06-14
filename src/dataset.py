@@ -7,25 +7,32 @@ import matplotlib.pyplot as plt
 
 
 class DataSet:
-    def add_files(self, files):
+    def add_files(self, files, min=50, max=300):
         self.files = files
         return self
     
     def files_to_numpy(self):
         dataset = []
-        for file in self.files:
+        print(len(self.files))
+        for i, file in enumerate(self.files):
             with open(file, 'r') as f:
                 example = pd.read_csv(file, sep='\t').to_numpy()
+
+            if len(example) < min or len(example) > max:
+                del self.files[i]
+
             print(f'dims of {file}:\t{example.shape}')
             example = example[example[:,0].argsort()]
             
             dataset.append(example)
-
         self.dataset = dataset
 
         return self
 
-    
+
+
+
+
     def handle_dups(self):
         for index, example in enumerate(self.dataset):
             unique, i = np.unique(example[:, 0], return_index=True)

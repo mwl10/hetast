@@ -88,7 +88,7 @@ class DataSet:
             
             pruned_example = np.delete(example, outliers, axis=0)
 
-            if i == index:
+            if plot==True and i == index:
                 plt.plot(example[:,0], quintic_y)
                 plt.scatter(example[outliers,0], example[outliers,1], c='r', marker='x')
                 plt.scatter(pruned_example[:,0], pruned_example[:,1], c='b')

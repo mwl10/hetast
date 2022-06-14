@@ -17,7 +17,7 @@ class DataSet:
                 example = pd.read_csv(file, sep='\t').to_numpy()
             #print(f'dims of {file}:\t{example.shape}')
             example = example[example[:,0].argsort()]
-            example = example[:200]
+            
             dataset.append(example)
         self.dataset = dataset
 

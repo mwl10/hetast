@@ -11,16 +11,14 @@ class DataSet:
         self.files = files
         return self
     
-    def files_to_numpy(self, minimum=50, maximum=300):
+    def files_to_numpy(self):
         dataset = []
         print(len(self.files))
         for i, file in enumerate(self.files):
             with open(file, 'r') as f:
                 example = pd.read_csv(file, sep='\t').to_numpy()
 
-            if len(example) < minimum or len(example) > maximum:
-                del self.files[i]
-                continue
+            
 
             print(f'dims of {file}:\t{example.shape}')
             example = example[example[:,0].argsort()]
@@ -70,7 +68,6 @@ class DataSet:
 # than 10 percent of the points were rejected
 
     def prune_graham(self, plot=False, index=100):
-        pruned_examples = []
         for i, example in enumerate(self.dataset):
             example[:,1] = signal.medfilt(example[:,1], kernel_size=3)
             quintic_fit = np.polyfit(example[:,0], example[:,1], deg=5)
@@ -96,7 +93,7 @@ class DataSet:
                     break
             
             pruned_example = np.delete(example, outliers, axis=0)
-            pruned_examples.append(pruned_example)
+            self.dataset[i] = pruned_example
 
             if plot==True and i == index:
                 plt.plot(example[:,0], quintic_y)
@@ -105,7 +102,6 @@ class DataSet:
                 plt.xlabel('MJD')
                 plt.ylabel('mag')
             
-        self.dataset = pruned_examples
         return self 
 
 

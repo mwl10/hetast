@@ -21,7 +21,7 @@ class DataSet:
             print(f'dims of {file}:\t{example.shape}')
             example = example[example[:,0].argsort()]
             if (len(example) <= minimum) or  (len(example) >= maximum):
-                del dataset.files[i]
+                del self.files[i]
                 continue
             dataset.append(example)
         self.dataset = dataset

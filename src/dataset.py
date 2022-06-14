@@ -31,6 +31,14 @@ class DataSet:
         return self
 
 
+#  **************************************************
+#     prune_outliers()
+#     **************************************************
+#         parameters: std_threshold (default: 3)
+
+#         std_threshold sets how many stds from the mean y values we will remove outliers
+
+
     def prune_outliers(self, std_threshold=3):
         for i, example in enumerate(self.dataset):
             y = example[:,1]
@@ -44,11 +52,30 @@ class DataSet:
         return self
 
 
+#    **************************************************
+#     normalize()
+#     **************************************************
+
+#         parameters: normalize_y (default: individual)
+#                     normalize_x (default: none)
+
+#         normalize_y sets how we normalize the y values, & can be
+#             'all'         to normalize across the dataset 
+#             'individual'  to normalize per example
+
+#         normalize_x sets how we normalize x values (time) & can be
+#          
+#             'all'         to normalize across the dataset
+#             'individual'  to normalize per example
+
+#     ->set_union_x() sets instance attribute (union_x) of the dataset object union_x for the network to use in calculating 'intensity' 
+#     ->zero_fill(), make_masks(), are formating that the network needs
+#     ->error_to_sample_weight() changes the errors column to sample weights which are used in the loss function 
+#             i.e. MSE = (y_pred - y)**2 * sample_weights 
+    
+# '''
 
 
-    # this feels ugly
-
-    # remember x norm setting is 
     def normalize(self, normalize_y='individual', normalize_x='none', x_by_range=True, y_by_range=False): 
         dataset = self.dataset
         union_x = np.hstack([example[:,0] for example in dataset])
@@ -88,7 +115,7 @@ class DataSet:
                     example[:,0] = example[:,0] / range_x
                     x_mean_std[i,1] = range_x
                 else:
-                    example[:,0] = example / std_x
+                    example[:,0] = example[:,0] / std_x
                     x_mean_std[i,1] = std_x
 
             else: 
@@ -193,6 +220,19 @@ class DataSet:
             new_samples.append(new_sample)
 
         return new_samples
+
+
+
+
+#    **************************************************
+#     resample_dataset()
+#     **************************************************
+
+#         desc: sampling from the errors and adding to the flux value to create more data variants
+        
+#         parameters: num_samples (default: 1)
+
+#         num_samples sets how many sets of new samples we will make from the dataset
 
     def resample_dataset(self, num_samples=1):
         print(f'generating {num_samples} new sample of each example in the dataset & appending them \n old dataset length: {len(self.dataset)}')

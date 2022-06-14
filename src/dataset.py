@@ -49,13 +49,15 @@ class DataSet:
     # this feels ugly
 
     # remember x norm setting is 
-    def normalize(self, normalize_y='individual', normalize_x='none'): 
+    def normalize(self, normalize_y='individual', normalize_x='none', x_by_range=True, y_by_range=False): 
         dataset = self.dataset
         union_x = np.hstack([example[:,0] for example in dataset])
+        range_x = np.max(union_x) - np.min(union_x)
         std_x = np.std(union_x)
         union_x = np.unique(union_x)
         
         union_y = np.hstack([example[:,1] for example in dataset])
+        range_y = np.max(union_y) - np.min(union_y)
         std_y = np.std(union_y)
         mean_y = np.mean(union_y)
         y_mean_std = np.zeros((len(dataset), 2)) # keep this for denormalization purposes in prediction
@@ -68,33 +70,51 @@ class DataSet:
             example[:,0] = example[:,0] - start_x # start light curves at 0
             x_mean_std[i,0] = start_x
 
-            if normalize_x=='365':
-                
-                example[:,0] = example[:,0] / 365
-                x_mean_std[i,1] = 365
 
-            elif normalize_x=='individual':
-                x_mean_std[i,1] = np.std(example[:,0])
-                x_range = np.max(example[:,0]) - np.min(example[:,0])
-
+            if normalize_x=='individual':
+                if x_by_range:
+                    range_x = np.max(example[:,0]) - np.min(example[:,0])
+                    x_mean_std[i,1] = range_x
+                    example[:,0] = example[:, 0] / range_x
+                else:  
+                    x_std = np.std(example[:,0])
+                    x_mean_std[i,1] = x_std
+                    example[:,0] = example[:,0] / x_std
                 #example[:,0] = example[:,0] / np.std(example[:,0])
-                example[:,0] = example[:, 0] / x_range
+                    
 
             elif normalize_x=='all':
-                example[:,0] = example[:,0] / std_x
-                x_mean_std[i,1] = std_x
+                if x_by_range:
+                    example[:,0] = example[:,0] / range_x
+                    x_mean_std[i,1] = range_x
+                else:
+                    example[:,0] = example / std_x
+                    x_mean_std[i,1] = std_x
+
             else: 
                 x_mean_std[i,1] = 1
                 
 
             if normalize_y == 'all':
-                y_mean_std[i] = (mean_y, std_y)
-                example[:,1] = (example[:,1] - mean_y) / std_y
-                example[:,2] = example[:,2] / std_y # normalize errors as well 
+                if y_by_range:
+                    y_mean_std[i] = (mean_y, range_y)
+                    example[:,1] = (example[:,1] - mean_y) /range_y
+                    example[:,2] = example[:,2] / range_y # normalize errors as well 
+                else:
+                    y_mean_std[i] = (mean_y, std_y)
+                    example[:,1] = (example[:,1] - mean_y) / std_y
+                    example[:,2] = example[:,2] / std_y # normalize errors as well 
             elif normalize_y == 'individual':
-                y_mean_std[i] = (np.mean(example[:,1]), np.std(example[:,1]))
-                example[:,1] = (example[:,1] - y_mean_std[i,0]) / y_mean_std[i,1]
-                example[:,2] = example[:,2] / y_mean_std[i,1] # normalize errors as well 
+                if y_by_range:
+                    range_y = np.max(example[:,1]) - np.min(example[:,1])
+                    y_mean_std[i] = (np.mean(example[:,1]), range_y)
+                    example[:,1] = (example[:,1] - y_mean_std[i,0]) / y_mean_std[i,1]
+                    example[:,2] = example[:,2] / y_mean_std[i,1] # normalize errors as well 
+
+                else:
+                    y_mean_std[i] = (np.mean(example[:,1]), np.std(example[:,1]))
+                    example[:,1] = (example[:,1] - y_mean_std[i,0]) / y_mean_std[i,1]
+                    example[:,2] = example[:,2] / y_mean_std[i,1] # normalize errors as well 
 
         self.y_mean_std = y_mean_std
         self.x_mean_std = x_mean_std

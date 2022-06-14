@@ -7,18 +7,18 @@ import matplotlib.pyplot as plt
 
 
 class DataSet:
-    def add_files(self, files, min=50, max=300):
+    def add_files(self, files):
         self.files = files
         return self
     
-    def files_to_numpy(self):
+    def files_to_numpy(self, minimum=50, maximum=300):
         dataset = []
         print(len(self.files))
         for i, file in enumerate(self.files):
             with open(file, 'r') as f:
                 example = pd.read_csv(file, sep='\t').to_numpy()
 
-            if len(example) < min or len(example) > max:
+            if len(example) < minimum or len(example) > maximum:
                 del self.files[i]
 
             print(f'dims of {file}:\t{example.shape}')

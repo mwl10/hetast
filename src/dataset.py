@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from scipy import signal
+import matplotlib.pyplot as plt
 
 # all operations are in place
 
@@ -60,7 +61,7 @@ class DataSet:
 # clipping threshold was initially set to 0.25 mag and then iteratively increased (if necessary) until no more 
 # than 10 percent of the points were rejected
 
-    def prune_graham(self):
+    def prune_graham(self, plot=False, index=100):
         for i, example in enumerate(self.dataset):
             example[:,1] = signal.medfilt(example[:,1], kernel_size=3)
             quintic_fit = np.polyfit(example[:,0], example[:,1], deg=5)
@@ -86,7 +87,15 @@ class DataSet:
                     break
             
             pruned_example = np.delete(example, outliers, axis=0)
+
+            if i == index:
+                plt.plot(example[:,0], quintic_y)
+                plt.scatter(example[outliers,0], example[outliers,1], c='r', marker='x')
+                plt.scatter(pruned_example[:,0], pruned_example[:,1], c='b')
+                plt.xlabel('MJD')
+                plt.ylabel('mag')
             self.dataset[i] = pruned_example
+            
         return self 
 
 

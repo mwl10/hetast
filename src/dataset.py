@@ -87,7 +87,7 @@ class DataSet:
             
             pruned_example = np.delete(example, outliers, axis=0)
             self.dataset[i] = pruned_example
-        
+        return self 
 
 
 #    **************************************************

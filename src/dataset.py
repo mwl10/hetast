@@ -70,6 +70,7 @@ class DataSet:
 # than 10 percent of the points were rejected
 
     def prune_graham(self, plot=False, index=100):
+        pruned_examples = []
         for i, example in enumerate(self.dataset):
             example[:,1] = signal.medfilt(example[:,1], kernel_size=3)
             quintic_fit = np.polyfit(example[:,0], example[:,1], deg=5)
@@ -95,6 +96,7 @@ class DataSet:
                     break
             
             pruned_example = np.delete(example, outliers, axis=0)
+            pruned_examples.append(pruned_example)
 
             if plot==True and i == index:
                 plt.plot(example[:,0], quintic_y)
@@ -102,8 +104,8 @@ class DataSet:
                 plt.scatter(pruned_example[:,0], pruned_example[:,1], c='b')
                 plt.xlabel('MJD')
                 plt.ylabel('mag')
-            self.dataset[i] = pruned_example
             
+        self.dataset = pruned_examples
         return self 
 
 

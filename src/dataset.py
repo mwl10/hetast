@@ -15,7 +15,7 @@ class DataSet:
         for file in self.files:
             with open(file, 'r') as f:
                 example = pd.read_csv(file, sep='\t').to_numpy()
-            print(f'dims of {file}:\t{example.shape}')
+            #print(f'dims of {file}:\t{example.shape}')
             example = example[example[:,0].argsort()]
             example = example[:200]
             dataset.append(example)
@@ -30,8 +30,6 @@ class DataSet:
             self.dataset[index] = example[i]
         return self
 
-
-    # function to purge low variability light curves from the dataset? 
 
     def prune_outliers(self, std_threshold=3):
         for i, example in enumerate(self.dataset):
@@ -104,8 +102,7 @@ class DataSet:
 
         return self
 
-        # normalize ys across the dataset
-    #
+
     
     def denormalize(self):
         denormalized = self.dataset.copy()

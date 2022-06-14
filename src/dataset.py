@@ -70,6 +70,7 @@ class DataSet:
     def prune_graham(self, plot=False, index=100):
         for i, example in enumerate(self.dataset):
             example[:,1] = signal.medfilt(example[:,1], kernel_size=3)
+            print(len(example))
             quintic_fit = np.polyfit(example[:,0], example[:,1], deg=5)
             quintic_y = np.array([example[:,0]**5, example[:,0] ** 4, example[:,0] ** 3, example[:,0] ** 2 , example[:,0], np.ones(len(example))])
             quintic_y = np.matmul(quintic_y.T, quintic_fit)

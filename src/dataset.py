@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+from scipy import signal
 
 # all operations are in place
 
@@ -17,8 +17,9 @@ class DataSet:
                 example = pd.read_csv(file, sep='\t').to_numpy()
             print(f'dims of {file}:\t{example.shape}')
             example = example[example[:,0].argsort()]
-
+            
             dataset.append(example)
+
         self.dataset = dataset
 
         return self
@@ -52,6 +53,43 @@ class DataSet:
         return self
 
 
+# three point median filter
+
+# clipping of all points that deviated significantly from a quintic polynomial fit to the data 
+
+# clipping threshold was initially set to 0.25 mag and then iteratively increased (if necessary) until no more 
+# than 10 percent of the points were rejected
+
+    def prune_graham(self):
+        for i, example in enumerate(self.dataset):
+            example[:,1] = signal.medfilt(example[:,1], kernel_size=3)
+            quintic_fit = np.polyfit(example[:,0], example[:,1], deg=5)
+            quintic_y = np.array([example[:,0]**5, example[:,0] ** 4, example[:,0] ** 3, example[:,0] ** 2 , example[:,0], np.ones(len(example))])
+            quintic_y = np.matmul(quintic_y.T, quintic_fit)
+
+            #print(np.std(quintic_y))
+            
+            dev = np.abs(example[:,1] - quintic_y)
+
+
+            # increase mag_threshold of outliers if more than 10 percent are removed
+            percentage = 1.
+            mag_threshold = 0.25
+            while(True):
+                outliers = np.where(dev >= mag_threshold)[0]
+                percentage = len(outliers)/ len(example) # none past 10 percent 
+                #print(percentage)
+                if percentage > .1:
+                    #print('need to increase outlier mag threshold')
+                    mag_threshold += 0.01
+                else:
+                    break
+            
+            pruned_example = np.delete(example, outliers, axis=0)
+            self.dataset[i] = pruned_example
+        
+
+
 #    **************************************************
 #     normalize()
 #     **************************************************
@@ -68,7 +106,7 @@ class DataSet:
 #             'all'         to normalize across the dataset
 #             'individual'  to normalize per example
 
-#     ->set_union_x() sets instance attribute (union_x) of the dataset object union_x for the network to use in calculating 'intensity' 
+#     ->set_union_x() sets instance attribute (union_x) of the dataset object union_x for the network to use in caexampleulating 'intensity' 
 #     ->zero_fill(), make_masks(), are formating that the network needs
 #     ->error_to_sample_weight() changes the errors column to sample weights which are used in the loss function 
 #             i.e. MSE = (y_pred - y)**2 * sample_weights 

@@ -20,7 +20,7 @@ class DataSet:
 
             if len(example) < minimum or len(example) > maximum:
                 del self.files[i]
-                pass
+                continue
 
             print(f'dims of {file}:\t{example.shape}')
             example = example[example[:,0].argsort()]

@@ -83,7 +83,7 @@ class DataSet:
             percentage = 1.
             mag_threshold = 0.25
             while(True):
-                outliers = np.where(dev >= res_std * 3)[0]
+                outliers = np.where(dev >= mag_threshold)[0]
                 percentage = len(outliers)/ len(example) # none past 10 percent 
                 #print(percentage)
                 if percentage > .1:

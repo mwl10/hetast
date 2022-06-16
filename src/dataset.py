@@ -175,7 +175,7 @@ class DataSet:
                     x_mean_std[i,1] = std_x
 
             else: 
-                x_mean_std[i,1] = 1
+                x_mean_std[i,1] = 0
                 
 
             if normalize_y == 'all':

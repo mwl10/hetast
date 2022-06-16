@@ -85,7 +85,6 @@ class DataSet:
             
             # increase mag_threshold of outliers if more than 10 percent are removed
             percentage = 1.
-            mag_threshold = 0.25
             while(True):
                 outliers = np.where(dev >= mag_threshold)[0]
                 percentage = len(outliers)/ len(example) # none past 10 percent 

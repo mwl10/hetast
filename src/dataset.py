@@ -20,16 +20,13 @@ class DataSet:
 
             print(f'dims of {file}:\t{example.shape}')
             example = example[example[:,0].argsort()]
-            if (len(example) <= minimum) or  (len(example) >= maximum):
+            if (len(example) <= minimum): #or  (len(example) >= maximum):
                 del self.files[i]
                 continue
             dataset.append(example)
         self.dataset = dataset
 
         return self
-
-
-
 
 
     def handle_dups(self):

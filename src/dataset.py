@@ -75,6 +75,8 @@ class DataSet:
             #print(np.std(quintic_y))
             
             dev = np.abs(example[:,1] - quintic_y)
+            # square root of the mean of the squared residuals 
+            print(np.sqrt(np.mean(dev)))
             print(np.std(dev))
 
             # increase mag_threshold of outliers if more than 10 percent are removed

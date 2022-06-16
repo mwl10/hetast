@@ -119,7 +119,7 @@ class UnTAN(nn.Module):
             x.size(0), -1, self.h, self.embed_time_k).transpose(1, 2)
             for l, x in zip(self.linears, (query, key))]
         x, intensity = self.attention(query, key, value, mask, self.dropout)
-        print(x, intensity)
+        print(x.shape, intensity.shape)
         if self.intensity:
             intensity = intensity.transpose(1, 2).contiguous() \
                 .view(batch, -1, self.h * self.dim)

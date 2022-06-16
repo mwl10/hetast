@@ -79,6 +79,7 @@ class DataSet:
             if res_std:
                 res_std = np.sqrt(np.mean(dev**2))
                 mag_threshold = std_threshold*res_std
+                print(mag_threshold)
 
             #print(np.std(dev))
             

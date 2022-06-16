@@ -64,7 +64,7 @@ class DataSet:
 # clipping threshold was initially set to 0.25 mag and then iteratively increased (if necessary) until no more 
 # than 10 percent of the points were rejected
 
-    def prune_graham(self, plot=False, index=100):
+    def prune_graham(self, plot=False, index=100, res_std=True, std_threshold=3, mag_threshold=0.25):
         for i, example in enumerate(self.dataset):
             example[:,1] = signal.medfilt(example[:,1], kernel_size=3)
             print(len(example))
@@ -76,9 +76,12 @@ class DataSet:
             
             dev = np.abs(example[:,1] - quintic_y)
             # residual std error 
-            res_std = np.sqrt(np.mean(dev**2))
-            #print(np.std(dev))
+            if res_std:
+                res_std = np.sqrt(np.mean(dev**2))
+                mag_threshold = std_threshold*res_std
 
+            #print(np.std(dev))
+            
             # increase mag_threshold of outliers if more than 10 percent are removed
             percentage = 1.
             mag_threshold = 0.25

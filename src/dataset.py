@@ -71,11 +71,11 @@ class DataSet:
             quintic_fit = np.polyfit(example[:,0], example[:,1], deg=5)
             quintic_y = np.array([example[:,0]**5, example[:,0] ** 4, example[:,0] ** 3, example[:,0] ** 2 , example[:,0], np.ones(len(example))])
             quintic_y = np.matmul(quintic_y.T, quintic_fit)
-
+            quintic_y_std = np.std(quintic_y)
             #print(np.std(quintic_y))
             
             dev = np.abs(example[:,1] - quintic_y)
-
+            print(np.std(dev))
 
             # increase mag_threshold of outliers if more than 10 percent are removed
             percentage = 1.

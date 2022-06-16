@@ -75,15 +75,15 @@ class DataSet:
             #print(np.std(quintic_y))
             
             dev = np.abs(example[:,1] - quintic_y)
-            # square root of the mean of the squared residuals 
-            print(np.sqrt(np.mean(dev**2)))
-            print(np.std(dev))
+            # residual std error 
+            res_std = np.sqrt(np.mean(dev**2))
+            #print(np.std(dev))
 
             # increase mag_threshold of outliers if more than 10 percent are removed
             percentage = 1.
             mag_threshold = 0.25
             while(True):
-                outliers = np.where(dev >= mag_threshold)[0]
+                outliers = np.where(dev >= res_std * 3)[0]
                 percentage = len(outliers)/ len(example) # none past 10 percent 
                 #print(percentage)
                 if percentage > .1:

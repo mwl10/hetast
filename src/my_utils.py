@@ -19,9 +19,17 @@ def make_masks(lcs, frac=0.7):
         obs_points = np.sort(np.random.choice(
             indexes, size=length, replace=False))
         subsampled_mask[i, obs_points] = 1
-        recon_mask[i] = np.logical_xor(lc[:, 1], subsampled_mask[i])
+
+        recon_mask[i] = torch.logical_xor(lc[:, 1], subsampled_mask[i])
 
     return subsampled_mask, recon_mask
+
+
+
+
+
+
+
 
 
 # visualisation for one light curve w/ increasing number of points

@@ -16,12 +16,13 @@ def make_masks(lcs, frac=0.7):
         indexes = lc[:, 1].nonzero()[0]
         # this should vary to some extent
         length = int(np.round(len(indexes) * frac))
-        obs_points = torch.sort(np.random.choice(
+        obs_points = np.sort(np.random.choice(
             indexes, size=length, replace=False))
         subsampled_mask[i, obs_points] = 1
 
         recon_mask[i] = torch.logical_xor(lc[:, 1], subsampled_mask[i])
-
+        print(torch.is_tensor(subsampled_mask))
+        print(torch.is_tensor(recon_mask))
     return subsampled_mask, recon_mask
 
 

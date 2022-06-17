@@ -6,7 +6,77 @@ from scipy import signal
 from glob import glob
 from dataset import DataSet
 
+def train(net, optimizer,epoch, train_loader, args, device="cuda", frac=0.5, sample_weight=False):
+      
+    train_loss = 0.
+    train_n = 0.
+    avg_loglik, avg_kl, mse, mae = 0., 0., 0., 0.
+    for i, train_batch in enumerate(train_loader):
+        batch_len = train_batch.shape[0] 
+        #train_batch[:,:,2] = torch.ones((train_batch[:,:,3].shape))
+        recon_mask, subsampled_mask = my_utils.make_masks(train_batch, frac=0.5)
+        
+        train_batch = torch.cat((train_batch, torch.unsqueeze(subsampled_mask, 2), torch.unsqueeze(recon_mask, 2)), axis=-1)
+        # print(torch.unsqueeze(subsampled_mask, 2).shape)
+        # print(train_batch.shape)
+        # train_batch[:,:,4:5] = torch.unsqueeze(recon_mask[:,:], 2)
+        # train_batch[:,:,3:4] = torch.unsqueeze(subsampled_mask[:,:], 2)
+        train_batch = train_batch.to(device)
+        x = train_batch[:,:,0]
+        y = train_batch[:,:,1:2]
+        subsampled_mask = train_batch[:,:,3:4]
+        recon_mask = train_batch[:,:,4:5]
+        if sample_weight:
 
+            sample_weight = train_batch[:,:,2:3]
+        else:
+            sample_weight = 1.
+        # weights for loss in analogy to standard weighted least squares error 
+
+        seqlen = train_batch.size(1) 
+        # subsampled flux values and their corresponding masks....
+        context_y = torch.cat((
+            y * subsampled_mask, subsampled_mask
+        ), -1) 
+        recon_context_y = torch.cat((            # flux values with only recon_mask values showing
+                y * recon_mask, recon_mask
+            ), -1) 
+# format: compute_unsupervised_loss(self, context_x, context_y, target_x, target_y, num_samples=1, beta=1):
+        loss_info = net.compute_unsupervised_loss(
+            x,
+            context_y,  
+            x,  # can pick the points we want to project to
+            recon_context_y,
+            num_samples=args.k_iwae, # 1? 
+            beta=0.1,
+            # optional, will be zero if not set
+            sample_weight = sample_weight,
+
+        )
+        optimizer.zero_grad()
+        loss_info.composite_loss.backward()
+        optimizer.step()
+        #scheduler.step()
+        train_loss += loss_info.composite_loss.item() * batch_len
+        avg_loglik += loss_info.loglik * batch_len
+        avg_kl += loss_info.kl * batch_len
+        mse += loss_info.mse * batch_len
+        mae += loss_info.mae * batch_len
+        train_n += batch_len
+        
+    if epoch % 100 == 0:
+        print(
+            'Iter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg kl: {:.4f}, '
+            'mse: {:.6f}, mae: {:.6f}'.format(
+                epoch,
+                train_loss / train_n,
+                -avg_loglik / train_n,
+                avg_kl / train_n,
+                mse / train_n,
+                mae / train_n
+            )
+        )
+    return -avg_loglik / train_n, mse / train_n
 
 def make_masks(lcs, frac=0.7):
     # will depend on dimensions later

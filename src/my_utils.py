@@ -6,7 +6,7 @@ from scipy import signal
 from glob import glob
 from dataset import DataSet
 
-def train(net, optimizer,epoch, train_loader, args, device="cuda", frac=0.5, sample_weight=False):
+def train(net, optimizer,epoch, train_loader, args, device="cuda", frac=0.5, errors=False):
       
     train_loss = 0.
     train_n = 0.
@@ -26,8 +26,7 @@ def train(net, optimizer,epoch, train_loader, args, device="cuda", frac=0.5, sam
         y = train_batch[:,:,1:2]
         subsampled_mask = train_batch[:,:,3:4]
         recon_mask = train_batch[:,:,4:5]
-        if sample_weight:
-
+        if errors:
             sample_weight = train_batch[:,:,2:3]
         else:
             sample_weight = 1.

@@ -15,7 +15,7 @@ def make_masks(lcs, frac=0.7):
     for i, lc in enumerate(lcs):
         indexes = lc[:, 1].nonzero()[0]
         # this should vary to some extent
-        length = int(torch.round(len(indexes) * frac))
+        length = int(np.round(len(indexes) * frac))
         obs_points = torch.sort(np.random.choice(
             indexes, size=length, replace=False))
         subsampled_mask[i, obs_points] = 1

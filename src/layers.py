@@ -122,12 +122,11 @@ class UnTAN(nn.Module):
         if self.intensity:
             intensity = intensity.transpose(1, 2).contiguous() \
                 .view(batch, -1, self.h * self.dim)
-            print(intensity.shape)
         x = x.transpose(1, 2).contiguous() \
             .view(batch, -1, self.h * self.dim)
-        print(x.shape)
         if self.intensity and self.no_mix:
             return torch.stack((x, intensity), -1)
         elif self.intensity:
+            print(x.shape, 'intensity:', intensity.shape)
             return self.linears[-1](torch.cat((x, intensity), -1))
         return self.linears[-1](x)

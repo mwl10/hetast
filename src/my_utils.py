@@ -21,8 +21,6 @@ def make_masks(lcs, frac=0.7):
         subsampled_mask[i, obs_points] = 1
 
         recon_mask[i] = torch.logical_xor(lc[:, 1], subsampled_mask[i])
-        print(torch.is_tensor(subsampled_mask))
-        print(torch.is_tensor(recon_mask))
     return subsampled_mask, recon_mask
 
 

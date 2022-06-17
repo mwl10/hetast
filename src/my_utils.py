@@ -14,7 +14,7 @@ def train(net, optimizer,epoch, train_loader, args, device="cuda", frac=0.5, sam
     for i, train_batch in enumerate(train_loader):
         batch_len = train_batch.shape[0] 
         #train_batch[:,:,2] = torch.ones((train_batch[:,:,3].shape))
-        recon_mask, subsampled_mask = my_utils.make_masks(train_batch, frac=0.5)
+        recon_mask, subsampled_mask = make_masks(train_batch, frac=0.5)
         
         train_batch = torch.cat((train_batch, torch.unsqueeze(subsampled_mask, 2), torch.unsqueeze(recon_mask, 2)), axis=-1)
         # print(torch.unsqueeze(subsampled_mask, 2).shape)

@@ -132,7 +132,7 @@ class DataSet:
 # '''
 
 
-    def normalize(self, normalize_y='individual', normalize_x='none', x_by_range=True, y_by_range=False): 
+    def normalize(self, normalize_y='individual', normalize_x='individual', x_by_range=True, y_by_range=False): 
         dataset = self.dataset
         union_x = np.hstack([example[:,0] for example in dataset])
         range_x = np.max(union_x) - np.min(union_x)
@@ -175,7 +175,7 @@ class DataSet:
                     x_mean_std[i,1] = std_x
 
             else: 
-                x_mean_std[i,1] = 0
+                x_mean_std[i,1] = 1.
                 
 
             if normalize_y == 'all':
@@ -237,7 +237,7 @@ class DataSet:
 
     def set_target_x(self, num_points=40, forecast=False, forecast_frac=1.2):
         time = self.dataset[:,:,0]
-        to_append = time.shape[1] - num_points
+        to_append = time.shape[1] - num_points - 1
         self.target_x = np.zeros(time.shape)
         for i,example in enumerate(time):
 

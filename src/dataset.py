@@ -238,7 +238,7 @@ class DataSet:
     def set_target_x(self, num_points=40, forecast=False, forecast_frac=1.2):
         time = self.dataset[:,:,0]
         to_append = time.shape[1] - num_points
-        self.target_x = np.zeros(time.shape + 1)
+        self.target_x = np.zeros_like(time)
         for i,example in enumerate(time):
 
             max_time = np.max(example)
@@ -246,7 +246,7 @@ class DataSet:
                 max_time =  forecast_frac * max_time
             target_x = np.arange(0,max_time, max_time/num_points)
             target_x = np.append(target_x, np.zeros((to_append)), axis=0)
-            self.target_x[i] = target_x
+            self.target_x[i] = target_x[:(len(time))]
         self.target_x = self.target_x.astype(np.float32)
         return self 
 

@@ -237,8 +237,8 @@ class DataSet:
 
     def set_target_x(self, num_points=40, forecast=False, forecast_frac=1.2):
         time = self.dataset[:,:,0]
-        to_append = time.shape[1] - num_points - 1
-        self.target_x = np.zeros(time.shape)
+        to_append = time.shape[1] - num_points
+        self.target_x = np.zeros(time.shape + 1)
         for i,example in enumerate(time):
 
             max_time = np.max(example)

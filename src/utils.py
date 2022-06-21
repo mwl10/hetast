@@ -257,7 +257,7 @@ def get_mimiciii_data(batch_size, test_batch_size=5, filter_anomalies=True):
 
     total_dataset = np.concatenate(
         (observed_vals, observed_mask, observed_tp[:, :, None]), -1)
-    print(total_dataset.shape)
+    #print(total_dataset.shape)
     # Shuffle and split
     train_data, test_data = model_selection.train_test_split(
         total_dataset, train_size=0.8, random_state=42, shuffle=True

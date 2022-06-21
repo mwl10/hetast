@@ -39,7 +39,7 @@ def log_normal_pdf(x, mean, logvar, mask, sample_weight):
         logerr[torch.isinf(logerr)] = 0.0
 
 
-        return -0.5 * (const + (logvar) + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
+        return (-0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) / logerr) * mask
     else:
         return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
    
@@ -49,6 +49,7 @@ def mog_log_pdf(x, mean, logvar, mask):
     const2 = torch.from_numpy(np.array([mean.size(0)])).float().to(x.device)
     loglik = -0.5 * (const + logvar + (x - mean) **
                      2.0 / torch.exp(logvar)) * mask
+
     return torch.logsumexp(loglik - torch.log(const2), 0)
 
 

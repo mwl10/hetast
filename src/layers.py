@@ -83,7 +83,8 @@ class UnTAN(nn.Module):
         normalizer = torch.logsumexp(scores, dim=-2)
         if mask is not None:
             scores = scores.masked_fill(mask.unsqueeze(-3) == 0, -1e9)
-        p_attn = F.softmax(scores, dim=-2)
+        p_attn = F.softmax(scores, dim=-2) # these are the probability scores for attention
+        print("attention probs", p_attn.shape)
         if dropout is not None:
             p_attn = dropout(p_attn)
         if self.intensity:
@@ -127,6 +128,5 @@ class UnTAN(nn.Module):
         if self.intensity and self.no_mix:
             return torch.stack((x, intensity), -1)
         elif self.intensity:
-            print(x.shape, 'intensity:', intensity.shape)
             return self.linears[-1](torch.cat((x, intensity), -1))
         return self.linears[-1](x)

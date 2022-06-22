@@ -6,7 +6,7 @@ from scipy import signal
 from glob import glob
 from dataset import DataSet
 
-def train(net, optimizer,epoch, train_loader, args, device="cuda", frac=0.5, errors=False):
+def train(net, optimizer,epoch, train_loader, args, device="cuda", frac=0.5, errors=False, beta=0.1):
       
     train_loss = 0.
     train_n = 0.
@@ -47,7 +47,7 @@ def train(net, optimizer,epoch, train_loader, args, device="cuda", frac=0.5, err
             x,  # can pick the points we want to project to
             recon_context_y,
             num_samples=args.k_iwae, # 1? 
-            beta=0.1,
+            beta=beta, # beta i s a 
             # optional, will be zero if not set
             sample_weight = sample_weight,
 
@@ -75,7 +75,9 @@ def train(net, optimizer,epoch, train_loader, args, device="cuda", frac=0.5, err
                 mae / train_n
             )
         )
+        
     return -avg_loglik / train_n, mse / train_n
+
 
 def make_masks(lcs, frac=0.7):
     # will depend on dimensions later

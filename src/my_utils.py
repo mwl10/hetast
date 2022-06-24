@@ -76,7 +76,7 @@ def train(net, optimizer,epoch, train_loader, args, device="cuda", frac=0.5, err
             )
         )
         
-    return -avg_loglik / train_n, mse / train_n
+    return -avg_loglik / train_n, mse / train_n, y, recon_mask, subsampled_mask
 
 
 def make_masks(lcs, frac=0.7):

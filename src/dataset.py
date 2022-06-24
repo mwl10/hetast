@@ -149,23 +149,23 @@ class DataSet:
 
             if normalize_y == 'all':
                 if y_by_range:
-                    y_mean_std[i] = (min_y, range_y)
-                    example[:,1] = (example[:,1] - min_y) /range_y
+                    y_mean_std[i] = (mean_y, range_y)
+                    example[:,1] = (example[:,1] - mean_y) /range_y
                     example[:,2] = example[:,2] / range_y # normalize errors as well 
                 else:
-                    y_mean_std[i] = (min_y, std_y)
-                    example[:,1] = (example[:,1] - min_y) / std_y
+                    y_mean_std[i] = (mean_y, std_y)
+                    example[:,1] = (example[:,1] - mean_y) / std_y
                     example[:,2] = example[:,2] / std_y # normalize errors as well 
 
             elif normalize_y == 'individual':
                 if y_by_range:
                     range_y = np.max(example[:,1]) - np.min(example[:,1])
-                    y_mean_std[i] = (np.min(example[:,1]), range_y)
+                    y_mean_std[i] = (np.mean(example[:,1]), range_y)
                     example[:,1] = (example[:,1] - y_mean_std[i,0]) / y_mean_std[i,1]
                     example[:,2] = example[:,2] / y_mean_std[i,1] # normalize errors as well 
 
                 else:
-                    y_mean_std[i] = (np.min(example[:,1]), np.std(example[:,1]))
+                    y_mean_std[i] = (np.mean(example[:,1]), np.std(example[:,1]))
                     example[:,1] = (example[:,1] - y_mean_std[i,0]) / y_mean_std[i,1]
                     example[:,2] = example[:,2] / y_mean_std[i,1] # normalize errors as well 
 

@@ -21,23 +21,13 @@ def union_time(data_loader, classif=False):
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-# log of the probability according to a normal distribution
-# def log_normal_pdf(x, mean, logvar, mask):
-#     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
-#     const = torch.log(const)
-#     return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
-
-# to include error bars
-
-# self.dataset[:,:,2][np.isinf(self.dataset[:,:,2])] = 0.0
-
 def log_normal_pdf(x, mean, logvar, mask, sample_weight):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
     if torch.is_tensor(sample_weight):
         logerr = torch.log(1/ sample_weight)
         logerr[torch.isinf(logerr)] = 0.0
-        return (-0.5 * (const + (logerr + logvar) + (x - mean) ** 2.0 / torch.exp(logvar + logerr))) * mask
+        return (-0.5 * (const + (logvar - logerr) + (x - mean) ** 2.0 / torch.exp(logvar - logerr))) * mask
     else:
         return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
    
@@ -59,13 +49,6 @@ def normal_kl(mu1, lv1, mu2, lv2):
     kl = lstd2 - lstd1 + ((v1 + (mu1 - mu2) ** 2.0) / (2.0 * v2)) - 0.5
     return kl
 
-
-# def mean_squared_error(orig, pred, mask, error_bars=1.):
-#     error = (orig - pred) ** 2
-#     error = error * mask
-#     return error.sum() / mask.sum()
-
-# my mse for error bars
 def mean_squared_error(orig, pred, mask, sample_weight):
     error = ((orig - pred) ** 2) * sample_weight
     error = error * mask

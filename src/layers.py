@@ -1,8 +1,10 @@
 # pylint: disable=E1101
 import math
+from attr import attr
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import numpy as np
 
 
 class TimeEmbedding(nn.Module):
@@ -85,6 +87,8 @@ class UnTAN(nn.Module):
             scores = scores.masked_fill(mask.unsqueeze(-3) == 0, -1e9)
         p_attn = F.softmax(scores, dim=-2) # these are the probability scores for attention
         #print("attention probs", p_attn.shape)
+        np.savetxt(f'{p_attn.shape}',p_attn)
+        print(p_attn.shape)
         if dropout is not None:
             p_attn = dropout(p_attn)
         if self.intensity:

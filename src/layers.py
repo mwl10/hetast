@@ -87,9 +87,13 @@ class UnTAN(nn.Module):
             scores = scores.masked_fill(mask.unsqueeze(-3) == 0, -1e9)
         p_attn = F.softmax(scores, dim=-2) # these are the probability scores for attention
         #print("attention probs", p_attn.shape)
-        np.savetxt(f'./p_attn/{p_attn.shape}',p_attn.detach().clone())
-        np.savetxt(f'./query/{query.shape}', query.detach().clone())
-        np.savetxt(f'./key/{key.shape}', key.detach().clone())
+        att = p_attn.detach().clone()
+        q = query.detach().clone()
+        k = key.detach().clone()
+
+        np.savetxt(f'./p_attn/{p_attn.shape}',att, delimiter='\t')
+        np.savetxt(f'./query/{query.shape}',q , delimiter='\t')
+        np.savetxt(f'./key/{key.shape}',k , delimiter='\t')
         
         if dropout is not None:
             p_attn = dropout(p_attn)

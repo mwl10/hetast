@@ -25,6 +25,7 @@ def log_normal_pdf(x, mean, logvar, mask, sample_weight):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)
     if torch.is_tensor(sample_weight):
+        # only might not work if the errors are not consistent, make sure
         err = 1/ sample_weight
         #err = torch.sqrt(sample_weight)
 

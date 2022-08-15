@@ -97,12 +97,6 @@ def make_masks(lcs, frac=0.7):
 
 
 
-
-
-
-
-
-
 # visualisation for one light curve w/ increasing number of points
 def viz_per_example(example, target_x, net, device="cuda", k_iwae=10, fracs=[0.25,0.5,0.75]): 
     pred_mean, pred_std = [], []
@@ -168,8 +162,6 @@ def viz_per_example(example, target_x, net, device="cuda", k_iwae=10, fracs=[0.2
         plt.scatter(tp[j], inputs[j, :, 0], c='k', lw=w, label='Observed Data')
     plt.show()
     return qz
-
-
 
 
 def evaluate(net, data_loader, device="cuda"):

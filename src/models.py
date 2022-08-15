@@ -6,7 +6,7 @@ from vae_models import (
 )
 
 
-def load_network(args, dim, union_tp=None, device="cuda"):
+def load_network(args, dim, union_tp=None):
     if args.net == 'hetvae':
         net = HeTVAE(
             input_dim=dim,
@@ -26,7 +26,8 @@ def load_network(args, dim, union_tp=None, device="cuda"):
             mse_weight=args.mse_weight,
             norm=args.norm,
             mixing=args.mixing,
-        ).to(device)
+            device=args.device,
+        ).to(args.device)
     elif args.net == 'hetvae_det':
         net = HeTVAE_DET(
             input_dim=dim,
@@ -46,7 +47,8 @@ def load_network(args, dim, union_tp=None, device="cuda"):
             mse_weight=args.mse_weight,
             norm=args.norm,
             mixing=args.mixing,
-        ).to(device)
+            device=args.device,
+        ).to(args.device)
     elif args.net == 'hetvae_prob':
         net = HeTVAE_PROB(
             input_dim=dim,
@@ -66,7 +68,8 @@ def load_network(args, dim, union_tp=None, device="cuda"):
             mse_weight=args.mse_weight,
             norm=args.norm,
             mixing=args.mixing,
-        ).to(device)
+            device=args.device,
+        ).to(args.device)
     else:
         raise ValueError("Network not available")
     return net

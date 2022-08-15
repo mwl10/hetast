@@ -257,12 +257,14 @@ class HeTVAE_DET(TVAE):
             intensity=self.intensity,
             union_tp=self.union_tp,
             no_mix=True,
+            device=self.device
         )
         self.decoder = UnTAN(
             input_dim=self.latent_dim,
             nhidden=self.nhidden,
             embed_time=self.embed_time,
             num_heads=self.num_heads,
+            device=self.device
         )
 
 
@@ -292,6 +294,7 @@ class HeTVAE(HeTVAE_DET):
             nhidden=self.nhidden,
             embed_time=self.embed_time,
             num_heads=self.num_heads,
+            device=self.device
         )
 
     def encode(self, context_x, context_y):

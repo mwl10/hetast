@@ -40,6 +40,7 @@ parser.add_argument('--normalize-input', type=str, default='znorm')
 parser.add_argument('--mse-weight', type=float, default=0.0)
 parser.add_argument('--elbo-weight', type=float, default=1.0)
 parser.add_argument('--mixing', type=str, default='concat')
+parser.add_argument('--device', type=str, default='cpu')
 args = parser.parse_args()
 
 
@@ -112,7 +113,9 @@ if __name__ == '__main__':
             context_y = torch.cat((
                 train_batch[:, :, :dim] * subsampled_mask, subsampled_mask
             ), -1)
-
+            print(train_batch[:, :, -1].shape)
+            print(context_y.shape)
+            break
             loss_info = net.compute_unsupervised_loss(
                 train_batch[:, :, -1],
                 context_y,

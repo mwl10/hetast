@@ -65,64 +65,10 @@ def mean_absolute_error(orig, pred, mask):
     return error.sum() / mask.sum()
 
 
-# def evaluate_hetvae(
-#     net,
-#     dim,
-#     train_loader,
-#     sample_tp=0.5,
-#     shuffle=False,
-#     k_iwae=1,
-#     device='cuda',
-# ):
-#     torch.manual_seed(seed=0)
-#     np.random.seed(seed=0)
-#     train_n = 0
-#     avg_loglik, mse, mae = 0, 0, 0
-#     mean_mae, mean_mse = 0, 0
-#     with torch.no_grad():
-#         for train_batch in train_loader:
-#             train_batch = train_batch.to(device)
-#             subsampled_mask = subsample_timepoints(
-#                 train_batch[:, :, dim:2 * dim].clone(),
-#                 sample_tp,
-#                 shuffle=shuffle,
-#             )
-#             recon_mask = train_batch[:, :, dim:2 * dim] - subsampled_mask
-#             context_y = torch.cat((
-#                 train_batch[:, :, :dim] * subsampled_mask, subsampled_mask
-#             ), -1)
-#             loss_info = net.compute_unsupervised_loss(
-#                 train_batch[:, :, -1],
-#                 context_y,
-#                 train_batch[:, :, -1],
-#                 torch.cat((
-#                     train_batch[:, :, :dim] * recon_mask, recon_mask
-#                 ), -1),
-#                 num_samples=k_iwae,
-#             )
-#             num_context_points = recon_mask.sum().item()
-#             mse += loss_info.mse * num_context_points
-#             mae += loss_info.mae * num_context_points
-#             mean_mse += loss_info.mean_mse * num_context_points
-#             mean_mae += loss_info.mean_mae * num_context_points
-#             avg_loglik += loss_info.mogloglik * num_context_points
-#             train_n += num_context_points
-#     print(
-#         'nll: {:.4f}, mse: {:.4f}, mae: {:.4f}, '
-#         'mean_mse: {:.4f}, mean_mae: {:.4f}'.format(
-#             - avg_loglik / train_n,
-#             mse / train_n,
-#             mae / train_n,
-#             mean_mse / train_n,
-#             mean_mae / train_n
-#         )
-#     )
-#     return - avg_loglik / train_n
-
 def evaluate_hetvae(
     net,
     dim,
-    data_loader,
+    train_loader,
     sample_tp=0.5,
     shuffle=False,
     k_iwae=1,
@@ -134,27 +80,24 @@ def evaluate_hetvae(
     avg_loglik, mse, mae = 0, 0, 0
     mean_mae, mean_mse = 0, 0
     with torch.no_grad():
-        for train_batch in data_loader:
+        for train_batch in train_loader:
             train_batch = train_batch.to(device)
-            x = train_batch[:,:,0]
-            y = train_batch[:,:,1:2]
-            subsampled_mask = train_batch[:,:,3:4]
-            recon_mask = train_batch[:,:,4:]
-            error_bars = train_batch[:,:,2:3]
-
+            subsampled_mask = subsample_timepoints(
+                train_batch[:, :, dim:2 * dim].clone(),
+                sample_tp,
+                shuffle=shuffle,
+            )
+            recon_mask = train_batch[:, :, dim:2 * dim] - subsampled_mask
             context_y = torch.cat((
-              y * subsampled_mask, subsampled_mask
-                ), -1)
-            
-            recon_context_y = torch.cat((            # flux values with only recon_mask values showing
-                  y * recon_mask, recon_mask
-                ), -1)
-
+                train_batch[:, :, :dim] * subsampled_mask, subsampled_mask
+            ), -1)
             loss_info = net.compute_unsupervised_loss(
-                x,
+                train_batch[:, :, -1],
                 context_y,
-                x,
-                recon_context_y,
+                train_batch[:, :, -1],
+                torch.cat((
+                    train_batch[:, :, :dim] * recon_mask, recon_mask
+                ), -1),
                 num_samples=k_iwae,
             )
             num_context_points = recon_mask.sum().item()
@@ -174,9 +117,6 @@ def evaluate_hetvae(
             mean_mae / train_n
         )
     )
-
-    return - avg_loglik / train_n
-    
 
     
 
@@ -392,3 +332,6 @@ def subsample_timepoints(mask, percentage_tp_to_sample=None, shuffle=False):
         if mask is not None:
             mask[i, tp_to_set_to_zero] = 0.
     return mask
+
+
+

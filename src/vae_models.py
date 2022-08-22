@@ -95,8 +95,7 @@ class TVAE(nn.Module):
         if self.mixing == 'concat_and_mix':
             hidden = torch.cat((hidden[:, :, :, 0], hidden[:, :, :, 1]), -1)
             q = self.h2z(hidden)
-            qz.mean, qz.logvar = q[:, :,
-                                   :self.latent_dim], q[:, :, self.latent_dim:]
+            qz.mean, qz.logvar = q[:, :,:self.latent_dim], q[:, :, self.latent_dim:]
         elif self.mixing == 'concat':
             hidden = torch.cat((hidden[:, :, :, 0], hidden[:, :, :, 1]), -1)
             qz.mean = self.h2z_mean(hidden)

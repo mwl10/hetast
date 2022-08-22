@@ -45,37 +45,6 @@ class TimeEmbedding(nn.Module):
             return torch.cat([out1, out2], -1)
 
         
-class AstromerEmbedding(nn.Module):
-    def __init__(self, embed_time, arg=None, dim=None, device="cuda"):
-        super(altEmbedding, self).__init__()
-        self.embed_mag = embed_mag
-        self.device = device
-        self.arg = arg
-        
-        i = torch.arange(embed_mag)
-        self.w =  1 / 1000 ** ((2 * i) / embed_mag
-        
-        self.linears = nn.Sequential(
-            nn.Linear(1, embed_mag, bias=False),
-            nn.Linear(embed_mag, embed_mag, bias=False),
-            nn.Linear(embed_mag, embed_mag, bias=False)
-        )
-            
-        ## sin,cos addition is made relative to mag values
-
-    def forward(self, tt, mags):
-        ## pass the magnitudes through a few layers to project them
-        ## add positional encoding/ rotary encoding 
-       
-        mags = self.linears(mags)
-        pos_encoding = 1 / 1000 ** ((2 * i) / len(self.embed_mag))
-
-class ACEmbedding(nn.Module):
-    def __init__(self, embed_mag, arg=None, dim=None, device="cuda"):
-        super(ACEmbedding, self).__init__()
-        self.embed_mag = embed_mag
-        
-
 
 class UnTAN(nn.Module):
     def __init__(

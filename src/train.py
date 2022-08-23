@@ -1,10 +1,8 @@
-import argparse
 import numpy as np
 import torch
 import torch.optim as optim
 import my_utils
 from argparse import Namespace
-
 from random import SystemRandom
 import models
 import utils
@@ -18,7 +16,7 @@ def main(args):
     np.random.seed(seed)
     torch.cuda.manual_seed(seed)
 
-    device = torch.device('mps' if torch.has_mps else 'cpu')
+    device = torch.device(args.device)
     
     #if args.dataset == 'synth':
     data_obj = my_utils.get_synthetic_data(seed=seed)

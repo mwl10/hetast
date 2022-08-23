@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
-from scipy import signal 
 from glob import glob
 from dataset import DataSet
 from eztao.carma import DRW_term, DHO_term

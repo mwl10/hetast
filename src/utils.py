@@ -2,7 +2,7 @@
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
-from sklearn import model_selection
+#from sklearn import model_selection
 import sys
 
 def union_time(data_loader, classif=False):

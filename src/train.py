@@ -21,7 +21,7 @@ def main(args):
     device = torch.device('mps' if torch.has_mps else 'cpu')
     
     #if args.dataset == 'synth':
-    data_obj = my_utils.get_synthetic_data()
+    data_obj = my_utils.get_synthetic_data(seed=seed)
 
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
@@ -29,7 +29,7 @@ def main(args):
     dim = data_obj["input_dim"]
     union_tp = data_obj['union_tp']
     net = models.load_network(args, dim, union_tp)
-    
+
     
     params = list(net.parameters())
     optimizer = optim.Adam(params, lr=args.lr)
@@ -107,8 +107,9 @@ def main(args):
                     k_iwae=num_samples,
                     device='mps'
                 )
-                
-        if itr % 100 == 0 and args.save:
+        ## set a learning rate scheduler?
+        ## set a stopping for num_iters where there's no improvement
+        if itr % 10 == 0 and args.save:
             torch.save({
                 'args': args,
                 'epoch': itr,
@@ -121,42 +122,11 @@ def main(args):
 
 if __name__ == '__main__':
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--niters', type=int, default=2000)
-    parser.add_argument('--lr', type=float, default=0.01)
-    parser.add_argument('--latent-dim', type=int, default=32)
-    parser.add_argument('--rec-hidden', type=int, default=32)
-    parser.add_argument('--width', type=int, default=512)
-    parser.add_argument('--embed-time', type=int, default=128)
-    parser.add_argument('--num-ref-points', type=int, default=128)
-    parser.add_argument('--k-iwae', type=int, default=1)
-    parser.add_argument('--save', action='store_true')
-    parser.add_argument('--seed', type=int, default=0)
-    parser.add_argument('--n', type=int, default=8000)
-    parser.add_argument('--batch-size', type=int, default=64)
-    parser.add_argument('--norm', action='store_true')
-    parser.add_argument('--kl-annealing', action='store_true')
-    parser.add_argument('--kl-zero', action='store_true')
-    parser.add_argument('--enc-num-heads', type=int, default=1)
-    parser.add_argument('--dropout', type=float, default=0.0)
-    parser.add_argument('--intensity', action='store_true')
-    parser.add_argument('--net', type=str, default='hetvae')
-    parser.add_argument('--const-var', action='store_true')
-    parser.add_argument('--var-per-dim', action='store_true')
-    parser.add_argument('--std', type=float, default=0.1)
-    parser.add_argument('--sample-tp', type=float, default=0.5)
-    parser.add_argument('--bound-variance', action='store_true')
-    parser.add_argument('--shuffle', action='store_true')
-    parser.add_argument('--recon-loss', action='store_true')
-    parser.add_argument('--normalize-input', type=str, default='znorm')
-    parser.add_argument('--mse-weight', type=float, default=0.0)
-    parser.add_argument('--elbo-weight', type=float, default=1.0)
-    parser.add_argument('--mixing', type=str, default='concat')
-    parser.add_argument('--device', type=str, default='mps')
-    args = Namespace(batch_size=8, 
+    args = Namespace(batch_size=8,
+                    niters=10,
                     bound_variance=False, 
                     const_var=False,
-                    dropout=0.19462264721791603, 
+                    dropout=0.0, 
                     elbo_weight=4.108914123847402, 
                     embed_time=32,           
                     enc_num_heads=4, 
@@ -169,7 +139,6 @@ if __name__ == '__main__':
                     mixing='concat', 
                     mse_weight=4.060280688730988, 
                     net='hetvae', 
-                    niters=1000, 
                     norm=True, 
                     normalize_input='znorm', 
                     num_ref_points=32, 
@@ -183,10 +152,6 @@ if __name__ == '__main__':
                     var_per_dim=False, 
                     width=512, 
                     device='mps')
-
-    #args = parser.parse_args()
-
-
 
     main(args)
     

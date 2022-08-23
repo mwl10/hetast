@@ -9,8 +9,9 @@ from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand
 
 
-def get_synthetic_data(num_samples=100, dims= 1, batch_size=8, sim_params={'SNR':10, 'duration':10*365, 'N':200}, drw_kernel_params={'tau':100, 'amp':0.2}, dho_kernel_params = {'a1':1.0, 'a2':1.0, 'b0':1.0,'b1':1.0}, kernel='DRW'):
+def get_synthetic_data(seed = 0, num_samples=100, dims= 1, batch_size=8, sim_params={'SNR':10, 'duration':10*365, 'N':200}, drw_kernel_params={'tau':100, 'amp':0.2}, dho_kernel_params = {'a1':1.0, 'a2':1.0, 'b0':1.0,'b1':1.0}, kernel='DRW'):
 ##### making synthetic data multivariate
+    np.random.seed(seed)
     
     if kernel=='DRW':
         log_amp, log_tau = np.log([drw_kernel_params['amp'], drw_kernel_params['tau']])

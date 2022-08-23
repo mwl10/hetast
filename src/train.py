@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 import my_utils
+import argparse
 from argparse import Namespace
 from random import SystemRandom
 import models
@@ -119,37 +120,40 @@ def main(args):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--batch-size', type=int, default=8) #batch_size=8,
+    parser.add_argument('--niters', type=int, default=10) # niters=10,
+    parser.add_argument('--bound-variance', action='store_true') # bound_variance=False,
+    parser.add_argument('--const-var', action='store_true') # const_var=False,
+    parser.add_argument('--dropout', type=float, default=0.0) # dropout=0.0, 
+    parser.add_argument('--elbo-weight', type=float, default=4.1) # elbo_weight=4.108914123847402,
+    parser.add_argument('--embed-time', type=int, default=32) # embed_time=32, 
+    parser.add_argument('--enc-num-heads', type=int, default=4) # enc_num_heads=4,
+    parser.add_argument('--intensity', action='store_false') #  intensity=True,
+    parser.add_argument('--k-iwae', type=int, default=1) #  k_iwae=1, 
+    parser.add_argument('--kl-annealing', action='store_true') # kl_annealing=False,
+    parser.add_argument('--kl-zero', action='store_true') # kl_zero=False, 
+    parser.add_argument('--latent-dim', type=int, default=32) # latent_dim=32, 
+    parser.add_argument('--lr', type=float, default=0.001) # lr=0.001, 
+    parser.add_argument('--mixing', type=str, default='concat') # mixing='concat',
+    parser.add_argument('--mse-weight', type=float, default=4.0) # mse_weight=4.060280688730988,
+    parser.add_argument('--net', type=str, default='hetvae') # net='hetvae', 
+    parser.add_argument('--norm', action='store_false') # norm=True,
+    parser.add_argument('--normalize-input', type=str, default='znorm') # normalize_input='znorm',
+    parser.add_argument('--num-ref-points', type=int, default=32) # num_ref_points=32,
+    parser.add_argument('--rec-hidden', type=int, default=32) # rec_hidden=32, 
+    parser.add_argument('--recon-loss', action='store_true') #  recon_loss=False,
+    parser.add_argument('--sample-tp', type=float, default=0.5) # sample_tp=0.4733820088130086, 
+    parser.add_argument('--save', action='store_false') # save=True, 
+    parser.add_argument('--seed', type=int, default=0) # seed=0, 
+    parser.add_argument('--shuffle', action='store_false') #shuffle=True,
+    parser.add_argument('--std', type=float, default=0.1) # std=0.1, 
+    parser.add_argument('--var-per-dim', action='store_true') # var_per_dim=False,
+    parser.add_argument('--width', type=int, default=512) # width=512,
+    parser.add_argument('--device', type=str, default='cuda') # device='mps'
     
-    args = Namespace(batch_size=8,
-                    niters=10,
-                    bound_variance=False, 
-                    const_var=False,
-                    dropout=0.0, 
-                    elbo_weight=4.108914123847402, 
-                    embed_time=32,           
-                    enc_num_heads=4, 
-                    intensity=True, 
-                    k_iwae=1, 
-                    kl_annealing=False, 
-                    kl_zero=False, 
-                    latent_dim=32, 
-                    lr=0.001, 
-                    mixing='concat', 
-                    mse_weight=4.060280688730988, 
-                    net='hetvae', 
-                    norm=True, 
-                    normalize_input='znorm', 
-                    num_ref_points=32, 
-                    rec_hidden=32, 
-                    recon_loss=False, 
-                    sample_tp=0.4733820088130086, 
-                    save=True, 
-                    seed=0, 
-                    shuffle=True, 
-                    std=0.1, 
-                    var_per_dim=False, 
-                    width=512, 
-                    device='mps')
+   
+    args = parser.parse_args()
 
     main(args)
     

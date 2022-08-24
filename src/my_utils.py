@@ -6,7 +6,27 @@ from glob import glob
 from dataset import DataSet
 from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand
+import os
+import models
+import torch.optim as optim
 
+
+# checkpoint needs to load the model with the same data, union_tp, dims, if we add a scheduler it needs to be added as well 
+def load_checkpoint(filename, data_obj):
+    if os.path.isfile(filename):
+        print("=> loading checkpoint '{}'".format(filename))
+        #cp keys ['args', 'epoch', 'state_dict', 'optimizer_state_dict', 'loss']
+        cp = torch.load(filename)
+        print(cp['args'])
+        print(data_obj['input_dim'])
+        net = models.load_network(cp['args'], data_obj['input_dim'], data_obj['union_tp'])
+        net.load_state_dict(cp['state_dict'])
+        params = list(net.parameters())
+        optimizer = optim.Adam(params)
+        optimizer.load_state_dict(cp['optimizer_state_dict'])
+        return net,optimizer, cp['args'], cp['epoch'], cp['loss']
+    
+    
 
 def get_synthetic_data(seed = 0, num_samples=100, dims= 1, batch_size=8, sim_params={'SNR':10, 'duration':10*365, 'N':200}, drw_kernel_params={'tau':100, 'amp':0.2}, dho_kernel_params = {'a1':1.0, 'a2':1.0, 'b0':1.0,'b1':1.0}, kernel='DRW'):
 ##### making synthetic data multivariate

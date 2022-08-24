@@ -16,25 +16,41 @@ def main(args):
     torch.manual_seed(seed)
     np.random.seed(seed)
     torch.cuda.manual_seed(seed)
-
     device = torch.device(args.device)
     
-    #if args.dataset == 'synth':
-    data_obj = my_utils.get_synthetic_data(seed=seed)
-
+    if args.data_obj: # we can make the synthetic data, or we can pass the data_obj 
+        pass
+    else:
+        data_obj = my_utils.get_synthetic_data(seed=seed)
+        
+        
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]
     dim = data_obj["input_dim"]
     union_tp = data_obj['union_tp']
-    net = models.load_network(args, dim, union_tp)
-
     
-    params = list(net.parameters())
-    optimizer = optim.Adam(params, lr=args.lr)
-    print('parameters:', utils.count_parameters(net))
+    if args.checkpoint:
+        net, optimizer, args, epoch, loss = my_utils.load_checkpoint(args.checkpoint, data_obj)
+        print(f'loaded checkpoint with loss: {loss}')
+    else:
+        net = models.load_network(args, dim, union_tp)
+        params = list(net.parameters())
+        optimizer = optim.Adam(params, lr=args.lr)
+        epoch = 1
+        loss = 10000
+        
     
-    for itr in range(1, args.niters + 1):
+#     net = models.load_network(args, dim, union_tp)
+#     params = list(net.parameters())
+#     optimizer = optim.Adam(params, lr=args.lr)
+#     print('parameters:', utils.count_parameters(net))
+    
+    # stop if loss doens't decrease for how many epochs? 
+    best_loss = loss 
+    counter = 0
+    
+    for itr in range(epoch, epoch+args.niters + 1):
         train_loss = 0
         train_n = 0
         avg_loglik, avg_kl, mse, mae = 0, 0, 0, 0
@@ -116,7 +132,18 @@ def main(args):
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss / train_n,
             }, 'synth' + '_' + str(experiment_id) + '.h5')
-
+        # could add a delta requirement to this
+        if args.early_stopping:
+            if best_loss > (train_loss / train_n): 
+                counter += 1
+            else:
+                best_loss = (train_loss / train_n) 
+                counter == 0
+            
+            if counter >= args.patience:
+                print(f'training has not improved for {args.patience} epochs')
+                break
+        
 
 
 if __name__ == '__main__':
@@ -131,7 +158,7 @@ if __name__ == '__main__':
     parser.add_argument('--enc-num-heads', type=int, default=4) # enc_num_heads=4,
     parser.add_argument('--intensity', action='store_false') #  intensity=True,
     parser.add_argument('--k-iwae', type=int, default=1) #  k_iwae=1, 
-    parser.add_argument('--kl-annealing', action='store_true') # kl_annealing=False,
+    parser.add_argument('--kl-annealing', action='store_false') # kl_annealing=False,
     parser.add_argument('--kl-zero', action='store_true') # kl_zero=False, 
     parser.add_argument('--latent-dim', type=int, default=32) # latent_dim=32, 
     parser.add_argument('--lr', type=float, default=0.001) # lr=0.001, 
@@ -151,9 +178,11 @@ if __name__ == '__main__':
     parser.add_argument('--var-per-dim', action='store_true') # var_per_dim=False,
     parser.add_argument('--width', type=int, default=512) # width=512,
     parser.add_argument('--device', type=str, default='cuda') # device='mps'
+    parser.add_argument('--data_obj', type=str, default='')
+    parser.add_argument('--checkpoint', type=str, default='')
+    parser.add_argument('--early-stopping', action='store_true')
+    parser.add_argument('--patience', type=int, default='50')
     
-   
     args = parser.parse_args()
-
     main(args)
     

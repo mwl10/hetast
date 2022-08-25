@@ -142,6 +142,13 @@ def main(args):
             
             if counter >= args.patience:
                 print(f'training has not improved for {args.patience} epochs')
+                torch.save({
+                    'args': args,
+                    'epoch': itr,
+                    'state_dict': net.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': train_loss / train_n,
+                }, 'synth' + '_' + str(experiment_id) + '.h5')
                 break
         
 
@@ -182,6 +189,7 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint', type=str, default='')
     parser.add_argument('--early-stopping', action='store_true')
     parser.add_argument('--patience', type=int, default='50')
+    parser.add_argument('save_at', type=int, default=50)
     
     args = parser.parse_args()
     main(args)

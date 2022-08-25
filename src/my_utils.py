@@ -11,6 +11,8 @@ import models
 import torch.optim as optim
 
 
+
+
 # checkpoint needs to load the model with the same data, union_tp, dims, if we add a scheduler it needs to be added as well 
 def load_checkpoint(filename, data_obj):
     if os.path.isfile(filename):

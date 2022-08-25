@@ -124,7 +124,7 @@ def main(args):
                 )
         ## set a learning rate scheduler?
         ## set a stopping for num_iters where there's no improvement
-        if itr % 10 == 0 and args.save:
+        if itr % args.save_at == 0 and args.save:
             torch.save({
                 'args': args,
                 'epoch': itr,
@@ -189,7 +189,7 @@ if __name__ == '__main__':
     parser.add_argument('--checkpoint', type=str, default='')
     parser.add_argument('--early-stopping', action='store_true')
     parser.add_argument('--patience', type=int, default='50')
-    parser.add_argument('save_at', type=int, default=50)
+    parser.add_argument('--save-at', type=int, default='50')
     
     args = parser.parse_args()
     main(args)

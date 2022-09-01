@@ -21,9 +21,9 @@ def main(args):
     if args.data_obj: # we can make the synthetic data, or we can pass the data_obj 
         pass
     else:
-        data_obj = my_utils.get_synthetic_data(seed=seed)
+        data_obj = my_utils.get_synthetic_data(seed=seed, uniform=True)
         
-        
+     
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]
@@ -40,13 +40,15 @@ def main(args):
         epoch = 1
         loss = 10000
         
+    model_size = utils.count_parameters(net) 
     
-#     net = models.load_network(args, dim, union_tp)
-#     params = list(net.parameters())
-#     optimizer = optim.Adam(params, lr=args.lr)
-#     print('parameters:', utils.count_parameters(net))
+    if args.scheduler == True: 
+        args.lr = my_utils.update_lr(model_size, epoch, args.warmup)
+        for g in optimizer.param_groups:
+            g['lr'] = args.lr
+            
     
-    # stop if loss doens't decrease for how many epochs? 
+    # stop if loss doesn't decrease for how many epochs? 
     best_loss = loss 
     counter = 0
     
@@ -98,7 +100,14 @@ def main(args):
             mae += loss_info.mae * batch_len
             train_n += batch_len
             
-        print(itr)
+        
+        if args.scheduler == True: 
+            args.lr = my_utils.update_lr(model_size, itr, args.warmup)
+            for g in optimizer.param_groups:
+                g['lr'] = args.lr
+                
+        #print(itr, f'lr: {args.lr}')
+        
         if itr % 10 == 0:
           print(
               'Iter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg kl: {:.4f}, '
@@ -111,17 +120,17 @@ def main(args):
                   mae / train_n
               )
           )
-        if itr % 10 == 0:
-            for loader, num_samples in [(val_loader, 5), (test_loader, 100)]:
-                my_utils.evaluate_hetvae(
-                    net,
-                    dim,
-                    loader,
-                    0.5,
-                    shuffle=False,
-                    k_iwae=num_samples,
-                    device='mps'
-                )
+#         if itr % 10 == 0:
+#             for loader, num_samples in [(val_loader, 5), (test_loader, 100)]:
+#                 my_utils.evaluate_hetvae(
+#                     net,
+#                     dim,
+#                     loader,
+#                     0.5,
+#                     shuffle=False,
+#                     k_iwae=num_samples,
+#                     device='mps'
+#                 )
         ## set a learning rate scheduler?
         ## set a stopping for num_iters where there's no improvement
         if itr % args.save_at == 0 and args.save:
@@ -132,7 +141,7 @@ def main(args):
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss / train_n,
             }, 'synth' + '_' + str(experiment_id) + '.h5')
-        # could add a delta requirement to this
+        # could add a delta improvement requirement to this
         if args.early_stopping:
             if best_loss > (train_loss / train_n): 
                 counter += 1
@@ -176,7 +185,6 @@ if __name__ == '__main__':
     parser.add_argument('--normalize-input', type=str, default='znorm') # normalize_input='znorm',
     parser.add_argument('--num-ref-points', type=int, default=32) # num_ref_points=32,
     parser.add_argument('--rec-hidden', type=int, default=32) # rec_hidden=32, 
-    parser.add_argument('--recon-loss', action='store_true') #  recon_loss=False,
     parser.add_argument('--sample-tp', type=float, default=0.5) # sample_tp=0.4733820088130086, 
     parser.add_argument('--save', action='store_false') # save=True, 
     parser.add_argument('--seed', type=int, default=0) # seed=0, 
@@ -190,6 +198,8 @@ if __name__ == '__main__':
     parser.add_argument('--early-stopping', action='store_true')
     parser.add_argument('--patience', type=int, default='50')
     parser.add_argument('--save-at', type=int, default='50')
+    parser.add_argument('--scheduler', action='store_false')
+    parser.add_argument('--warmup', type=int, default='4000')
     
     args = parser.parse_args()
     main(args)

@@ -11,6 +11,9 @@ import models
 import torch.optim as optim
 
 
+def update_lr(model_size, itr, warmup):
+    lr = (model_size ** -0.5) * min(itr**-0.5, itr * warmup**-0.5)
+    return lr
 
 
 # checkpoint needs to load the model with the same data, union_tp, dims, if we add a scheduler it needs to be added as well 
@@ -28,9 +31,18 @@ def load_checkpoint(filename, data_obj):
         optimizer.load_state_dict(cp['optimizer_state_dict'])
         return net,optimizer, cp['args'], cp['epoch'], cp['loss']
     
-    
 
-def get_synthetic_data(seed = 0, num_samples=100, dims= 1, batch_size=8, sim_params={'SNR':10, 'duration':10*365, 'N':200}, drw_kernel_params={'tau':100, 'amp':0.2}, dho_kernel_params = {'a1':1.0, 'a2':1.0, 'b0':1.0,'b1':1.0}, kernel='DRW'):
+    # u = 320.5 - 393.5, g = 401.5 - 551.9, r = 552.0 - 691.0, i = 691.0 - 818.0,
+    # z = 818.0 - 923.5, y = 923.8 - 1084.5
+
+
+# disc transfer function, psi(tau, lambda)
+def psi(mass = 2e8, l = 0.1, n=0.1, disc_inclination=45, azimuth=0):
+    # convolute, shift 
+    return None    
+    
+    
+def get_synthetic_data(seed = 0, num_samples=100, uniform=False, dims= 1, batch_size=8, sim_params={'SNR':10, 'duration':10*365, 'N':200}, drw_kernel_params={'tau':100, 'amp':0.2}, dho_kernel_params = {'a1':1.0, 'a2':1.0, 'b0':1.0,'b1':1.0}, kernel='DRW'):
 ##### making synthetic data multivariate
     np.random.seed(seed)
     
@@ -43,9 +55,7 @@ def get_synthetic_data(seed = 0, num_samples=100, dims= 1, batch_size=8, sim_par
         kernel=DHO_term(log_a1,log_a2,log_b0,log_b1)
         
     SNR, duration, N = sim_params['SNR'], sim_params['duration'], sim_params['N']
-    synth = np.array([gpSimRand(kernel, SNR, duration, N) for _ in range(num_samples)]).transpose(0,2,1)
-                                                                                                 
-                                                                     
+    synth = np.array([gpSimRand(kernel, SNR, duration, N) for _ in range(num_samples)]).transpose(0,2,1)   
     size = int(num_samples / dims)
     num_examples = synth.shape[0]
     union_tps_all = []
@@ -55,10 +65,13 @@ def get_synthetic_data(seed = 0, num_samples=100, dims= 1, batch_size=8, sim_par
     for i in range(num_examples):
         union_tps = []
         sample = []
-        subset_lengths = np.random.randint(low=50, high=100, size=dims)
+        if uniform == True:
+            subset_lengths = [N] * 4
+        else:
+            subset_lengths = np.random.randint(low=50, high=100, size=dims)
         # each dimension could be a random subset of the original, scaled, shifted,
         for j in range(dims):   
-            obs_points = np.sort(np.random.choice(np.arange(num_samples), size=subset_lengths[j], replace=False))
+            obs_points = np.sort(np.random.choice(np.arange(N), size=subset_lengths[j], replace=False))
             sample_j = synth[i, obs_points, :]
 
             ##### here we could vary y vals, t vals for each dim
@@ -113,10 +126,10 @@ def get_synthetic_data(seed = 0, num_samples=100, dims= 1, batch_size=8, sim_par
     # torch loader
     samples = samples.astype('float32')
     np.random.shuffle(samples)
-    print(samples.shape)
+    #print(samples.shape)
     splindex = int(np.floor(.8*len(samples)))
     training, valid, test = np.split(samples, [splindex, splindex + int(np.floor(.1*len(samples)))])# shuffle?
-    print(training.shape, valid.shape, test.shape)
+    #print(training.shape, valid.shape, test.shape)
     # normalizing?
     
     train_loader = torch.utils.data.DataLoader(training, batch_size=batch_size)

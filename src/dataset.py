@@ -11,17 +11,28 @@ class DataSet:
         self.files = files
         return self
     
-    def files_to_numpy(self, minimum=50, maximum=300):
+    
+    def flux_to_mag()
+        pass
+    def mag_to_flux():
+        pass
+    
+    def files_to_numpy(self, sep='\t', minimum=50, maximum=300):
         dataset = []
         print(len(self.files))
         for i, file in enumerate(self.files):
-            with open(file, 'r') as f:
-                example = pd.read_csv(file, sep='\t').to_numpy()
-
-            print(f'dims of {file}:\t{example.shape}')
+            try:
+                example = pd.read_csv(file, sep=sep)
+            except:
+                print(f"skipping {file.split('/')[-1]} fails on pd read")
+                del self.files[i]
+                continue
+            example = example.to_numpy()
+            example = example[:,1:4].astype(np.float32)
             example = example[example[:,0].argsort()]
             if (len(example) <= minimum): #or  (len(example) >= maximum):
                 del self.files[i]
+                print(f"skipping {file.split('/')[-1]} has less than {minimum} points")
                 continue
             dataset.append(example)
         self.dataset = dataset
@@ -50,7 +61,7 @@ class DataSet:
             y_std = np.std(y)
             y_mean = np.mean(y)
             outlier_indexes = np.where((y > (y_mean + y_std*std_threshold)) | (y < (y_mean - y_std*std_threshold)))[0]
-            print(f'indexes of outliers to be pruned, if any: {outlier_indexes}')
+            #print(f'indexes of outliers to be pruned, if any: {outlier_indexes}')
             self.dataset[i] = np.delete(example, outlier_indexes, axis=0)
 
 
@@ -67,7 +78,6 @@ class DataSet:
     def prune_graham(self, plot=False, index=100, res_std=True, std_threshold=3, mag_threshold=0.25):
         for i, example in enumerate(self.dataset):
             example[:,1] = signal.medfilt(example[:,1], kernel_size=3)
-            print(len(example))
             quintic_fit = np.polyfit(example[:,0], example[:,1], deg=5)
             quintic_y = np.array([example[:,0]**5, example[:,0] ** 4, example[:,0] ** 3, example[:,0] ** 2 , example[:,0], np.ones(len(example))])
             quintic_y = np.matmul(quintic_y.T, quintic_fit)
@@ -79,7 +89,7 @@ class DataSet:
             if res_std:
                 res_std = np.sqrt(np.mean(dev**2))
                 mag_threshold = std_threshold*res_std
-                print(mag_threshold)
+               
 
             #print(np.std(dev))
             
@@ -132,8 +142,9 @@ class DataSet:
 # '''
 
     def normalize(self, normalize_y='individual', y_by_range=False): 
-        dataset = self.dataset
+        self.unnormalized_data = self.dataset.copy()
         
+        dataset = self.dataset
         union_y = np.hstack([example[:,1] for example in dataset])
         range_y = np.max(union_y) - np.min(union_y)
         std_y = np.std(union_y)
@@ -168,27 +179,9 @@ class DataSet:
                     y_mean_std[i] = (np.mean(example[:,1]), np.std(example[:,1]))
                     example[:,1] = (example[:,1] - y_mean_std[i,0]) / y_mean_std[i,1]
                     example[:,2] = example[:,2] / y_mean_std[i,1] # normalize errors as well 
-
-        self.y_mean_std = y_mean_std
-        self.x_min = x_min
             
 
         return self
-
-
-    
-    def denormalize(self):
-        denormalized = self.dataset.copy()
-
-        for i, example in enumerate(denormalized):
-            y_mean, y_std = self.y_mean_std[i]
-            x_mean, x_std = self.x_mean_std[i]
-
-            example[:,0] = (example[:,0] * x_std) + x_mean
-            example[:,1] = (example[:,1] * y_std) + y_mean
-
-            example[:,2] = example[:,2] * y_std
-        return denormalized
 
 
     def reorder(self):

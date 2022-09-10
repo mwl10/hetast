@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+src/ZTF_DR_data
+
+
 # Distribution / packaging
 .Python
 build/

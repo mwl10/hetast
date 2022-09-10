@@ -18,12 +18,11 @@ def main(args):
     torch.cuda.manual_seed(seed)
     device = torch.device(args.device)
     
-    if args.data_obj: # we can make the synthetic data, or we can pass the data_obj 
-        pass
-    else:
+    if args.data_folder == 'synth':
         data_obj = my_utils.get_synthetic_data(seed=seed, uniform=True)
-        
-     
+    else:
+        _, data_obj = my_utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
+
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]
@@ -52,7 +51,7 @@ def main(args):
     best_loss = loss 
     counter = 0
     
-    for itr in range(epoch, epoch+args.niters + 1):
+    for itr in range(epoch, epoch+args.niters):
         train_loss = 0
         train_n = 0
         avg_loglik, avg_kl, mse, mae = 0, 0, 0, 0
@@ -70,8 +69,8 @@ def main(args):
             batch_len = train_batch.shape[0]
             train_batch = train_batch.to(device)
           
-            subsampled_mask = train_batch[:,:,:,4]
-            recon_mask = train_batch[:,:,:,5]
+            subsampled_mask = train_batch[:,:,:,-2]
+            recon_mask = train_batch[:,:,:,-1]
 
             context_y = torch.cat((
               train_batch[:,:,:,1] * subsampled_mask, subsampled_mask
@@ -81,7 +80,6 @@ def main(args):
                 train_batch[:,:,:,1] * recon_mask, recon_mask
             ), 1).transpose(2,1)
             
-            #print(recon_context_y.shape, context_y.shape,train_batch[:, 0, :,0].shape )
             loss_info = net.compute_unsupervised_loss(
                 train_batch[:, 0, :,0],
                 context_y,
@@ -100,40 +98,35 @@ def main(args):
             mae += loss_info.mae * batch_len
             train_n += batch_len
             
-        
         if args.scheduler == True: 
             args.lr = my_utils.update_lr(model_size, itr, args.warmup)
             for g in optimizer.param_groups:
                 g['lr'] = args.lr
                 
-        #print(itr, f'lr: {args.lr}')
+        print(itr, f'lr: {args.lr}')
         
         if itr % 10 == 0:
-          print(
-              'Iter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg kl: {:.4f}, '
-              'mse: {:.6f}, mae: {:.6f}'.format(
-                  itr,
-                  train_loss / train_n,
-                  -avg_loglik / train_n,
-                  avg_kl / train_n,
-                  mse / train_n,
-                  mae / train_n
-              )
-          )
-#         if itr % 10 == 0:
-#             for loader, num_samples in [(val_loader, 5), (test_loader, 100)]:
-#                 my_utils.evaluate_hetvae(
-#                     net,
-#                     dim,
-#                     loader,
-#                     0.5,
-#                     shuffle=False,
-#                     k_iwae=num_samples,
-#                     device='mps'
-#                 )
-        ## set a learning rate scheduler?
-        ## set a stopping for num_iters where there's no improvement
+            print(
+                'Iter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg kl: {:.4f}, '
+                'mse: {:.6f}, mae: {:.6f}'.format(
+                    itr,
+                    train_loss / train_n,
+                    -avg_loglik / train_n,
+                    avg_kl / train_n,
+                    mse / train_n,
+                    mae / train_n
+                )
+            )
+            valid_nll_loss = my_utils.evaluate_hetvae(
+                net,
+                dim,
+                val_loader,
+                0.5,
+                k_iwae=args.k_iwae,
+                device=args.device
+                )
         if itr % args.save_at == 0 and args.save:
+            print('saving.................')
             torch.save({
                 'args': args,
                 'epoch': itr,
@@ -141,6 +134,8 @@ def main(args):
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss / train_n,
             }, 'synth' + '_' + str(experiment_id) + '.h5')
+            print('done')
+            
         # could add a delta improvement requirement to this
         if args.early_stopping:
             if best_loss > (train_loss / train_n): 
@@ -161,38 +156,37 @@ def main(args):
                 break
         
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch-size', type=int, default=8) #batch_size=8,
-    parser.add_argument('--niters', type=int, default=10) # niters=10,
-    parser.add_argument('--bound-variance', action='store_true') # bound_variance=False,
-    parser.add_argument('--const-var', action='store_true') # const_var=False,
-    parser.add_argument('--dropout', type=float, default=0.0) # dropout=0.0, 
-    parser.add_argument('--elbo-weight', type=float, default=4.1) # elbo_weight=4.108914123847402,
-    parser.add_argument('--embed-time', type=int, default=32) # embed_time=32, 
-    parser.add_argument('--enc-num-heads', type=int, default=4) # enc_num_heads=4,
-    parser.add_argument('--intensity', action='store_false') #  intensity=True,
-    parser.add_argument('--k-iwae', type=int, default=1) #  k_iwae=1, 
-    parser.add_argument('--kl-annealing', action='store_false') # kl_annealing=False,
-    parser.add_argument('--kl-zero', action='store_true') # kl_zero=False, 
-    parser.add_argument('--latent-dim', type=int, default=32) # latent_dim=32, 
-    parser.add_argument('--lr', type=float, default=0.001) # lr=0.001, 
-    parser.add_argument('--mixing', type=str, default='concat') # mixing='concat',
-    parser.add_argument('--mse-weight', type=float, default=4.0) # mse_weight=4.060280688730988,
-    parser.add_argument('--net', type=str, default='hetvae') # net='hetvae', 
-    parser.add_argument('--norm', action='store_false') # norm=True,
-    parser.add_argument('--normalize-input', type=str, default='znorm') # normalize_input='znorm',
-    parser.add_argument('--num-ref-points', type=int, default=32) # num_ref_points=32,
-    parser.add_argument('--rec-hidden', type=int, default=32) # rec_hidden=32, 
-    parser.add_argument('--sample-tp', type=float, default=0.5) # sample_tp=0.4733820088130086, 
-    parser.add_argument('--save', action='store_false') # save=True, 
-    parser.add_argument('--seed', type=int, default=0) # seed=0, 
-    parser.add_argument('--shuffle', action='store_false') #shuffle=True,
-    parser.add_argument('--std', type=float, default=0.1) # std=0.1, 
-    parser.add_argument('--var-per-dim', action='store_true') # var_per_dim=False,
-    parser.add_argument('--width', type=int, default=512) # width=512,
-    parser.add_argument('--device', type=str, default='cuda') # device='mps'
+    parser.add_argument('--batch-size', type=int, default=8) 
+    parser.add_argument('--niters', type=int, default=10) 
+    parser.add_argument('--bound-variance', action='store_false') 
+    parser.add_argument('--const-var', action='store_true') 
+    parser.add_argument('--dropout', type=float, default=0.0)
+    parser.add_argument('--elbo-weight', type=float, default=4.1)
+    parser.add_argument('--embed-time', type=int, default=32)  
+    parser.add_argument('--enc-num-heads', type=int, default=4) 
+    parser.add_argument('--intensity', action='store_false') 
+    parser.add_argument('--k-iwae', type=int, default=1)  
+    parser.add_argument('--kl-annealing', action='store_false')
+    parser.add_argument('--kl-zero', action='store_true') 
+    parser.add_argument('--latent-dim', type=int, default=32)  
+    parser.add_argument('--lr', type=float, default=0.001)  
+    parser.add_argument('--mixing', type=str, default='concat') 
+    parser.add_argument('--mse-weight', type=float, default=4.0) 
+    parser.add_argument('--net', type=str, default='hetvae') 
+    parser.add_argument('--norm', action='store_false') 
+    parser.add_argument('--normalize-input', type=str, default='znorm') 
+    parser.add_argument('--num-ref-points', type=int, default=32) 
+    parser.add_argument('--rec-hidden', type=int, default=32) 
+    parser.add_argument('--sample-tp', type=float, default=0.5) 
+    parser.add_argument('--save', action='store_false') 
+    parser.add_argument('--seed', type=int, default=0)
+    parser.add_argument('--shuffle', action='store_false') 
+    parser.add_argument('--std', type=float, default=0.1)  
+    parser.add_argument('--var-per-dim', action='store_true')
+    parser.add_argument('--width', type=int, default=512) 
+    parser.add_argument('--device', type=str, default='cuda') 
     parser.add_argument('--data_obj', type=str, default='')
     parser.add_argument('--checkpoint', type=str, default='')
     parser.add_argument('--early-stopping', action='store_true')
@@ -200,6 +194,8 @@ if __name__ == '__main__':
     parser.add_argument('--save-at', type=int, default='50')
     parser.add_argument('--scheduler', action='store_false')
     parser.add_argument('--warmup', type=int, default='4000')
+    parser.add_argument('--data-folder', type=str, required=True)
+    parser.add_argument('--start-col', type=int, default='0')
     
     args = parser.parse_args()
     main(args)

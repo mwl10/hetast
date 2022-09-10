@@ -5,7 +5,6 @@ from vae_models import (
     HeTVAE_PROB,
 )
 
-
 def load_network(args, dim, union_tp=None):
     if args.net == 'hetvae':
         net = HeTVAE(

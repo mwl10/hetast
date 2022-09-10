@@ -21,10 +21,10 @@ def main(trial, args):
     torch.cuda.manual_seed(seed)
     device = torch.device(args.device)
     
-    if args.data_obj: # we can make the synthetic data, or we can pass the data_obj 
-        pass
-    else:
+    if args.data_folder == 'synth': # we can make the synthetic data, or we can pass the data_obj 
         data_obj = my_utils.get_synthetic_data(seed=seed, uniform=True)
+    else:
+         _, data_obj = my_utils.get_data(seed=seed, folder=args.data_folder, start_col=args.start_col)
         
      
     train_loader = data_obj["train_loader"]
@@ -50,7 +50,7 @@ def main(trial, args):
         for g in optimizer.param_groups:
             g['lr'] = args.lr
             
-    
+        
     # stop if loss doesn't decrease for how many epochs? 
     best_loss = loss 
     counter = 0
@@ -73,8 +73,8 @@ def main(trial, args):
             batch_len = train_batch.shape[0]
             train_batch = train_batch.to(device)
           
-            subsampled_mask = train_batch[:,:,:,4]
-            recon_mask = train_batch[:,:,:,5]
+            subsampled_mask = train_batch[:,:,:,-2]
+            recon_mask = train_batch[:,:,:,-1]
 
             context_y = torch.cat((
               train_batch[:,:,:,1] * subsampled_mask, subsampled_mask
@@ -84,7 +84,6 @@ def main(trial, args):
                 train_batch[:,:,:,1] * recon_mask, recon_mask
             ), 1).transpose(2,1)
             
-            #print(recon_context_y.shape, context_y.shape,train_batch[:, 0, :,0].shape )
             loss_info = net.compute_unsupervised_loss(
                 train_batch[:, 0, :,0],
                 context_y,
@@ -103,22 +102,26 @@ def main(trial, args):
             mae += loss_info.mae * batch_len
             train_n += batch_len
             
+        valid_nll_loss = my_utils.evaluate_hetvae(
+            net,
+            dim,
+            val_loader,
+            0.5,
+            k_iwae=args.k_iwae,
+            device=args.device)
         
         if args.scheduler == True: 
             args.lr = my_utils.update_lr(model_size, itr, args.warmup)
             for g in optimizer.param_groups:
                 g['lr'] = args.lr
         
-        loss = train_loss / train_n
         
-        trial.report(loss, itr)
+        trial.report(valid_nll_loss, itr)
         if trial.should_prune():
             raise optuna.exceptions.TrialPruned()
             
-    return loss 
+    return valid_nll_loss 
                 
-
-
 
 if __name__ == '__main__':
 
@@ -131,22 +134,22 @@ if __name__ == '__main__':
             const_var = False,
             dropout =0.0,# trial.suggest_float("dropout", 0.0,0.5),
             elbo_weight = 1,#trial.suggest_float("elbo_weight", 0.0, 5.0),
-            embed_time = trial.suggest_categorical("embed_time", [8,16,32,64,128]),
-            enc_num_heads=trial.suggest_categorical("enc_num_heads", [1,2,4,8,16]),
+            embed_time = trial.suggest_categorical("embed_time", [16,32,64,128]),
+            enc_num_heads=1,#,trial.suggest_categorical("enc_num_heads", [1,2,4,8,16]),
             intensity=True,
             k_iwae=1,
             kl_annealing=True,#trial.suggest_categorical("kl_annealing",False),
             kl_zero=False, 
-            latent_dim=trial.suggest_categorical("latent_dim", [8,16,32,64,128]),
+            latent_dim=32,#,trial.suggest_categorical("latent_dim", [8,16,32,64,128]),
             lr=0.001,
             mixing='concat',#trial.suggest_categorical("mixing", ["concat", "concat_and_mix"]),#"separate", "interp_only", "na"]),
             mse_weight=trial.suggest_float("mse_weight",1,10),
             net='hetvae', 
-            niters=100, 
+            niters=10, 
             norm=True, 
             normalize_input='znorm', 
-            num_ref_points=trial.suggest_categorical("num_ref_points", [8,16,32,64,128]),
-            rec_hidden=trial.suggest_categorical("rec_hidden", [8,16,32,64,128]),
+            num_ref_points=16,#trial.suggest_categorical("num_ref_points", [8,16,32,64,128]),
+            rec_hidden=8,#trial.suggest_categorical("rec_hidden", [8,16,32,64,128]),
             save=True, 
             seed=0, 
             shuffle=True, 
@@ -160,7 +163,9 @@ if __name__ == '__main__':
             patience = False,
             save_at = 10000000,
             scheduler = True,
-            warmup = trial.suggest_int('warmup', 3000,5000)
+            warmup = trial.suggest_int('warmup', 3000,5000),
+            data_folder = './ZTF_DR_data/i_band',
+            start_col = 1
         )
 
         return args

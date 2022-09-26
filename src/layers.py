@@ -1,6 +1,5 @@
 # pylint: disable=E1101
 import math
-from attr import attr
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -45,7 +44,6 @@ class TimeEmbedding(nn.Module):
             return torch.cat([out1, out2], -1)
 
         
-
 class UnTAN(nn.Module):
     def __init__(
         self,

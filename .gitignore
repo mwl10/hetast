@@ -5,7 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
-src/test_
+src/test_*
 src/ZTF_DR_data
 src/archive/
 

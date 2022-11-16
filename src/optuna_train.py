@@ -13,11 +13,14 @@ import sys
 import logging
 import warnings
 
+warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
+LCS = my_utils.get_data('./ZTF_g', seed = 0, start_col=1)
 
 def define_model_args(trial):
+    
     args = Namespace(
-        data_folder = './test_d1/',
-        batch_size = 8,#trial.suggest_categorical("batch_size", [8,16,32]),
+        data_folder = './ZTF_g/',
+        batch_size = 8, #trial.suggest_categorical("batch_size", [8, 16, 32, 64]),
         dropout =0.0,# trial.suggest_float("dropout", 0.0,0.5),
         elbo_weight = 1,#trial.suggest_float("elbo_weight", 0.0, 5.0),
         embed_time = 16,#,trial.suggest_categorical("embed_time", [16,32,64,128]),
@@ -43,7 +46,7 @@ def define_model_args(trial):
         checkpoint = '',
         early_stopping = False,
         patience = False,
-        save_at = 10000000,
+        save_at = 10000000, 
         scheduler = True,
         start_col = 1,
         inc_errors = False,
@@ -51,41 +54,10 @@ def define_model_args(trial):
      
     return args
 
-def objective(trial):
-    args = define_model_args(trial)
-    loss = train(trial,args)
-    return loss
 
-def main():
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-    
-    study = optuna.create_study(direction="minimize")
-    study.optimize(objective, n_trials=int(sys.argv[1]), timeout=600)
-    pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
-    complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
-
-    print("Study statistics: ")
-    print("  Number of finished trials: ", len(study.trials))
-    print("  Number of pruned trials: ", len(pruned_trials))
-    print("  Number of complete trials: ", len(complete_trials))
-    print("Best trial:")
-    trial = study.best_trial
-    print("  Value: ", trial.value)
-    print("  Params: ")
-    for key, value in trial.params.items():
-        print("    {}: {}".format(key, value))
-    
-
-if __name__ == '__main__':
-    main()
-
-
-
-def train(trial, args):
+def train(trial, args, lcs):
     experiment_id = int(SystemRandom().random() * 10000000)
-    logging.info(args, experiment_id)
+    #print(args, experiment_id)
     ##################################
     seed = args.seed
     torch.manual_seed(seed)
@@ -94,11 +66,12 @@ def train(trial, args):
     ##################################
     device = torch.device(args.device)
     
-    if args.data_folder == 'synth':
-        data_obj = my_utils.get_synthetic_data(seed=seed, uniform=True)
-    else:
-        lcs = my_utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
-        data_obj = lcs.data_obj
+    data_obj = lcs.data_obj
+#     if args.data_folder == 'synth':
+#         data_obj = my_utils.get_synthetic_data(seed=seed, uniform=True)
+#     else:
+#         lcs = my_utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
+#         
         
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
@@ -117,7 +90,7 @@ def train(trial, args):
         loss = 1000000000
         
     model_size = utils.count_parameters(net) 
-    logging.info('model size {model_size}')
+    #print('model size {model_size}')
     ############### have patience ##########
     best_loss = loss 
     patience_counter = 0
@@ -193,9 +166,8 @@ def train(trial, args):
             ##################################################
                 
         print(f'{itr},', end='', flush=True)
-        
         if itr % 10 == 0:
-            logging.info(
+            print(
                 '\tIter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg wnll: {:.4f}, avg kl: {:.4f}, '
                 'mse: {:.6f}, wmse: {:.6f}, mae: {:.6f}'.format(
                     itr,
@@ -210,14 +182,14 @@ def train(trial, args):
         valid_nll_loss, _ = my_utils.evaluate_hetvae(
             net,
             dim,
-            train_loader, # should be val_loader
+            val_loader, # should be val_loader
             0.5,
             k_iwae=args.k_iwae,
             device=args.device
             )
         ###########################################
         if itr % args.save_at == 0 and args.save:
-            logging.info('saving.................')
+            #print('saving.................')
             torch.save({
                 'args': args,
                 'epoch': itr,
@@ -225,7 +197,7 @@ def train(trial, args):
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss / train_n,
             }, 'synth' + '_' + str(experiment_id) + '.h5')
-            logging.info('done')
+            #print('done')
         ############################################
         if args.early_stopping:
             if best_loss > (train_loss / train_n): 
@@ -250,6 +222,32 @@ def train(trial, args):
             raise optuna.exceptions.TrialPruned()
             
     return valid_nll_loss
+
+def objective(trial):
+    args = define_model_args(trial)
+    loss = train(trial,args, LCS)
+    return loss
+
+
+def main():
+    
+    study = optuna.create_study(direction="minimize")
+    study.optimize(objective, n_trials=int(sys.argv[1]), timeout=600)
+    pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
+    complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
+
+    print("Study statistics: ")
+    print("  Number of finished trials: ", len(study.trials))
+    print("  Number of pruned trials: ", len(pruned_trials))
+    print("  Number of complete trials: ", len(complete_trials))
+    print("Best trial:")
+    trial = study.best_trial
+    print("  Value: ", trial.value)
+    print("  Params: ")
+    for key, value in trial.params.items():
+        print("    {}: {}".format(key, value))
     
 
+if __name__ == '__main__':
+    main()
         

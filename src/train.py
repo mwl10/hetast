@@ -7,11 +7,12 @@ from random import SystemRandom
 from model import load_network
 import utils
 import logging
+import matplotlib.pyplot as plt
 import warnings
 
 def train(args):
     experiment_id = int(SystemRandom().random() * 10000000)
-    logging.info(args, experiment_id)
+    print(args, experiment_id)
     ##################################
     seed = args.seed
     torch.manual_seed(seed)
@@ -25,29 +26,30 @@ def train(args):
     else:
         lcs = my_utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
         data_obj = lcs.data_obj
-        
+    print(lcs.dataset.shape)
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]
     dim = data_obj["input_dim"]
     union_tp = data_obj['union_tp']
-    
+    # what needs to be the same in args for continued run
     if args.checkpoint:
-        net, optimizer, args, epoch, loss = my_utils.load_checkpoint(args.checkpoint, data_obj)
-        logging.info(f'loaded checkpoint with loss: {loss}')
+        net, optimizer, _, epoch, loss = my_utils.load_checkpoint(args.checkpoint, data_obj)
+        epoch+=1
+        print(f'loaded checkpoint with loss: {loss}')
     else:
         net = load_network(args, dim, union_tp)
         params = list(net.parameters())
         optimizer = optim.Adam(params, lr=args.lr)
         epoch = 1
-        loss = 1000000000
+        loss = 1000000
         
     model_size = utils.count_parameters(net) 
-    logging.info(f'{model_size=}')
+    print(f'{model_size=}')
     ############### have patience ##########
     best_loss = loss 
     patience_counter = 0
-    ########################################
+    ######################################## 4000
     for itr in range(epoch, epoch+args.niters):
         train_loss = 0
         train_n = 0
@@ -117,10 +119,11 @@ def train(args):
             train_n += batch_len
             #########################################################
             
-        logging.info(f'{itr},', end='', flush=True)
-        
-        if itr % 1 == 0:
-            logging.info(
+          
+        print(f'{itr},', end='', flush=True)
+        if itr % args.print_at == 0:
+            #my_utils.predict(train_loader, net, subsample=False, plot=True)
+            print(
                 '\tIter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg wnll: {:.4f}, avg kl: {:.4f}, '
                 'mse: {:.6f}, wmse: {:.6f}, mae: {:.6f}'.format(
                     itr,
@@ -142,7 +145,7 @@ def train(args):
                 )
         ###########################################
         if itr % args.save_at == 0 and args.save:
-            logging.info('saving.................')
+            print('saving.................')
             torch.save({
                 'args': args,
                 'epoch': itr,
@@ -150,7 +153,7 @@ def train(args):
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss / train_n,
             }, 'synth' + '_' + str(experiment_id) + '.h5')
-            logging.info('done')
+            print('done')
         ############################################
         if args.early_stopping:
             if best_loss > (train_loss / train_n): 
@@ -160,7 +163,7 @@ def train(args):
                 patience_counter == 0
             
             if patience_counter >= args.patience:
-                logging.info(f'training has not improved for {args.patience} epochs')
+                print(f'training has not improved for {args.patience} epochs')
                 torch.save({
                     'args': args,
                     'epoch': itr,
@@ -170,7 +173,7 @@ def train(args):
                 }, 'synth' + '_' + str(experiment_id) + '.h5')
                 break
 
-                
+    plt.show()
 def main():
     
     warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
@@ -178,21 +181,21 @@ def main():
     parser = argparse.ArgumentParser()
     
     # things we might want to change 
-    parser.add_argument('--device', type=str, default='mps') 
+    parser.add_argument('--device', type=str, default='cuda') 
     parser.add_argument('--checkpoint', type=str, default='')
     parser.add_argument('--early-stopping', action='store_true')
     parser.add_argument('--patience', type=int, default='50')
     parser.add_argument('--save-at', type=int, default='50')
-    parser.add_argument('--no-scheduler', action='store_false')
+    parser.add_argument('--scheduler', action='store_true')
     parser.add_argument('--warmup', type=int, default='4000')
     parser.add_argument('--data-folder', type=str, required=True)
     parser.add_argument('--start-col', type=int, default='0')
     parser.add_argument('--inc-errors', action='store_true')
-    
+    parser.add_argument('--print-at', type=int, default='100')
     ##### model architecture hypers 
     parser.add_argument('--embed-time', type=int, default=32)  
     parser.add_argument('--enc-num-heads', type=int, default=1) 
-    parser.add_argument('--no-intensity', action='store_false') 
+    parser.add_argument('--intensity', action='store_true') 
     parser.add_argument('--latent-dim', type=int, default=32)  
     parser.add_argument('--mixing', type=str, default='concat') 
     parser.add_argument('--net', type=str, default='hetvae')
@@ -201,23 +204,22 @@ def main():
     parser.add_argument('--width', type=int, default=512)
     
     
-    
     ##### training hypers
     parser.add_argument('--batch-size', type=int, default=8) 
     parser.add_argument('--niters', type=int, default=10) 
-    parser.add_argument('--no-bound-variance', action='store_false') 
+    parser.add_argument('--bound-variance', action='store_true') 
     parser.add_argument('--const-var', action='store_true') 
     parser.add_argument('--dropout', type=float, default=0.0)
     parser.add_argument('--elbo-weight', type=float, default=1.0)
     parser.add_argument('--k-iwae', type=int, default=1)  
-    parser.add_argument('--no-kl-annealing', action='store_false')
-    parser.add_argument('--no-kl-zero', action='store_true') 
+    parser.add_argument('--kl-annealing', action='store_true')
+    parser.add_argument('--kl-zero', action='store_true') 
     parser.add_argument('--lr', type=float, default=0.00001)  
     parser.add_argument('--mse-weight', type=float, default=5.0) 
      
-    parser.add_argument('--no-norm', action='store_false') 
+    parser.add_argument('--norm', action='store_true') 
     parser.add_argument('--normalize-input', type=str, default='znorm') 
-    
+     
     parser.add_argument('--sample-tp', type=float, default=0.5) 
     parser.add_argument('--save', action='store_false') 
     parser.add_argument('--seed', type=int, default=0)

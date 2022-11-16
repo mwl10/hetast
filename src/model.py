@@ -18,7 +18,7 @@ def load_network(args, dim, union_tp=None):
         is_constant_per_dim=False,#args.var_per_dim,
         elbo_weight=args.elbo_weight,
         mse_weight=args.mse_weight,
-        norm=args.norm,
+        norm=True,
         mixing=args.mixing,
         device=args.device,
     ).to(args.device)

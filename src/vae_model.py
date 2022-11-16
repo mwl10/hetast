@@ -22,10 +22,8 @@ class LossInfo:
     mogloglik = None
     composite_loss = None
 
-
 class HeTVAE(nn.Module):
     '''Heteroscedastic Temporal Variational Autoencoder'''
-
     def __init__(
         self,
         input_dim,
@@ -238,7 +236,6 @@ class HeTVAE(nn.Module):
         px, qz = self.get_reconstruction(
             context_x, context_y, target_x, num_samples)
         mask = target_y[:, :, self.dim:]
-        
         loglik = self.compute_loglik(target_y, px, self.norm)
         wloglik = self.compute_loglik(target_y, px, self.norm, logerr=logerr)
         
@@ -268,7 +265,6 @@ class HeTVAE(nn.Module):
             + self.mse_weight * loss_info.mse
         loss_info.weighted_comp_loss = self.elbo_weight * loss_info.welbo \
             + self.mse_weight * loss_info.wmse
-        
         return loss_info
 
     

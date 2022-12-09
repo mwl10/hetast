@@ -13,7 +13,6 @@ import torch.optim as optim
 import logging
 
 
-
 def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=10):
     """
     This function provides a way to create & format a dataset for training hetvae. 

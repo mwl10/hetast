@@ -1,12 +1,10 @@
 
-This repository inherits most of its code from https://github.com/reml-lab/hetvae, the official implementation of Heteroscedastic Temporal Variational Autoencoder for Irregularly Sampled Time Series (https://arxiv.org/pdf/2107.11350.pdf). 
+This repository inherits code from https://github.com/reml-lab/hetvae, the official implementation of Heteroscedastic Temporal Variational Autoencoder for Irregularly Sampled Time Series (https://arxiv.org/pdf/2107.11350.pdf). 
 
 It's been modified to use for Time Domain Astronomy, more speficially for modeling AGN light curves in my MRes work at Durham University. 
 
 
-
-## [requirements.txt](./requirements.txt)
-
+## Main requirements
 
     pandas==1.4.3
     numpy==1.22.0
@@ -17,12 +15,6 @@ It's been modified to use for Time Domain Astronomy, more speficially for modeli
 
     i'm using python 3.10.5
 
-
-
-
-```bash
-pip3 install -r requirements.txt
-```
 
 
 ## Training and Evaluation
@@ -60,13 +52,13 @@ some that might be of particular convienience are
 ```
 
 
-the default to save the network happens either when it stops improving for a number of epochs, which is set by the --patience argument and defaults to 50, or we can just saveat a random epoch by setting --save-at 50
-
+the default to save the network happens either when it stops improving for a number of epochs, which is set by the --patience argument and defaults to 50, or we can just saveat a given epoch by setting --save-at 50
+<!-- 
 if you've trained the network and want to glance at some of the results, take a peak at
 
-[science.py](./src/science.ipynb)
+[science.py](./src/science.ipynb) -->
 
-where you can make predictions on the network, visualize the latent space, the attention, etc.
+<!-- where you can make predictions on the network, visualize the latent space, the attention, etc. -->
 
 
 ## Using synthetic data
@@ -80,8 +72,3 @@ if you so choose
 
 
 
-
-
-## TODO
-
-opsim cadence?

@@ -12,7 +12,7 @@ def create_ds_test2():
     ds = DataSet(min_length=100, sep=',', start_col=1) \
             .add_band('i', './ZTF_DR_data/i_band') \
             .add_band('r', './ZTF_DR_data/r_band') \
-            .add_band('g', './ZTF_DR_data/g_band') \ 
+            .add_band('g', './ZTF_DR_data/g_band') \
             .preprocess()
     
 def get_data_test1():

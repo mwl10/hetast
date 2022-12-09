@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import torch.optim as optim
-import my_utils
 import argparse
 from random import SystemRandom
 from model import load_network
@@ -22,9 +21,9 @@ def train(args):
     device = torch.device(args.device)
     
     if args.data_folder == 'synth':
-        data_obj = my_utils.get_synthetic_data(seed=seed, uniform=True)
+        data_obj = utils.get_synthetic_data(seed=seed, uniform=True)
     else:
-        lcs = my_utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
+        lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
         data_obj = lcs.data_obj
     print(lcs.dataset.shape)
     train_loader = data_obj["train_loader"]
@@ -34,7 +33,7 @@ def train(args):
     union_tp = data_obj['union_tp']
     # what needs to be the same in args for continued run
     if args.checkpoint:
-        net, optimizer, _, epoch, loss = my_utils.load_checkpoint(args.checkpoint, data_obj)
+        net, optimizer, _, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj)
         epoch+=1
         print(f'loaded checkpoint with loss: {loss}')
     else:
@@ -56,7 +55,7 @@ def train(args):
         avg_loglik, avg_wloglik, avg_kl, mse, wmse, mae = 0, 0, 0, 0, 0, 0
         ###########set learning rate based on our scheduler###############
         if args.scheduler == True: 
-            args.lr = my_utils.update_lr(model_size, epoch, args.warmup)
+            args.lr = utils.update_lr(model_size, epoch, args.warmup)
             for g in optimizer.param_groups:
                 g['lr'] = args.lr 
         ##################################################################    
@@ -81,7 +80,7 @@ def train(args):
             logerr = errorbars.to(device)
             weights = weights.to(device)
             ############################################################
-            subsampled_mask = my_utils.make_masks(train_batch)
+            subsampled_mask = utils.make_masks(train_batch)
             train_batch = train_batch.to(device)
             subsampled_mask = subsampled_mask.to(device)
             recon_mask = torch.logical_xor(subsampled_mask, train_batch[:,:,:,1])
@@ -122,7 +121,7 @@ def train(args):
           
         print(f'{itr},', end='', flush=True)
         if itr % args.print_at == 0:
-            #my_utils.predict(train_loader, net, subsample=False, plot=True)
+            #utils.predict(train_loader, net, subsample=False, plot=True)
             print(
                 '\tIter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg wnll: {:.4f}, avg kl: {:.4f}, '
                 'mse: {:.6f}, wmse: {:.6f}, mae: {:.6f}'.format(
@@ -135,7 +134,7 @@ def train(args):
                     wmse / train_n,
                     mae / train_n))
             
-            valid_nll_loss, _ = my_utils.evaluate_hetvae(
+            valid_nll_loss, _ = utils.evaluate_hetvae(
                 net,
                 dim,
                 train_loader, # should be val_loader

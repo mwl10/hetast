@@ -1,5 +1,5 @@
 from dataset import DataSet
-import my_utils
+import utils
 
 
 def create_ds_test1():
@@ -16,11 +16,11 @@ def create_ds_test2():
             .preprocess()
     
 def get_data_test1():
-    my_utils.get_data('./ZTF_DR_data')
+    utils.get_data('./ZTF_DR_data')
     
     
 def synth_data_test1():
-    my_utils.get_synth_data()
+    utils.get_synth_data()
     
     
 

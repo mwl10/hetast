@@ -1,9 +1,8 @@
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
 
-
-
-
-
-def ZDCF(lcf1, lcf2, outfile, fortran_dir='fortran_dir', ccf=False, mcmc=100, uniform=False, omit_zero_lag=True, min_ppb=0):
+def ZDCF(lcf1, lcf2, outfile, acf=False, fortran_dir='fortran_dir', mcmc=100, uniform=False, omit_zero_lag=True, min_ppb=0):
     """
     This function calls the ZDCF program compiled in fortran using the CL 
     params: 
@@ -11,7 +10,6 @@ def ZDCF(lcf1, lcf2, outfile, fortran_dir='fortran_dir', ccf=False, mcmc=100, un
         lcf2
         -------optional--------
         fortran_dir    (str) 'fortran_dir'
-        ccf            (bool)  True --> if false, compute acf for lcf1, otherwise compute ccf between lcf1 & lcf2
         mcmc           (int)   100 -- > number of monte carlo runs for error est
         outfile        (str) out--> which file to save the results in
         uniform        (bool)        True--> are the lcs uniformly sampled?
@@ -25,14 +23,11 @@ def ZDCF(lcf1, lcf2, outfile, fortran_dir='fortran_dir', ccf=False, mcmc=100, un
     
     uniform = 'y' if uniform else 'n'
     omit_zero_lag = 'y' if omit_zero_lag else 'n'
-    
-    if ccf:
+    if acf == True:
+        params = f'2\n{outfile}\n{uniform}\n{min_ppb}\n{omit_zero_lag}\n{mcmc}\n{lcf1}'
+    else:
         params = f'2\n{outfile}\n{uniform}\n{min_ppb}\n{omit_zero_lag}\n{mcmc}\n{lcf1}\n{lcf2}'
-    else: # acf
-        params = f'1\n{outfile}\n{uniform}\n{min_ppb}\n{omit_zero_lag}\n{mcmc}\n{lcf1}'
-    
-    os.system(f'{params} | ./zdcf')
-    #!printf "{params}" | ./zdcf # saves to outfile
+    os.system(f"printf '{params}' | ./zdcf")
     os.chdir('../')
 
     # Function that calls PLIKE from this notebook
@@ -46,7 +41,7 @@ def PLIKE(ccf_file, lower, upper, fortran_dir='fortran_dir'):
         upper (int) upper bound on peak location
         ----optional-----
         fortran_dir (str) 'fortran_dir'
-        p1 = input("Enter dcf file name:")
+    p1 = input("Enter dcf file name:")
     p2 = input("Enter lower bound on peak location:")
     p3 = input("Enter upper bound on peak location:")
     '''
@@ -54,13 +49,8 @@ def PLIKE(ccf_file, lower, upper, fortran_dir='fortran_dir'):
         os.chdir(fortran_dir)
     else:
         raise Exception(f'{fortran_dir} is not a directory')
-                 
-    os.chdir(path) # change to dir with Fortran program
-
-
-    parameters = p1+'\n'+p2+'\n'+p3
     params = f'{ccf_file}\n{lower}\n{upper}'
-    os.system(f'{params} | ./plike')
+    os.system(f"printf '{params}' | ./plike")
     os.chdir('../') # change back to current directory
     
     

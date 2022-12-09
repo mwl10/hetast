@@ -1,7 +1,6 @@
 import numpy as np
 import torch
 import torch.optim as optim
-import my_utils
 import argparse
 from random import SystemRandom
 from argparse import Namespace
@@ -14,7 +13,7 @@ import logging
 import warnings
 
 warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-LCS = my_utils.get_data('./ZTF_g', seed = 0, start_col=1)
+LCS = utils.get_data('./ZTF_g', seed = 0, start_col=1)
 
 def define_model_args(trial):
     
@@ -68,9 +67,9 @@ def train(trial, args, lcs):
     
     data_obj = lcs.data_obj
 #     if args.data_folder == 'synth':
-#         data_obj = my_utils.get_synthetic_data(seed=seed, uniform=True)
+#         data_obj = utils.get_synthetic_data(seed=seed, uniform=True)
 #     else:
-#         lcs = my_utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
+#         lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
 #         
         
     train_loader = data_obj["train_loader"]
@@ -80,7 +79,7 @@ def train(trial, args, lcs):
     union_tp = data_obj['union_tp']
     
     if args.checkpoint:
-        net, optimizer, args, epoch, loss = my_utils.load_checkpoint(args.checkpoint, data_obj)
+        net, optimizer, args, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj)
         print(f'loaded checkpoint with loss: {loss}')
     else:
         net = load_network(args, dim, union_tp)
@@ -102,7 +101,7 @@ def train(trial, args, lcs):
         avg_loglik, avg_wloglik, avg_kl, mse, wmse, mae = 0, 0, 0, 0, 0, 0
         ###########set learning rate based on our scheduler ###############
         if args.scheduler == True: 
-            args.lr = my_utils.update_lr(model_size, epoch, args.warmup)
+            args.lr = utils.update_lr(model_size, epoch, args.warmup)
             for g in optimizer.param_groups:
                 g['lr'] = args.lr 
         ##################################################################    
@@ -127,7 +126,7 @@ def train(trial, args, lcs):
             logerr = errorbars.to(device)
             weights = weights.to(device)
             ############################################################
-            subsampled_mask = my_utils.make_masks(train_batch)
+            subsampled_mask = utils.make_masks(train_batch)
             train_batch = train_batch.to(device)
             subsampled_mask = subsampled_mask.to(device)
             recon_mask = torch.logical_xor(subsampled_mask, train_batch[:,:,:,1])
@@ -179,7 +178,7 @@ def train(trial, args, lcs):
                     wmse / train_n,
                     mae / train_n))
             
-        valid_nll_loss, _ = my_utils.evaluate_hetvae(
+        valid_nll_loss, _ = utils.evaluate_hetvae(
             net,
             dim,
             val_loader, # should be val_loader

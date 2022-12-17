@@ -458,7 +458,7 @@ def delta_ccf(acf, ccf):
     return delta
 
 
-def plot_ccf_acf(delta, ccf, acf, locator=10, save=False, peak=False, tau=0, err_low=0, err_high=0, x1=-20, x2=80, y1=-0.25, y2=1.25):
+def plot_ccf_acf(delta, ccf, acf, locator=10, save=False, peak=False, tau=0, err_low=0, err_high=0, x1=-20, x2=80, y1_1=-0.5, y1_2=1.0, y2_1=-0.5, y2_2=0.6):
     """
     Plot CCF, ACF and their difference. Optionally, you can add peak location (tau) and associated errors.
     
@@ -486,10 +486,15 @@ def plot_ccf_acf(delta, ccf, acf, locator=10, save=False, peak=False, tau=0, err
     	Lower limit on x-axis of both plots.
     x2: int
     	Upper limit on x-axis of both plots.
-    y1: int
-    	Lower limit on y-axis of both plots.
-    y2: int
-    	Upper limit on y-axis of both plots.
+    y1_1: int
+    	Lower limit on y-axis of top plot.
+    y1_2: int
+    	Upper limit on y-axis of top plot.
+    y2_1: int
+    	Lower limit on y-axis of bottom plot.
+    y2_2: int
+    	Upper limit on y-axis of bottom plot.
+        
     """
 
     
@@ -509,7 +514,7 @@ def plot_ccf_acf(delta, ccf, acf, locator=10, save=False, peak=False, tau=0, err
     ax1.legend(loc='lower left', fontsize=13)
     #ax1.set_xlim(lim1,lim2)
     ax1.set_xlim(x1,x2)
-    ax1.set_ylim(y1,y2)
+    ax1.set_ylim(y1_1,y1_2)
     
     
     ax2 = fig.add_subplot(212)
@@ -536,7 +541,7 @@ def plot_ccf_acf(delta, ccf, acf, locator=10, save=False, peak=False, tau=0, err
     ax2.xaxis.set_major_locator(plt.MultipleLocator(locator))
     ax2.yaxis.set_major_locator(plt.MultipleLocator(0.1))
     ax2.legend(fontsize=13, loc='lower left')
-    ax2.set_ylim(-0.25,0.25)
+    ax2.set_ylim(y2_1,y2_2)
     ax2.set_xlim(x1,x2)
     if peak==True:
         ax2.text(0.72,0.05, r'$\tau$ = {:.1f} ({:.1f},+{:.1f}) d'.format(tau,err_low,err_high), transform=ax2.transAxes, size=12.5)

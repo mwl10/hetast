@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def ZDCF(lcf1, lcf2, outfile, acf=False, fortran_dir='fortran_dir', mcmc=100, uniform=False, omit_zero_lag=True, min_ppb=0):
+def ZDCF(lcf1, lcf2, outfile, acf=False, mcmc=10000, uniform=False, omit_zero_lag=True, min_ppb=0, fortran_dir='/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping/fortran_dir'):
     """
     This function calls the ZDCF program compiled in fortran using the CL 
     params: 
@@ -24,7 +24,7 @@ def ZDCF(lcf1, lcf2, outfile, acf=False, fortran_dir='fortran_dir', mcmc=100, un
     uniform = 'y' if uniform else 'n'
     omit_zero_lag = 'y' if omit_zero_lag else 'n'
     if acf == True:
-        params = f'2\n{outfile}\n{uniform}\n{min_ppb}\n{omit_zero_lag}\n{mcmc}\n{lcf1}'
+        params = f'1\n{outfile}\n{uniform}\n{min_ppb}\n{omit_zero_lag}\n{mcmc}\n{lcf1}'
     else:
         params = f'2\n{outfile}\n{uniform}\n{min_ppb}\n{omit_zero_lag}\n{mcmc}\n{lcf1}\n{lcf2}'
     os.system(f"printf '{params}' | ./zdcf")
@@ -32,7 +32,7 @@ def ZDCF(lcf1, lcf2, outfile, acf=False, fortran_dir='fortran_dir', mcmc=100, un
 
     # Function that calls PLIKE from this notebook
 
-def PLIKE(ccf_file, lower, upper, fortran_dir='fortran_dir'):
+def PLIKE(ccf_file, lower, upper, fortran_dir='/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping/fortran_dir'):
     '''
     This function calls the PLIKE program compiled in fortran using the CL
     params 
@@ -54,7 +54,7 @@ def PLIKE(ccf_file, lower, upper, fortran_dir='fortran_dir'):
     os.chdir('../') # change back to current directory
     
     
-def load_results_ZDCF(acf_file, ccf_file, fortran_dir='fortran_dir', plot=False):
+def load_results_ZDCF(acf_file, ccf_file, plot=False, fortran_dir='/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping/fortran_dir'):
     path = os.path.join(os.getcwd(), fortran_dir)
     cols = ['tau', '-sig(tau)', '+sig(tau)', 'dcf', '-err(dcf)', '+err(dcf)', '#bin']
     ccf = pd.read_csv(os.path.join(path, ccf_file), sep=" ", header=None, skipinitialspace=True)

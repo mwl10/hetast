@@ -15,11 +15,17 @@ It's been modified to use for Time Domain Astronomy, more speficially for modeli
 Data folders must follow the following directory structure
 
 ZTF_DR_data/
+
     ├── g
-         └──  000018.77+191232.9_DR_gband.csv
+         
+         └── 
+              000018.77+191232.9_DR_gband.csv
               000111.81-092508.2_DR_gband.csv
+              
     ├── i
-         └──  000018.77+191232.9_DR_iband.csv
+    
+         └──  
+              000018.77+191232.9_DR_iband.csv
               000111.81-092508.2_DR_iband.csv
               
 Where the object name must be separated by an underscore from the rest of the filename so the objects can be matched properly (in the multivariate case)

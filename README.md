@@ -14,6 +14,7 @@ It's been modified to use for Time Domain Astronomy, more speficially for modeli
 
 Data folders must follow the following directory structure
 
+```bash
 ZTF_DR_data/
 
     ├── g
@@ -27,20 +28,17 @@ ZTF_DR_data/
          └──  
               000018.77+191232.9_DR_iband.csv
               000111.81-092508.2_DR_iband.csv
+```
               
 Where the object name must be separated by an underscore from the rest of the filename so the objects can be matched properly (in the multivariate case)
 and the lightcurves must be in subdirectories labeled by the name of the band, i.e. g, i, b, r. 
 
 Additionally, the light curve files should be CSV with time, mag/flux, magerr/fluxerr in the first 3 columns respectively. If your csvs don't have the mag/flux starting in the first column you can provide a --start-col (the default is 0).
 
-```bash
-python3 train.py --folder ./ZTF_DR_data
-```
-
-there is an extensive list of hyperparameters for this nextwork which can be found in main() of train.py, all of which can be altered in the training from their defaults like:
+There is an extensive list of hyperparameters for this nextwork which can be found in main() of train.py, all of which can be altered in the training from their defaults like:
 
 ```bash
-python3 train.py --folder './/' --niters 100 --device cuda --checkpoint './'
+python3 train.py --folder './ZTF_DR_data' --niters 100 --device cuda --checkpoint './'
 ```
 
 some that might be of particular convienience are
@@ -76,13 +74,12 @@ if you've trained the network and want to glance at some of the results, take a 
 
 <!-- where you can make predictions on the network, visualize the latent space, the attention, etc. -->
 
-
 ## Using synthetic data
 
-if you set the data-folder argument like so
+set data-folder argument like so
+
 --data-folder synth
 
-you'll wind up using the synthetic data
 
 
 

@@ -21,12 +21,12 @@ def train(args):
     device = torch.device(args.device)
     
     if args.data_folder == 'synth':
-        data_obj = utils.get_synthetic_data(seed=seed, uniform=True)
+        folder = '/Users/mattlowery/Desktop/code/astro/hetvae/src/test_data'
+        data_obj = utils.get_synth_data(folder, seed = 0, batch_size=8, kernel='dho', duration=730, n=180)
     else:
         lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
         data_obj = lcs.data_obj
         
-    print(lcs.dataset.shape)
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]

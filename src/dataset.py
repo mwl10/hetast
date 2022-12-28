@@ -183,7 +183,6 @@ class DataSet:
                 #num_splits = int(ranges[i*j] / (mean_range))#std_threshold * std_ranges))
                 else:
                     split_threshold = lc[:,0].min() + (mean_range + (std_threshold * std_range))
-                    print(split_threshold)
                     split_pt = np.where(lc[:,0] > split_threshold)[0]
                     if np.any(split_pt):
                         self.dataset[i][j] = lc[:split_pt[0]] # shouldn't be discarding here, but alas              

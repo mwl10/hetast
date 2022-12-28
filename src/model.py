@@ -1,4 +1,4 @@
-var-per-dim# pylint: disable=E1101
+# pylint: disable=E1101
 from vae_model import HeTVAE
 
 def load_network(args, dim, union_tp=None):

@@ -4,25 +4,31 @@ This repository inherits code from https://github.com/reml-lab/hetvae, the offic
 It's been modified to use for Time Domain Astronomy, more speficially for modeling AGN light curves in my MRes work at Durham University. 
 
 
-## Main requirements
+## Requirements
 
-    pandas==1.4.3
-    numpy==1.22.0
-    optuna==2.10.1
-    eztao==0.4.0
-    scikit-learn==1.1.2 
-    torch==1.13.0dev (im using from pytorch-nightly so i can use my mac gpus)
-
-    i'm using python 3.10.5
-
-
+    numpy, pytorch, matplotlib, pandas, eztao, scipy, optuna, sklearn
+ 
 
 ## Training and Evaluation
 
-Train.py has the default hyperparameters for training the network on given ZTF data. If you'd like to train the network on your own data, you need to format it as a CSV file with time, mag/flux, magerr/fluxerr in the first 3 columns respectively and provide the folder where those exist. The folder argument is the only required. If your csvs don't have the mag/flux starting in the first column you can provide a --start-col (the default is 0).
+
+Data folders must follow the following directory structure
+
+ZTF_DR_data/
+    ├── g
+         └──  000018.77+191232.9_DR_gband.csv
+              000111.81-092508.2_DR_gband.csv
+    ├── i
+         └──  000018.77+191232.9_DR_iband.csv
+              000111.81-092508.2_DR_iband.csv
+              
+Where the object name must be separated by an underscore from the rest of the filename so the objects can be matched properly (in the multivariate case)
+and the lightcurves must be in subdirectories labeled by the name of the band, i.e. g, i, b, r. 
+
+Additionally, the light curve files should be CSV with time, mag/flux, magerr/fluxerr in the first 3 columns respectively. If your csvs don't have the mag/flux starting in the first column you can provide a --start-col (the default is 0).
 
 ```bash
-python3 train.py --folder ./ZTF_DR_data/i_band
+python3 train.py --folder ./ZTF_DR_data
 ```
 
 there is an extensive list of hyperparameters for this nextwork which can be found in main() of train.py, all of which can be altered in the training from their defaults like:
@@ -33,7 +39,10 @@ python3 train.py --folder './/' --niters 100 --device cuda --checkpoint './'
 
 some that might be of particular convienience are
 
+
 ```bash
+--checkpoint
+--niters
 --early-stopping
 --patience
 --device
@@ -53,6 +62,7 @@ some that might be of particular convienience are
 
 
 the default to save the network happens either when it stops improving for a number of epochs, which is set by the --patience argument and defaults to 50, or we can just saveat a given epoch by setting --save-at 50
+
 <!-- 
 if you've trained the network and want to glance at some of the results, take a peak at
 
@@ -66,9 +76,8 @@ if you've trained the network and want to glance at some of the results, take a 
 if you set the data-folder argument like so
 --data-folder synth
 
-you'll wind up using the synthetic data, and you can toggle from the default damped harmonic oscillator data by setting
---kernel drw
-if you so choose
+you'll wind up using the synthetic data
+
 
 
 

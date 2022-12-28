@@ -14,9 +14,8 @@ import logging
 from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand, gpSimFull
 
-def get_synthetic_data(folder, seed = 0, batch_size=8, frac=0.5, kernel='drw'):
+def get_synth_data(folder, seed = 0, batch_size=8, kernel='drw', duration=730, n=180):
     """
-    
     This function creates and loads a synthetic dataset relative to a given kernel (drw or dho), 
     distributing the kernel params relative to a real dataset, in base_folder 
     
@@ -48,39 +47,43 @@ def get_synthetic_data(folder, seed = 0, batch_size=8, frac=0.5, kernel='drw'):
         band = band_folder.lower()
         lcs.add_band(band, os.path.join(folder, band_folder))
         
-    lcs.filtering()
-    lcs.rm_high_magerrs()          
+    lcs.filter()         
     lcs.prune_outliers()
-    #lcs.prune_graham()
     lcs.set_carma_fits()
     lcs.set_snr()
-    duration = 2 * 365
-    n = 180
-    if kernel == 'drw':
-        synth_lcs = []
-        for i, params in enumerate(lcs.drw_params):
-            DRW_kernel = DRW_term(*params)
-            # kernel, snr, duration (days), n 
-            lc = np.array(gpSimRand(DRW_kernel,lcs.snr[i,0], duration, n)).transpose(1,0)[np.newaxis,np.newaxis]
-            synth_lcs.append(lc)
-            
-        synth_lcs = np.concatenate(synth_lcs, axis=0)
-    else:
-        synth_lcs = []
-        for i, params in enumerate(lcs.dho_params):
-            DHO_kernel = DHO_term(*params)
-            # kernel, snr, duration (days), n 
-            lc = np.array(gpSimRand(DHO_kernel,lcs.snr[i,0], duration, n)).transpose(1,0)[np.newaxis,np.newaxis]
-            synth_lcs.append(lc)
-        synth_lcs = np.concatenate(synth_lcs, axis=0)
-        
-    #union_tp = np.unique(synth[:,:,:,0].flatten()).astype('float32')
-    # uniform union_tp? 
-    union_tp = np.arange(0, np.ptp(union_tp), step=0.5)
     
-    np.random.shuffle(synth)
-    splindex = int(np.floor(.8*len(synth)))
-    training, valid, test = np.split(synth, [splindex, splindex + int(np.floor(.1*len(synth)))])# shuffle?
+    synth_lcs = []
+    if kernel == 'drw':
+        for i, params in enumerate(lcs.drw_fits):
+            if np.isnan(params[0]):
+                continue
+            DRW_kernel = DRW_term(*np.log(params))
+            # kernel, snr, duration (days), n 
+            lc = np.array(gpSimRand(DRW_kernel,lcs.snr[i,0], duration, n)).transpose(1,0)
+            lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])
+            lc[:,2] = lc[:,2] / np.std(lc[:,1])
+            synth_lcs.append(lc[np.newaxis,np.newaxis])
+    ##################### dho #################################
+    else:
+        for i, params in enumerate(lcs.dho_fits):
+            if np.isnan(params[0]):
+                continue
+            DHO_kernel = DHO_term(*np.log(params))
+            # kernel, snr, duration (days), n 
+            lc = np.array(gpSimFull(DHO_kernel,lcs.snr[i,0], duration, n)).transpose(1,0)
+            lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])
+            lc[:,2] = lc[:,2] / np.std(lc[:,1])
+            synth_lcs.append(lc[np.newaxis,np.newaxis])
+            
+    synth_lcs = np.concatenate(synth_lcs, axis=0).astype('float32')
+    print(synth_lcs.shape)
+    union_tp = np.unique(synth_lcs[:,:,:,0].flatten()).astype('float32')
+    #union_tp = np.arange(0, np.ptp(union_tp), step=0.5)
+    union_tp =  torch.Tensor(union_tp)
+    
+    np.random.shuffle(synth_lcs)
+    splindex = int(np.floor(.8*len(synth_lcs)))
+    training, valid, test = np.split(synth_lcs, [splindex, splindex + int(np.floor(.1*len(synth_lcs)))])# shuffle?
     train_loader = torch.utils.data.DataLoader(training, batch_size=batch_size)
     valid_loader = torch.utils.data.DataLoader(valid, batch_size=batch_size)
     test_loader = torch.utils.data.DataLoader(test, batch_size=batch_size)
@@ -89,9 +92,8 @@ def get_synthetic_data(folder, seed = 0, batch_size=8, frac=0.5, kernel='drw'):
         "test_loader": test_loader,
         "valid_loader": valid_loader,
         'union_tp': union_tp,
-        "input_dim": dims,
+        "input_dim": 1,
     }
-    
     return data_objects
 
 
@@ -148,10 +150,9 @@ def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=10)
     lcs.normalize() 
     lcs.formatting()
     lcs.set_union_tp() # maybe do this as some regularly sequenced bit
-    print(f'dataset created w/ shape {self.dataset.shape}')
+    print(f'dataset created w/ shape {lcs.dataset.shape}')
     ######## done preprocessing ########################################################################################################
     lcs.set_data_obj(batch_size=batch_size)
-    logging.info(f'created dataset of shape {lcs.dataset.shape}')
     return lcs
 
 
@@ -434,7 +435,8 @@ def log_normal_pdf(x, mean, logvar, mask, logerr=0.):
     logerr = logerr * mask
     logvar = logvar + logerr
     return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
-   x
+
+
 def mog_log_pdf(x, mean, logvar, mask):
     const = torch.from_numpy(np.array([2.0 * np.pi])).float().to(x.device)
     const = torch.log(const)

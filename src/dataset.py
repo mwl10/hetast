@@ -5,6 +5,8 @@ import logging
 import matplotlib.pyplot as plt
 from scipy import signal
 import torch
+from eztao.ts import gpSimRand, gpSimFull, drw_fit, dho_fit
+
 
 class DataSet:
     def __init__(self, name='', min_length=3, start_col=0, sep=','):
@@ -25,50 +27,54 @@ class DataSet:
         self.valid_files_df = pd.DataFrame()
         self.bands = [] 
         
-    def preprocess(self):
-        self.filtering()
-        self.rm_high_magerrs()          
-        self.prune_outliers()
-        self.prune_graham()
-        self.chop_lcs()
-        ###################################
-        self.set_excess_vars()
-        self.set_mean_mags()
-        ###################################
-        self.normalize() 
-        self.formatting()
-        self.set_union_tp() # maybe do this as some regularly sequenced bit
-        print(f'dataset created w/ shape {self.dataset.shape}')
+        
+    def set_data_obj(self, batch_size=8, split=0.8, shuffle=False):
+        #############################################################
+        # keep a consistent shuffle for unprocessing the light curves
+        #############################################################
+        
+        if shuffle==True:
+            shuffle = np.random.permutation(len(lcs.dataset)) 
+            self.dataset = self.dataset[shuffle]
+            self.unnormalized_data = [self.unnormalized_data[i] for i in shuffle]
+            self.valid_files_df = self.valid_files_df.reindex(shuffle)
+        
+        #######################################################################################################
+        # validation and training set can be the same because light curves are conditioned on differing subsamples 
+        ########################################################################################################
+        splindex = int(np.floor(split*len(self.dataset)))
+        training, test = np.split(self.dataset, [splindex])
+        valid_splindex = int(np.floor(split*len(training)))
+        _, valid = np.split(training, [valid_splindex])
+        self.split_index = splindex # keep this for deprocessing too
+        print(f'train size: {len(training)}, valid size: {len(valid)}, test size: {len(test)}')
+        train_loader = torch.utils.data.DataLoader(training, batch_size=batch_size)
+        valid_loader = torch.utils.data.DataLoader(valid, batch_size=batch_size)
+        test_loader = torch.utils.data.DataLoader(test, batch_size=batch_size)
+        union_tp = torch.Tensor(self.union_tp)  
+        
+        self.data_obj = {
+            "train_loader": train_loader,
+            "test_loader": test_loader,
+            "valid_loader": valid_loader,
+            'union_tp': union_tp,
+            "input_dim": len(self.bands),
+        }
 
         
     def normalize(self): 
         """
-        This function does not so much normalize the dataset as shift it. Scaling the mag/flux values takes away from important amplitude information in differentiating
-        objects as well as bands. The positional encoder would suffer if the time values were scaled in any way. Therefore we merely subtract the mean in both 
-        dimensions of the light curve. Scaling values is usually to ensure that dataset features are in the same range, but we don't have different features here so long as all
-        light curves in the dataset have the same units. 
         
         """
         self.unnormalized_data = self.dataset.copy()
-        
         for object_lcs in self.dataset:
             for lc in object_lcs:
                 if lc[:,1].sum() == 0: # means no light curve for this band/object
                     continue
-               # lc[:,0] = lc[:,0] - np.mean(lc[:,0]) #lc[0,0] 
                 lc[:,0] = lc[:,0] - lc[0,0] 
-                lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])
-#                 mean = np.mean(lc[:,1])
-#                 if y_by_range:
-#                     range_y = np.max(lc[:,1]) - np.min(lc[:,1])
-#                     lc[:,1] = (lc[:,1] - mean) / range_y
-#                     lc[:,2] = lc[:,2] / y_mean_std[i,1] # normalize errors as well 
-#                 else:
-#                     std = np.std(lc[:,1])
-#                     lc[:,1] = (lc[:,1] - mean) / std
-#                     lc[:,2] = lc[:,2] / std # normalize errors as well    
-
-
+                lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
+                lc[:,2] = lc[:,2] / np.std(lc[:,1])
+                 
 
     def prune_graham(self, med_filt=3, res_std=True, std_threshold=3, mag_threshold=0.25, plot=False, index=100):
         """
@@ -131,27 +137,21 @@ class DataSet:
                 y_std = np.std(y)
                 y_mean = np.mean(y)
                 # can do this with quantiles?
-                
                 outliers = np.where((y > (y_mean + y_std*std_threshold)) | \
                                            (y < (y_mean - y_std*std_threshold)))[0]
                 
                 self.dataset[i][j] = np.delete(lc, outliers, axis=0)
                 
-    # remove all points w/ >= 1 mag error (for ZTF)
-    def rm_high_magerrs(self):
-        for i, object_lcs in enumerate(self.dataset):
-            for j, lc in enumerate(object_lcs):
-                if lc[:,1].sum() == 0:
-                    continue
-                yerr = lc[:,2]
-                outliers = np.where(yerr >= 1)[0]
-                self.dataset[i][j] = np.delete(lc, outliers, axis=0)
-                
+                ## remove outliers with >= 1 mag error for ZTF
+                if self.name.lower().find('ztf'):
+                    outliers = np.where(lc[:,2] >=1)[0]
+                    self.dataset[i][j] = np.delete(lc, outliers, axis=0)
+                    
                 
     def add_band(self, band, folder): 
         """
         when we add a band via a folder filled with light_curve files, a dataframe keeps track of all the 
-        indexes the new stellar objects 
+        the new stellar objects 
         with their according files so that when another band is added the same dataframe can be used 
         """
         if os.path.isdir(folder):
@@ -168,8 +168,11 @@ class DataSet:
             else:
                 self.bands.append(band)
          
-        # sanchez-saez: tlength ≥ 730 days
+        
     def chop_lcs(self, std_threshold=1):
+        """
+        cut light curves longer than std_thresholds beyond the mean of lengths
+        """
         ranges = [np.ptp(lc[:,0]) for object_lcs in self.dataset for lc in object_lcs] 
         std_range = np.std(ranges)
         mean_range = np.mean(ranges)
@@ -180,15 +183,17 @@ class DataSet:
                 #num_splits = int(ranges[i*j] / (mean_range))#std_threshold * std_ranges))
                 else:
                     split_threshold = lc[:,0].min() + (mean_range + (std_threshold * std_range))
+                    print(split_threshold)
                     split_pt = np.where(lc[:,0] > split_threshold)[0]
                     if np.any(split_pt):
                         self.dataset[i][j] = lc[:split_pt[0]] # shouldn't be discarding here, but alas              
         
+    
+    def filter(self):
+        """rm lcs w/ g band magnitude fainter than 20.6 (close to the limiting magnitude of the ZTF images), 
+        and brighter than 13.5 (to avoid saturated ob- servations), also Pvar thing """
         
-    """rm lcs w/ g band magnitude fainter than 20.6 (close to the limiting magnitude of the ZTF images), 
-    and brighter than 13.5 (to avoid saturated ob- servations), also Pvar thing """
-    # really only need to check intrinsic sig, __, for one of the band's light curves, but
-    def filtering(self):
+        # really only need to check intrinsic sig, __, for one of the band's light curves, but
         valid_files = self.valid_files_df.dropna().values
         dataset = []
         for object_files in valid_files:
@@ -196,14 +201,16 @@ class DataSet:
             for band_file in object_files:
                 try:
                     lc = pd.read_csv(band_file, sep=self.sep).to_numpy()
+                    ##### filtering ZTF error codes #########
                     if self.name.lower().find('ztf'):
-                        lc = lc[np.where(lc[:,4] == 0)[0]]
+                        lc = lc[np.where(lc[:,4] == 0)[0]]  
+                    #########################################
                     lc = lc[:, self.start_col:self.start_col+3]
                     lc = lc[lc[:,0].argsort()].astype(np.float32)
                     if len(lc > self.min_length):
                         excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) / np.mean(lc[:,1])
                         mean_mag = np.mean(lc[:,1])
-                        if excess_var >= 0:# and (mean_mag >= 20.6 or mean_mag <= 13.5):
+                        if (excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 13.5):
                             object_lcs.append(lc)
                 except Exception:
                     pass
@@ -259,15 +266,41 @@ class DataSet:
         self.dataset = np.array(self.dataset).astype(np.float32)
 
         
-    def set_union_tp(self):
+    def set_carma_fits(self):
+        drw_fits = []
+        dho_fits = []
+        for i, object_lcs in enumerate(self.dataset):
+            print(i, end='')
+            lc = object_lcs[0]
+            dho = dho_fit(lc[:,0], lc[:,1], lc[:,2])
+            drw = drw_fit(lc[:,0], lc[:,1], lc[:,2])
+            dho_fits.append(dho)
+            drw_fits.append(drw)
+                     
+        self.drw_fits = drw_fits
+        self.dho_fits = dho_fits
+        
+     
+    def set_union_tp(self, uniform=False, n=1000):
         """
         calcluates an array of the union of all the time points across the dataset &
         sets it as self.union_x
+        
+        if uniform == True, set union_tp to n uniformly spaced points between the light curves length range 
+        
         """
-        self.union_tp = np.unique(self.dataset[:,:,:,0].flatten()).astype('float32')
+        # max val? 
+        self.union_tp = np.unique(self.dataset[:,:,:,0].flatten())
+        # num points? 
+        if uniform: 
+            step = np.ptp(self.union_tp) / n 
+            self.union_tp = np.arrange(np.min(self.union_tp), np.max(self.union_tp), step)
+            
+        self.union_tp = self.union_tp.astype('float32')
         print(f'created union_tp attribute of length {len(self.union_tp)}')
     
-    def set_target_x(self, num_points=40, forecast=False, forecast_frac=1.2):
+    
+    def set_target_x(self, n=40, forecast=False, forecast_frac=1.2):
         """
         sets the target time values we might want to interpolate the light curve to. 
         
@@ -280,7 +313,7 @@ class DataSet:
                                           its length should we forecast? 
         """
         time = self.dataset[:,:,:,0]
-        zs_to_append = time.shape[2] - num_points
+        zs_to_append = time.shape[2] - n
         self.target_x = np.zeros_like(time)
         
         for i, object_lcs_time in enumerate(time):
@@ -291,44 +324,13 @@ class DataSet:
                     max_time = forecast_frac * max_time
                 if lc_time.sum() == 0:
                     max_time = 1 
-                target_x = np.arange(min_time,max_time, (max_time - min_time)/num_points)
+                target_x = np.arange(min_time,max_time, (max_time - min_time)/n)
                 target_x = np.append(target_x, np.zeros((zs_to_append)), axis=0)[:time.shape[2]]
                 self.target_x[i,j] = target_x
-            
-            
-    def set_data_obj(self, batch_size=8, split=0.8, shuffle=False):
-        #############################################################
-        # keep a consistent shuffle for unprocessing the light curves
-        #############################################################
-        
-        if shuffle==True:
-            shuffle = np.random.permutation(len(lcs.dataset)) 
-            self.dataset = self.dataset[shuffle]
-            self.unnormalized_data = [self.unnormalized_data[i] for i in shuffle]
-            self.valid_files_df = self.valid_files_df.reindex(shuffle)
-        
-        #######################################################################################################
-        # validation and training set can be the same because light curves are conditioned on differing subsamples 
-        ########################################################################################################
-        splindex = int(np.floor(split*len(self.dataset)))
-        training, test = np.split(self.dataset, [splindex])
-        valid_splindex = int(np.floor(split*len(training)))
-        _, valid = np.split(training, [valid_splindex])
-        self.split_index = splindex # keep this for deprocessing too
-        print(f'train size: {len(training)}, valid size: {len(valid)}, test size: {len(test)}')
-        train_loader = torch.utils.data.DataLoader(training, batch_size=batch_size)
-        valid_loader = torch.utils.data.DataLoader(valid, batch_size=batch_size)
-        test_loader = torch.utils.data.DataLoader(test, batch_size=batch_size)
-        union_tp = torch.Tensor(self.union_tp)   
-        self.data_obj = {
-            "train_loader": train_loader,
-            "test_loader": test_loader,
-            "valid_loader": valid_loader,
-            'union_tp': union_tp,
-            "input_dim": len(self.bands),
-        }
-        
-            
+
+    #########
+    # intrinsic vars & excess vars are essentially the same thing
+    #########
     def set_intrinsic_vars(self):
         intrinsic_vars = np.zeros((len(self.dataset),len(self.bands)))
         for i, object_lcs in enumerate(self.dataset):
@@ -339,7 +341,15 @@ class DataSet:
                 intrinsic_var = avg_sq_dev_from_mean - avg_sq_err
                 intrinsic_vars[i,j] = intrinsic_var
         self.intrinsic_vars = intrinsic_vars
-        
+       
+    def set_snr(self):
+        snr = np.zeros((len(self.dataset),len(self.bands)))
+        for i, object_lcs in enumerate(self.dataset):
+            for j, lc in enumerate(object_lcs):
+                rms = np.sqrt(np.mean(np.square(lc[:,1])))
+                snr[i,j] = rms / np.median(lc[:,2])
+        self.snr = snr
+                
     def set_excess_vars(self):
         excess_vars = np.zeros((len(self.dataset),len(self.bands)))
         for i, object_lcs in enumerate(self.dataset):
@@ -351,7 +361,6 @@ class DataSet:
     def set_mean_mags(self):
         mean_mags = [np.mean(lc[:,1]) for object_lcs in self.dataset for lc in object_lcs]
         self.mean_mags = np.array(mean_mags)
-        
         
         
             # segments? 

@@ -399,13 +399,9 @@ def add_inverted_acf(acf):
 def interp(a,b):
     # a: df with common grid of tau values
     # b: df which we want to force upon that grid
-    
     new_b = pd.DataFrame(columns=['tau', '-sig(tau)', '+sig(tau)', 'dcf', '-err(dcf)', '+err(dcf)', '#bin'])
-    
     f0 = interpolate.interp1d(b['tau'], b['dcf'], kind='quadratic',fill_value="extrapolate")
     new_b['dcf'] = f0(a['tau'])
-    
-    
     for y in ['dcf','-sig(tau)','+sig(tau)','-err(dcf)','+err(dcf)','#bin']:
         if y == 'dcf':
             kind = 'quadratic'

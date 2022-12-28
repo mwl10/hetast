@@ -128,7 +128,6 @@ class HeTVAE(nn.Module):
         elif self.mixing == 'na':
             qz.mean = self.h2z_mean(hidden)
             qz.logvar = self.h2z_var(hidden)
-
         return qz
     
     def encode(self, context_x, context_y):

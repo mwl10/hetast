@@ -25,6 +25,7 @@ def train(args):
     else:
         lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
         data_obj = lcs.data_obj
+        
     print(lcs.dataset.shape)
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
@@ -118,7 +119,6 @@ def train(args):
             train_n += batch_len
             #########################################################
             
-          
         print(f'{itr},', end='', flush=True)
         if itr % args.print_at == 0:
             #utils.predict(train_loader, net, subsample=False, plot=True)
@@ -215,7 +215,7 @@ def main():
     parser.add_argument('--kl-zero', action='store_true') 
     parser.add_argument('--lr', type=float, default=0.00001)  
     parser.add_argument('--mse-weight', type=float, default=5.0) 
-     
+
     parser.add_argument('--norm', action='store_true') 
     parser.add_argument('--normalize-input', type=str, default='znorm') 
      

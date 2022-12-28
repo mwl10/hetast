@@ -9,6 +9,7 @@ src/test_*
 #src/ZTF_DR_data
 src/archive/
 src/reverberation_mapping/dho_fit*
+src/scratch*
 # Distribution / packaging
 .Python
 build/

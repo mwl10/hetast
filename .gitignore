@@ -8,7 +8,7 @@ __pycache__/
 src/test_*
 #src/ZTF_DR_data
 src/archive/
-
+src/reverberation_mapping/dho_fit*
 # Distribution / packaging
 .Python
 build/

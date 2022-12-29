@@ -8,6 +8,7 @@ __pycache__/
 src/test_*
 #src/ZTF_DR_data
 src/archive/
+src/collab*
 src/reverberation_mapping/dho_fit*
 src/scratch*
 src/preview_data*

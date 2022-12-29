@@ -3,6 +3,8 @@ This repository inherits code from https://github.com/reml-lab/hetvae, the offic
 
 It's been modified to use for Time Domain Astronomy, more speficially for modeling AGN light curves in my MRes work at Durham University. 
 
+Clearly a work in progress
+
 
 ## Requirements
 

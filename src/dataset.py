@@ -151,8 +151,7 @@ class DataSet:
     def add_band(self, band, folder): 
         """
         when we add a band via a folder filled with light_curve files, a dataframe keeps track of all the 
-        the new stellar objects 
-        with their according files so that when another band is added the same dataframe can be used 
+        the new stellar objects with their according files so that when another band is added the same dataframe can be used 
         """
         if os.path.isdir(folder):
             valid_counter = 0
@@ -190,7 +189,7 @@ class DataSet:
     
     def filter(self):
         """rm lcs w/ g band magnitude fainter than 20.6 (close to the limiting magnitude of the ZTF images), 
-        and brighter than 13.5 (to avoid saturated ob- servations), also Pvar thing """
+        and brighter than 13.5 (to avoid saturated ob- servations) """
         
         # really only need to check intrinsic sig, __, for one of the band's light curves, but
         valid_files = self.valid_files_df.dropna().values
@@ -362,7 +361,6 @@ class DataSet:
         self.mean_mags = np.array(mean_mags)
         
         
-            # segments? 
     def set_epoch_counts(self, sep_std=2, plot=False, index=1, figsize=(15,15)):
         ## count the epochs per lc
         epoch_counts = np.zeros((len(self.dataset), len(self.bands)))

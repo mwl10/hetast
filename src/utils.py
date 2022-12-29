@@ -17,15 +17,19 @@ from eztao.ts import gpSimRand, gpSimFull
 def get_synth_data(folder, seed = 0, batch_size=8, kernel='drw', duration=730, n=180):
     """
     This function creates and loads a synthetic dataset relative to a given kernel (drw or dho), 
-    distributing the kernel params relative to a real dataset, in base_folder 
+    distributing the kernel params relative to a real dataset  
     
     parameters:
+        folder             (str)      --> synthetic data will be fit to the light curves in this folder to get an honest distribution of params
+         ----- optional -----
         seed               (int)      --> random seed, this matters to keep the shuffles consistent
         batch_size         (int)      --> for the network, usually a multiple of 2
         kernel             (str)      --> 'drw' (dampled random walk), a carma(1) process; 'dho' (damped harmonic oscillator), a carma(2,1) process
+        n
+        duration 
         
-    drw_kernel def --> 'tau' is decorelation timescale, 'amp' is the amplitude
-    dho_kernel def --> a1 = 2 * Xi * w0
+    drw_kernel params --> 'tau' is decorelation timescale, 'amp' is the amplitude
+    dho_kernel params --> a1 = 2 * Xi * w0
                        a2 = w0 ** 2
                        b0 = sigma
                        b1 = tau * b0
@@ -35,7 +39,6 @@ def get_synth_data(folder, seed = 0, batch_size=8, kernel='drw', duration=730, n
         a dictionary of torch dataloaders with data formatted as necessary for network training 
         , as well as the dimension and union of all the time points
     """
-    # which bands do you want to simulate?!?
     
     np.random.seed(seed)
     if not os.path.isdir(folder):

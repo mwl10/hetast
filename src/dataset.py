@@ -158,7 +158,11 @@ class DataSet:
             dataset = []
             files = [os.path.join(folder, file) for file in os.listdir(folder)]
             for file in files:
-                obj_name = file.split('/')[-1].split('_')[0]
+                if file.find('_') > 0:
+                    obj_name = file.split('/')[-1].split('_')[0]
+                else:
+                    obj_name = "".join(file.split('/')[-1].split('.')[:-1]
+                                       
                 valid_counter += 1
                 self.valid_files_df.loc[obj_name, band] = file
             print(f'validated {valid_counter} files out of {len(files)} for {band=}')

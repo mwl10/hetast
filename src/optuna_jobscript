@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -c 1
+#SBATCH --gres=gpu:1
+#SBATCH -p res-gpu-small
+#SBATCH --qos=long-high-prio
+#SBATCH --job-name=hetvae
+#SBATCH -t 10:00:00
+
+source /etc/profile
+source activate $HOME/miniconda/envs/hetvae
+
+# trials is first CL arg, niters per trial is second 
+python3 $HOME/hetast/src/optuna_train.py 10 10

@@ -5,6 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
+src/predict.ipynb
 src/test_*
 #src/ZTF_DR_data
 src/archive/

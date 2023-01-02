@@ -143,7 +143,7 @@ class DataSet:
                 self.dataset[i][j] = np.delete(lc, outliers, axis=0)
                 
                 ## remove outliers with >= 1 mag error for ZTF
-                if self.name.lower().find('ztf'):
+                if self.name.lower().find('ztf') > 0:
                     outliers = np.where(lc[:,2] >=1)[0]
                     self.dataset[i][j] = np.delete(lc, outliers, axis=0)
                     
@@ -197,19 +197,24 @@ class DataSet:
         for object_files in valid_files:
             object_lcs = []
             for band_file in object_files:
-                try:
+                try: 
                     lc = pd.read_csv(band_file, sep=self.sep).to_numpy()
                     ##### filtering ZTF error codes #########
-                    if self.name.lower().find('ztf'):
+                    if self.name.lower().find('ztf') > 0:
                         lc = lc[np.where(lc[:,4] == 0)[0]]  
+                    
                     #########################################
-                    lc = lc[:, self.start_col:self.start_col+3]
-                    lc = lc[lc[:,0].argsort()].astype(np.float32)
-                    if len(lc > self.min_length):
+                    if len(lc) > self.min_length:
+                        lc = lc[:, self.start_col:self.start_col+3]
+                        lc = lc[lc[:,0].argsort()].astype(np.float32)
                         excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) / np.mean(lc[:,1])
                         mean_mag = np.mean(lc[:,1])
-                        if (excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 13.5):
+                        ### more ZTF filtering 
+                        if (self.name.lower().find('ztf') > 0) and excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 13.5:
                             object_lcs.append(lc)
+                        else:
+                            object_lcs.append(lc)
+                        
                 except Exception:
                     pass
             if len(object_lcs) == len(self.bands):
@@ -264,19 +269,19 @@ class DataSet:
         self.dataset = np.array(self.dataset).astype(np.float32)
 
         
-    def set_carma_fits(self):
-        drw_fits = []
-        dho_fits = []
+    def set_carma_fits(self, kernel='drw'):
+        carma_fits = []
         for i, object_lcs in enumerate(self.dataset):
             print(i, end='')
             lc = object_lcs[0]
-            dho = dho_fit(lc[:,0], lc[:,1], lc[:,2])
-            drw = drw_fit(lc[:,0], lc[:,1], lc[:,2])
-            dho_fits.append(dho)
-            drw_fits.append(drw)
+            if kernel == 'drw':
+                fit = drw_fit(lc[:,0], lc[:,1], lc[:,2])
+            else:
+                fit = dho_fit(lc[:,0], lc[:,1], lc[:,2])
+                
+            carma_fits.append(fit)
                      
-        self.drw_fits = drw_fits
-        self.dho_fits = dho_fits
+        self.carma_fits = carma_fits
         
      
     def set_union_tp(self, uniform=False, n=1000):

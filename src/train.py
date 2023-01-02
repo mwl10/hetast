@@ -20,12 +20,8 @@ def train(args):
     ##################################
     device = torch.device(args.device)
     
-    if args.data_folder == 'synth':
-        folder = '/Users/mattlowery/Desktop/code/astro/hetvae/src/test_data'
-        data_obj = utils.get_synth_data(folder, seed = 0, batch_size=8, kernel='dho', duration=730, n=180)
-    else:
-        lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
-        data_obj = lcs.data_obj
+    lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
+    data_obj = lcs.data_obj
         
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
@@ -81,7 +77,7 @@ def train(args):
             logerr = errorbars.to(device)
             weights = weights.to(device)
             ############################################################
-            subsampled_mask = utils.make_masks(train_batch)
+            subsampled_mask = utils.make_masks(train_batch, frac=args.frac)
             train_batch = train_batch.to(device)
             subsampled_mask = subsampled_mask.to(device)
             recon_mask = torch.logical_xor(subsampled_mask, train_batch[:,:,:,1])
@@ -173,6 +169,7 @@ def train(args):
                 break
 
     plt.show()
+    
 def main():
     
     warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
@@ -191,6 +188,7 @@ def main():
     parser.add_argument('--start-col', type=int, default='0')
     parser.add_argument('--inc-errors', action='store_true')
     parser.add_argument('--print-at', type=int, default='100')
+    
     ##### model architecture hypers 
     parser.add_argument('--embed-time', type=int, default=32)  
     parser.add_argument('--enc-num-heads', type=int, default=1) 
@@ -204,6 +202,7 @@ def main():
     
     
     ##### training hypers
+    parser.add_argument('--frac', type=float, default=0.9)
     parser.add_argument('--batch-size', type=int, default=8) 
     parser.add_argument('--niters', type=int, default=10) 
     parser.add_argument('--bound-variance', action='store_true') 

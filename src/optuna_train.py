@@ -13,17 +13,33 @@ import logging
 import warnings
 
 warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-LCS = utils.get_data('./ZTF_g', seed = 0, start_col=1)
+LCS = utils.get_data('synth_test_data', seed = 0, start_col=0)
+
+### trials is first CL arg, niters per trial is second 
+
+'''
+considering:
+    batch_size
+    frac
+    enc_num_heads
+    mse_weight
+    width
+    rec_hidden
+    latent_dim
+    num_ref_points
+
+'''
 
 def define_model_args(trial):
     
     args = Namespace(
-        data_folder = './ZTF_g/',
+        frac = 0.8,
+        data_folder = 'synth_test_data',
         batch_size = 8, #trial.suggest_categorical("batch_size", [8, 16, 32, 64]),
         dropout =0.0,# trial.suggest_float("dropout", 0.0,0.5),
         elbo_weight = 1,#trial.suggest_float("elbo_weight", 0.0, 5.0),
         embed_time = 16,#,trial.suggest_categorical("embed_time", [16,32,64,128]),
-        enc_num_heads=1,#,trial.suggest_categorical("enc_num_heads", [1,2,4,8,16]),
+        enc_num_heads=trial.suggest_categorical("enc_num_heads", [1,2,4,8,16]),
         width=128,#trial.suggest_categorical("width", [8,16,32,64,128]),
         num_ref_points=16,#trial.suggest_categorical("num_ref_points", [8,16,32,64,128]),
         rec_hidden=8,#trial.suggest_categorical("rec_hidden", [8,16,32,64,128]),
@@ -46,11 +62,9 @@ def define_model_args(trial):
         early_stopping = False,
         patience = False,
         save_at = 10000000, 
-        scheduler = True,
-        start_col = 1,
+        scheduler = False,
         inc_errors = False,
-    )
-     
+    ) 
     return args
 
 
@@ -126,7 +140,7 @@ def train(trial, args, lcs):
             logerr = errorbars.to(device)
             weights = weights.to(device)
             ############################################################
-            subsampled_mask = utils.make_masks(train_batch)
+            subsampled_mask = utils.make_masks(train_batch, frac=args.frac)
             train_batch = train_batch.to(device)
             subsampled_mask = subsampled_mask.to(device)
             recon_mask = torch.logical_xor(subsampled_mask, train_batch[:,:,:,1])
@@ -215,6 +229,8 @@ def train(trial, args, lcs):
                     'loss': train_loss / train_n,
                 }, 'synth' + '_' + str(experiment_id) + '.h5')
                 break
+
+                
         ###### optuna stuff #######################        
         trial.report(valid_nll_loss, itr)
         if trial.should_prune():
@@ -226,6 +242,7 @@ def objective(trial):
     args = define_model_args(trial)
     loss = train(trial,args, LCS)
     return loss
+
 
 
 def main():

@@ -76,11 +76,7 @@ if you've trained the network and want to glance at some of the results, take a 
 
 <!-- where you can make predictions on the network, visualize the latent space, the attention, etc. -->
 
-## Using synthetic data
 
-set data-folder argument like so
-
---data-folder synth
 
 
 

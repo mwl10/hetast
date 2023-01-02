@@ -8,13 +8,18 @@ from dataset import DataSet
 from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand
 import os
+import sys
 import model
 import torch.optim as optim
 import logging
 from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand, gpSimFull
 
-def get_synth_data(folder, seed = 0, batch_size=8, kernel='drw', duration=730, n=180):
+### make multivariate synth data
+sys.path.insert(0, '/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping')
+import photRM
+
+def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src/test_data', save_folder='synth_test_data', seed = 0, kernel='drw',duration=730, n=180, uniform=False):
     """
     This function creates and loads a synthetic dataset relative to a given kernel (drw or dho), 
     distributing the kernel params relative to a real dataset  
@@ -39,65 +44,44 @@ def get_synth_data(folder, seed = 0, batch_size=8, kernel='drw', duration=730, n
         a dictionary of torch dataloaders with data formatted as necessary for network training 
         , as well as the dimension and union of all the time points
     """
+    synth_band_name = 'simband1'
     
     np.random.seed(seed)
-    if not os.path.isdir(folder):
-        raise Exception(f"{folder} is not a directory")
+    if not os.path.isdir(base_folder):
+        raise Exception(f"{base_folder} is not a directory")
         
-    lcs = DataSet(name=folder, min_length=50, sep=',', start_col=1)
-    band_folders = os.listdir(folder)
+    if not os.path.isdir(save_folder):
+        os.mkdir(save_folder)
+        os.mkdir(os.path.join(save_folder,synth_band_name))   
+        
+    lcs = DataSet(name=base_folder, min_length=50, sep=',', start_col=1)
+    band_folders = os.listdir(base_folder)
     for band_folder in band_folders:
         band = band_folder.lower()
-        lcs.add_band(band, os.path.join(folder, band_folder))
+        lcs.add_band(band, os.path.join(base_folder, band_folder))
         
     lcs.filter()         
     lcs.prune_outliers()
-    lcs.set_carma_fits()
+    lcs.set_carma_fits(kernel=kernel)
     lcs.set_snr()
     
     synth_lcs = []
-    if kernel == 'drw':
-        for i, params in enumerate(lcs.drw_fits):
-            if np.isnan(params[0]):
-                continue
-            DRW_kernel = DRW_term(*np.log(params))
-            # kernel, snr, duration (days), n 
-            lc = np.array(gpSimRand(DRW_kernel,lcs.snr[i,0], duration, n)).transpose(1,0)
-            lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])
-            lc[:,2] = lc[:,2] / np.std(lc[:,1])
-            synth_lcs.append(lc[np.newaxis,np.newaxis])
-    ##################### dho #################################
-    else:
-        for i, params in enumerate(lcs.dho_fits):
-            if np.isnan(params[0]):
-                continue
-            DHO_kernel = DHO_term(*np.log(params))
-            # kernel, snr, duration (days), n 
-            lc = np.array(gpSimFull(DHO_kernel,lcs.snr[i,0], duration, n)).transpose(1,0)
-            lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])
-            lc[:,2] = lc[:,2] / np.std(lc[:,1])
-            synth_lcs.append(lc[np.newaxis,np.newaxis])
-            
-    synth_lcs = np.concatenate(synth_lcs, axis=0).astype('float32')
-    print(synth_lcs.shape)
-    union_tp = np.unique(synth_lcs[:,:,:,0].flatten()).astype('float32')
-    #union_tp = np.arange(0, np.ptp(union_tp), step=0.5)
-    union_tp =  torch.Tensor(union_tp)
-    
-    np.random.shuffle(synth_lcs)
-    splindex = int(np.floor(.8*len(synth_lcs)))
-    training, valid, test = np.split(synth_lcs, [splindex, splindex + int(np.floor(.1*len(synth_lcs)))])# shuffle?
-    train_loader = torch.utils.data.DataLoader(training, batch_size=batch_size)
-    valid_loader = torch.utils.data.DataLoader(valid, batch_size=batch_size)
-    test_loader = torch.utils.data.DataLoader(test, batch_size=batch_size)
-    data_objects = {
-        "train_loader": train_loader,
-        "test_loader": test_loader,
-        "valid_loader": valid_loader,
-        'union_tp': union_tp,
-        "input_dim": 1,
-    }
-    return data_objects
+    for i, params in enumerate(lcs.carma_fits):
+        if np.isnan(params[0]):
+            continue
+        if kernel == 'drw':
+            term = DRW_term(*np.log(params))
+        else:
+            term = DHO_term(*np.log(params))
+                
+        # kernel, snr, duration (days), n      
+        if uniform == True:
+            lc = np.array(gpSimFull(term,lcs.snr[i,0], duration, n)).transpose(1,0)
+        else: 
+            lc = np.array(gpSimRand(term,lcs.snr[i,0], duration, n)).transpose(1,0)   
+        fpath = f'{os.path.join(save_folder, synth_band_name,str(i))}_.csv'
+        np.savetxt(fpath,lc, delimiter=',', header=' , , ', comments='')
+
 
 
 def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=10):
@@ -141,7 +125,6 @@ def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=10)
     for band_folder in band_folders:
         band = band_folder.lower()
         lcs.add_band(band, os.path.join(folder, band_folder))
-    
     ### preprocessing functions ####################################################################
     lcs.filter()          
     lcs.prune_outliers()
@@ -159,7 +142,7 @@ def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=10)
     return lcs
 
 
-def preview_mask(dataloader, bands, batch_num = 0, frac=0.5, N=1, figsize=(15,15)):
+def preview_masks(dataloader, bands, batch_num = 0, frac=0.5, N=1, figsize=(15,15)):
     """
     function to visualize masks on the light curves
     
@@ -198,7 +181,6 @@ def preview_mask(dataloader, bands, batch_num = 0, frac=0.5, N=1, figsize=(15,15
     fig.legend(lines, labels, bbox_to_anchor=(0.12, 0.92), loc='upper left')
     [ax[j][index].set_xlabel(bands[index]) for index in range(len(bands))]
 
-    
     
 def preview_lcs(dataloader, bands, batch_num = 0, N=1, figsize=(15,15)):
     """

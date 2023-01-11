@@ -76,7 +76,7 @@ class DataSet:
                 lc[:,2] = lc[:,2] / np.std(lc[:,1])
                  
 
-    def prune_graham(self, med_filt=3, res_std=True, std_threshold=3, mag_threshold=0.25, plot=False, index=100):
+    def prune_graham(self, med_filt=3, res_std=True, std_threshold=3, mag_threshold=0.25, plot=False, index=2):
         """
         prunes outliers by the given method in Graham et al. 2015
         
@@ -124,6 +124,23 @@ class DataSet:
                 plt.scatter(lc[outliers,0], lc[outliers,1], c='r', marker='x')
                 plt.scatter(pruned_lc[:,0], pruned_lc[:,1], c='b')    
                 
+                
+    def resample_lcs(self, num_samples=10):
+        
+        new_samples = []
+        for _ in range(num_samples):
+            for i, object_lcs in enumerate(self.dataset):
+                new_sample = []
+                for j, lc in enumerate(object_lcs):
+                    new_lc = np.array([lc[:,0], lc[:,1] + np.random.normal(0,lc[:,2]), lc[:,2]]).T
+                    new_sample.append(new_lc)
+                new_samples.append(new_sample)
+        
+        self.dataset.extend(new_samples)
+        
+        
+        
+    
     def prune_outliers(self, std_threshold=10):
         """
         removes all points further than a given number of std deviations in the dataset
@@ -161,7 +178,7 @@ class DataSet:
                 if file.find('_') > 0:
                     obj_name = file.split('/')[-1].split('_')[0]
                 else:
-                    obj_name = "".join(file.split('/')[-1].split('.')[:-1]
+                    obj_name = "".join(file.split('/')[-1].split('.')[:-1])
                                        
                 valid_counter += 1
                 self.valid_files_df.loc[obj_name, band] = file
@@ -206,7 +223,6 @@ class DataSet:
                     ##### filtering ZTF error codes #########
                     if self.name.lower().find('ztf') > 0:
                         lc = lc[np.where(lc[:,4] == 0)[0]]  
-                    
                     #########################################
                     if len(lc) > self.min_length:
                         lc = lc[:, self.start_col:self.start_col+3]
@@ -301,7 +317,7 @@ class DataSet:
         # num points? 
         if uniform: 
             step = np.ptp(self.union_tp) / n 
-            self.union_tp = np.arrange(np.min(self.union_tp), np.max(self.union_tp), step)
+            self.union_tp = np.arange(np.min(self.union_tp), np.max(self.union_tp), step)
             
         self.union_tp = self.union_tp.astype('float32')
         print(f'created union_tp attribute of length {len(self.union_tp)}')
@@ -310,8 +326,7 @@ class DataSet:
     def set_target_x(self, n=40, forecast=False, forecast_frac=1.2):
         """
         sets the target time values we might want to interpolate the light curve to. 
-        
-        
+ 
         parameters:
             -----optional-----
             num_points     (int)      --> how many points do we want 
@@ -319,22 +334,28 @@ class DataSet:
             forecast_frac  (float)    --> what percentage of the light curve relative to 
                                           its length should we forecast? 
         """
-        time = self.dataset[:,:,:,0]
+        time = self.dataset[:,:,:,0]                            
         zs_to_append = time.shape[2] - n
         self.target_x = np.zeros_like(time)
         
         for i, object_lcs_time in enumerate(time):
-            for j, lc_time in enumerate(object_lcs_time):
+            for j, lc_time in enumerate(object_lcs_time):                     
                 max_time = np.max(lc_time)
                 min_time = lc_time[0]
                 if forecast:
                     max_time = forecast_frac * max_time
                 if lc_time.sum() == 0:
-                    max_time = 1 
+                    max_time = 1
+                                       
                 target_x = np.arange(min_time,max_time, (max_time - min_time)/n)
-                target_x = np.append(target_x, np.zeros((zs_to_append)), axis=0)[:time.shape[2]]
+                try:
+                    target_x = np.append(target_x, np.zeros((zs_to_append)), axis=0)[:time.shape[2]]
+                except Exception:
+                    print(f"can't predict to more points than {len(lc_time)}") 
                 self.target_x[i,j] = target_x
 
+                
+                
     #########
     # intrinsic vars & excess vars are essentially the same thing
     #########

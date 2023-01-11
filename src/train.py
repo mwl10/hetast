@@ -20,13 +20,14 @@ def train(args):
     ##################################
     device = torch.device(args.device)
     
-    lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
+    lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp)
     data_obj = lcs.data_obj
         
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]
     dim = data_obj["input_dim"]
+    # can just make it instead here! 
     union_tp = data_obj['union_tp']
     # what needs to be the same in args for continued run
     if args.checkpoint:
@@ -52,7 +53,7 @@ def train(args):
         avg_loglik, avg_wloglik, avg_kl, mse, wmse, mae = 0, 0, 0, 0, 0, 0
         ###########set learning rate based on our scheduler###############
         if args.scheduler == True: 
-            args.lr = utils.update_lr(model_size, epoch, args.warmup)
+            args.lr = utils.update_lr(model_size, itr, args.warmup)
             for g in optimizer.param_groups:
                 g['lr'] = args.lr 
         ##################################################################    
@@ -117,7 +118,6 @@ def train(args):
             
         print(f'{itr},', end='', flush=True)
         if itr % args.print_at == 0:
-            #utils.predict(train_loader, net, subsample=False, plot=True)
             print(
                 '\tIter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg wnll: {:.4f}, avg kl: {:.4f}, '
                 'mse: {:.6f}, wmse: {:.6f}, mae: {:.6f}'.format(
@@ -168,19 +168,19 @@ def train(args):
                 }, 'synth' + '_' + str(experiment_id) + '.h5')
                 break
 
-    plt.show()
     
 def main():
     
     warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-    
     parser = argparse.ArgumentParser()
     
     # things we might want to change 
     parser.add_argument('--device', type=str, default='cuda') 
     parser.add_argument('--checkpoint', type=str, default='')
+    
     parser.add_argument('--early-stopping', action='store_true')
-    parser.add_argument('--patience', type=int, default='50')
+    parser.add_argument('--patience', type=int, default='150')
+    
     parser.add_argument('--save-at', type=int, default='50')
     parser.add_argument('--scheduler', action='store_true')
     parser.add_argument('--warmup', type=int, default='4000')
@@ -188,6 +188,7 @@ def main():
     parser.add_argument('--start-col', type=int, default='0')
     parser.add_argument('--inc-errors', action='store_true')
     parser.add_argument('--print-at', type=int, default='100')
+    parser.add_argument('--n-union-tp', type=int, default='1000')
     
     ##### model architecture hypers 
     parser.add_argument('--embed-time', type=int, default=32)  
@@ -200,7 +201,6 @@ def main():
     parser.add_argument('--rec-hidden', type=int, default=32) 
     parser.add_argument('--width', type=int, default=512)
     
-    
     ##### training hypers
     parser.add_argument('--frac', type=float, default=0.9)
     parser.add_argument('--batch-size', type=int, default=8) 
@@ -208,7 +208,6 @@ def main():
     parser.add_argument('--bound-variance', action='store_true') 
     parser.add_argument('--const-var', action='store_true') 
     parser.add_argument('--dropout', type=float, default=0.0)
-    parser.add_argument('--elbo-weight', type=float, default=1.0)
     parser.add_argument('--k-iwae', type=int, default=1)  
     parser.add_argument('--kl-annealing', action='store_true')
     parser.add_argument('--kl-zero', action='store_true') 
@@ -217,8 +216,6 @@ def main():
 
     parser.add_argument('--norm', action='store_true') 
     parser.add_argument('--normalize-input', type=str, default='znorm') 
-     
-    parser.add_argument('--sample-tp', type=float, default=0.5) 
     parser.add_argument('--save', action='store_false') 
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--shuffle', action='store_false') 

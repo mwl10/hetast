@@ -13,7 +13,7 @@ import logging
 import warnings
 
 warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-LCS = utils.get_data('synth_test_data', seed = 0, start_col=0)
+LCS = utils.get_data('ZTF_gband_test', seed = 0, start_col=1)
 
 ### trials is first CL arg, niters per trial is second 
 
@@ -33,36 +33,35 @@ considering:
 def define_model_args(trial):
     
     args = Namespace(
-        frac = 0.8,
-        data_folder = 'synth_test_data',
-        batch_size = 8, #trial.suggest_categorical("batch_size", [8, 16, 32, 64]),
+        frac = trial.suggest_float('frac',0.5,0.9, step=0.1),
+        enc_num_heads=4,#trial.suggest_categorical("enc_num_heads", [1,2,4,8,16]),
+        embed_time =128,# trial.suggest_categorical("embed_time", [64,128,256]),
+        width=128,#trial.suggest_categorical("width", [128,256,512,1028]),
+        num_ref_points=32,#trial.suggest_categorical("num_ref_points", [16,32,64,128]),
+        rec_hidden=128,#,trial.suggest_categorical("rec_hidden", [64,128,256]),
+        latent_dim=128,#trial.suggest_categorical("latent_dim", [64,128,256]),
+        lr=0.001,#trial.suggest_float('lr', 0.0001, 0.01, log=True),
+        mixing='concat',#trial.suggest_categorical('mixing', ['concat','concat_and_mix']),
+        mse_weight=5,#trial.suggest_int("mse_weight",1,20),
+        data_folder = 'ZTF_gband_test',
+        batch_size = 16,#trial.suggest_categorical("batch_size", [64,,256]),
         dropout =0.0,# trial.suggest_float("dropout", 0.0,0.5),
-        elbo_weight = 1,#trial.suggest_float("elbo_weight", 0.0, 5.0),
-        embed_time = 16,#,trial.suggest_categorical("embed_time", [16,32,64,128]),
-        enc_num_heads=trial.suggest_categorical("enc_num_heads", [1,2,4,8,16]),
-        width=128,#trial.suggest_categorical("width", [8,16,32,64,128]),
-        num_ref_points=16,#trial.suggest_categorical("num_ref_points", [8,16,32,64,128]),
-        rec_hidden=8,#trial.suggest_categorical("rec_hidden", [8,16,32,64,128]),
-        latent_dim=32,#,trial.suggest_categorical("latent_dim", [8,16,32,64,128]),
+        early_stopping = False,
+        patience = 150,
+        scheduler = False,
         warmup = 4000,#trial.suggest_int('warmup', 3000,5000),
-        mse_weight=trial.suggest_float("mse_weight",1,10),
         k_iwae=1,
         kl_annealing=True,
         kl_zero=False, 
-        lr=0.001,
-        mixing='concat',
         net='hetvae', 
         niters=int(sys.argv[2]), 
         norm=True, 
-        save=True, 
+        save=False, 
         seed=0, 
         std=0.1, 
         device='mps',
         checkpoint = '',
-        early_stopping = False,
-        patience = False,
         save_at = 10000000, 
-        scheduler = False,
         inc_errors = False,
     ) 
     return args
@@ -91,6 +90,7 @@ def train(trial, args, lcs):
     val_loader = data_obj["valid_loader"]
     dim = data_obj["input_dim"]
     union_tp = data_obj['union_tp']
+    
     
     if args.checkpoint:
         net, optimizer, args, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj)

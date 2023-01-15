@@ -13,7 +13,7 @@ source activate $HOME/miniconda/envs/hetvae
 
 python3 $HOME/astr/hetast/src/train.py \
     --data-folder datasets/ZTF_gband_test \
-    --device mps \
+    --device cuda \
     --niters 10 \
     --start-col 1 \
     --save-at 1000 \

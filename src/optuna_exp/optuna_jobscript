@@ -11,4 +11,4 @@ source /etc/profile
 source activate $HOME/miniconda/envs/hetvae
 
 # trials is first CL arg, niters per trial is second 
-python3 $HOME/hetast/src/optuna_train.py 100 100
+python3 $HOME/hetast/src/optuna_exp/optuna_train.py 100 100

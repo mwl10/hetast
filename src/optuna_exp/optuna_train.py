@@ -12,8 +12,6 @@ import sys
 import logging
 import warnings
 
-sys.path.insert(0, '$HOME/astr/hetast/src')
-
 # should test things a few at a time
 # mask frac, 
 

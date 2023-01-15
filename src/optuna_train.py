@@ -62,7 +62,7 @@ def define_model_args(trial):
         save=False, 
         seed=0, 
         std=0.1, 
-        device='mps',
+        device='cuda',
         checkpoint = '',
         save_at = 10000000, 
         inc_errors = False,

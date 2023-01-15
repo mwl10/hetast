@@ -13,7 +13,7 @@ source activate $HOME/miniconda/envs/hetvae
 python3 $HOME/hetast/src/train.py \
     --data-folder ztf_test_data \
     --device mps \
-    --niters 10000 \
+    --niters 10 \
     --start-col 1 \
     --save-at 1000 \
     --bound-variance \

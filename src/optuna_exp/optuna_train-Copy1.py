@@ -13,7 +13,7 @@ import logging
 import warnings
 
 warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-LCS = utils.get_data('ZTF_gband_test', seed = 0, start_col=1)
+LCS = utils.get_data('./datasets/ZTF_gband_test', seed = 0, start_col=1)
 
 ### trials is first CL arg, niters per trial is second 
 

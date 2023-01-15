@@ -1,11 +1,9 @@
 import os
 import pandas as pd
 import numpy as np
-import logging
 import matplotlib.pyplot as plt
 from scipy import signal
 import torch
-from eztao.ts import gpSimRand, gpSimFull, drw_fit, dho_fit
 
 
 class DataSet:
@@ -125,10 +123,10 @@ class DataSet:
                 plt.scatter(pruned_lc[:,0], pruned_lc[:,1], c='b')    
                 
                 
-    def resample_lcs(self, num_samples=10):
+    def resample_lcs(self, num_resamples=10):
         
         new_samples = []
-        for _ in range(num_samples):
+        for _ in range(num_resamples):
             for i, object_lcs in enumerate(self.dataset):
                 new_sample = []
                 for j, lc in enumerate(object_lcs):

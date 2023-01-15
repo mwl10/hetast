@@ -15,9 +15,9 @@ import logging
 from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand, gpSimFull
 
-### make multivariate synth data
-sys.path.insert(0, '/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping')
-import photRM
+
+# sys.path.insert(0, '/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping')
+# import photRM
 
 def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src/test_data', save_folder='synth_test_data', seed = 0, kernel='drw',duration=730, n=180, uniform=False):
     """
@@ -84,7 +84,7 @@ def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src
 
 
 
-def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=1000):
+def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=1000, num_resamples=0):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -126,9 +126,10 @@ def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=40,
         band = band_folder.lower()
         lcs.add_band(band, os.path.join(folder, band_folder))
     ### preprocessing functions ####################################################################
-    lcs.filter()          
-    lcs.prune_outliers()
+    lcs.filter()
+    lcs.prune_graham()
     lcs.chop_lcs()
+    lcs.resample_lcs(num_resamples=num_resamples)
     ###################################
     lcs.set_excess_vars()
     lcs.set_mean_mags()

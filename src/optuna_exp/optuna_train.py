@@ -3,13 +3,76 @@ import torch
 import torch.optim as optim
 import argparse
 from random import SystemRandom
+from argparse import Namespace
 from model import load_network
 import utils
+import optuna
+from optuna.trial import TrialState
+import sys
+import logging
 import warnings
 
-def train(args):
+# should test things a few at a time
+# mask frac, 
+
+warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
+LCS = utils.get_data('./datasets/ZTF_gband_test', seed = 0, start_col=1)
+
+### trials is first CL arg, niters per trial is second 
+
+'''
+considering:
+    batch_size
+    frac
+    enc_num_heads
+    mse_weight
+    width
+    rec_hidden
+    latent_dim
+    num_ref_points
+
+'''
+
+def define_model_args(trial):
+    
+    args = Namespace(
+        frac = trial.suggest_float('frac',0.5,0.9, step=0.1),
+        enc_num_heads=4,#trial.suggest_categorical("enc_num_heads", [1,2,4,8,16]),
+        embed_time =128,# trial.suggest_categorical("embed_time", [64,128,256]),
+        width=128,#trial.suggest_categorical("width", [128,256,512,1028]),
+        num_ref_points=32,#trial.suggest_categorical("num_ref_points", [16,32,64,128]),
+        rec_hidden=128,#,trial.suggest_categorical("rec_hidden", [64,128,256]),
+        latent_dim=128,#trial.suggest_categorical("latent_dim", [64,128,256]),
+        lr=0.001,#trial.suggest_float('lr', 0.0001, 0.01, log=True),
+        mixing='concat',#trial.suggest_categorical('mixing', ['concat','concat_and_mix']),
+        mse_weight=5,#trial.suggest_int("mse_weight",1,20),
+        data_folder = 'ZTF_gband_test',
+        batch_size = 16,#trial.suggest_categorical("batch_size", [64,,256]),
+        dropout =0.0,# trial.suggest_float("dropout", 0.0,0.5),
+        early_stopping = False,
+        patience = 150,
+        scheduler = False,
+        warmup = 4000,#trial.suggest_int('warmup', 3000,5000),
+        k_iwae=1,
+        kl_annealing=True,
+        kl_zero=False, 
+        net='hetvae', 
+        niters=int(sys.argv[2]), 
+        norm=True, 
+        save=False, 
+        seed=0, 
+        std=0.1, 
+        device='mps',
+        checkpoint = '',
+        save_at = 10000000, 
+        inc_errors = False,
+    ) 
+    return args
+
+
+def train(trial, args, lcs):
     experiment_id = int(SystemRandom().random() * 10000000)
-    print(args, experiment_id)
+    #print(args, experiment_id)
     ##################################
     seed = args.seed
     torch.manual_seed(seed)
@@ -18,40 +81,44 @@ def train(args):
     ##################################
     device = torch.device(args.device)
     
-    lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp)
     data_obj = lcs.data_obj
+#     if args.data_folder == 'synth':
+#         data_obj = utils.get_synthetic_data(seed=seed, uniform=True)
+#     else:
+#         lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
+#         
         
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]
     dim = data_obj["input_dim"]
-    # can just make it instead here! 
     union_tp = data_obj['union_tp']
-    # what needs to be the same in args for continued run
+    
+    
     if args.checkpoint:
-        net, optimizer, _, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj)
-        epoch+=1
+        net, optimizer, args, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj)
         print(f'loaded checkpoint with loss: {loss}')
     else:
         net = load_network(args, dim, union_tp)
         params = list(net.parameters())
         optimizer = optim.Adam(params, lr=args.lr)
         epoch = 1
-        loss = 1000000
+        loss = 1000000000
         
     model_size = utils.count_parameters(net) 
-    print(f'{model_size=}')
+    #print('model size {model_size}')
     ############### have patience ##########
     best_loss = loss 
     patience_counter = 0
-    ######################################## 4000
+    ########################################
     for itr in range(epoch, epoch+args.niters):
+        ##############
         train_loss = 0
         train_n = 0
         avg_loglik, avg_wloglik, avg_kl, mse, wmse, mae = 0, 0, 0, 0, 0, 0
-        ###########set learning rate based on our scheduler###############
+        ###########set learning rate based on our scheduler ###############
         if args.scheduler == True: 
-            args.lr = utils.update_lr(model_size, itr, args.warmup)
+            args.lr = utils.update_lr(model_size, epoch, args.warmup)
             for g in optimizer.param_groups:
                 g['lr'] = args.lr 
         ##################################################################    
@@ -68,7 +135,7 @@ def train(args):
         ###################################################################  
         for train_batch in train_loader:
             batch_len = train_batch.shape[0]
-            ### errorbar stuff, to do on cpu ##############################
+            ### errorbar stuff (do on cpu) ##############################
             errorbars = torch.swapaxes(train_batch[:,:,:,2], 2,1)
             weights = errorbars.clone()
             weights[weights!=0] = 1 / weights[weights!=0]
@@ -103,7 +170,7 @@ def train(args):
             else:
                 loss_info.composite_loss.backward()
             optimizer.step()
-            #########################################################
+            ##################################################
             train_loss += loss_info.composite_loss.item() * batch_len
             avg_loglik += loss_info.loglik * batch_len
             avg_wloglik += loss_info.wloglik * batch_len
@@ -112,10 +179,10 @@ def train(args):
             wmse += loss_info.wmse * batch_len
             mae += loss_info.mae * batch_len
             train_n += batch_len
-            #########################################################
-            
+            ##################################################
+                
         print(f'{itr},', end='', flush=True)
-        if itr % args.print_at == 0:
+        if itr % 10 == 0:
             print(
                 '\tIter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg wnll: {:.4f}, avg kl: {:.4f}, '
                 'mse: {:.6f}, wmse: {:.6f}, mae: {:.6f}'.format(
@@ -128,17 +195,17 @@ def train(args):
                     wmse / train_n,
                     mae / train_n))
             
-            valid_nll_loss, _ = utils.evaluate_hetvae(
-                net,
-                dim,
-                train_loader, # should be val_loader
-                0.5,
-                k_iwae=args.k_iwae,
-                device=args.device
-                )
+        valid_nll_loss, _ = utils.evaluate_hetvae(
+            net,
+            dim,
+            val_loader, # should be val_loader
+            0.5,
+            k_iwae=args.k_iwae,
+            device=args.device
+            )
         ###########################################
         if itr % args.save_at == 0 and args.save:
-            print('saving.................')
+            #print('saving.................')
             torch.save({
                 'args': args,
                 'epoch': itr,
@@ -146,7 +213,7 @@ def train(args):
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss / train_n,
             }, 'synth' + '_' + str(experiment_id) + '.h5')
-            print('done')
+            #print('done')
         ############################################
         if args.early_stopping:
             if best_loss > (train_loss / train_n): 
@@ -166,66 +233,40 @@ def train(args):
                 }, 'synth' + '_' + str(experiment_id) + '.h5')
                 break
 
-    
+                
+        ###### optuna stuff #######################        
+        trial.report(valid_nll_loss, itr)
+        if trial.should_prune():
+            raise optuna.exceptions.TrialPruned()
+            
+    return valid_nll_loss
+
+def objective(trial):
+    args = define_model_args(trial)
+    loss = train(trial,args, LCS)
+    return loss
+
+
+
 def main():
     
-    warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-    parser = argparse.ArgumentParser()
-    
-    # things we might want to change 
-    parser.add_argument('--device', type=str, default='cuda') 
-    parser.add_argument('--checkpoint', type=str, default='')
-    
-    parser.add_argument('--early-stopping', action='store_true')
-    parser.add_argument('--patience', type=int, default='150')
-    
-    parser.add_argument('--save-at', type=int, default='50')
-    parser.add_argument('--scheduler', action='store_true')
-    parser.add_argument('--warmup', type=int, default='4000')
-    parser.add_argument('--data-folder', type=str, required=True)
-    parser.add_argument('--start-col', type=int, default='0')
-    parser.add_argument('--inc-errors', action='store_true')
-    parser.add_argument('--print-at', type=int, default='100')
-    parser.add_argument('--n-union-tp', type=int, default='1000')
-    
-    ##### model architecture hypers 
-    parser.add_argument('--embed-time', type=int, default=32)  
-    parser.add_argument('--enc-num-heads', type=int, default=1) 
-    parser.add_argument('--intensity', action='store_true') 
-    parser.add_argument('--latent-dim', type=int, default=32)  
-    parser.add_argument('--mixing', type=str, default='concat') 
-    parser.add_argument('--net', type=str, default='hetvae')
-    parser.add_argument('--num-ref-points', type=int, default=32) 
-    parser.add_argument('--rec-hidden', type=int, default=32) 
-    parser.add_argument('--width', type=int, default=512)
-    
-    ##### training hypers
-    parser.add_argument('--frac', type=float, default=0.9)
-    parser.add_argument('--batch-size', type=int, default=8) 
-    parser.add_argument('--niters', type=int, default=10) 
-    parser.add_argument('--bound-variance', action='store_true') 
-    parser.add_argument('--const-var', action='store_true') 
-    parser.add_argument('--dropout', type=float, default=0.0)
-    parser.add_argument('--k-iwae', type=int, default=1)  
-    parser.add_argument('--kl-annealing', action='store_true')
-    parser.add_argument('--kl-zero', action='store_true') 
-    parser.add_argument('--lr', type=float, default=0.00001)  
-    parser.add_argument('--mse-weight', type=float, default=5.0) 
+    study = optuna.create_study(direction="minimize")
+    study.optimize(objective, n_trials=int(sys.argv[1]), timeout=600)
+    pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
+    complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
-    parser.add_argument('--norm', action='store_true') 
-    parser.add_argument('--normalize-input', type=str, default='znorm') 
-    parser.add_argument('--save', action='store_false') 
-    parser.add_argument('--seed', type=int, default=0)
-    parser.add_argument('--shuffle', action='store_false') 
-    parser.add_argument('--std', type=float, default=0.1)  
-    parser.add_argument('--var-per-dim', action='store_true')
-     
-
-    args = parser.parse_args()
-    train(args)
-    return args
+    print("Study statistics: ")
+    print("  Number of finished trials: ", len(study.trials))
+    print("  Number of pruned trials: ", len(pruned_trials))
+    print("  Number of complete trials: ", len(complete_trials))
+    print("Best trial:")
+    trial = study.best_trial
+    print("  Value: ", trial.value)
+    print("  Params: ")
+    for key, value in trial.params.items():
+        print("    {}: {}".format(key, value))
+    
 
 if __name__ == '__main__':
     main()
-    
-    
+        

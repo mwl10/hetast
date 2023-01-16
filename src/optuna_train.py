@@ -195,14 +195,14 @@ def train(trial, args, lcs):
                     wmse / train_n,
                     mae / train_n))
             
-        valid_nll_loss, _ = utils.evaluate_hetvae(
-            net,
-            dim,
-            val_loader, # should be val_loader
-            0.5,
-            k_iwae=args.k_iwae,
-            device=args.device
-            )
+#         valid_nll_loss, _ = utils.evaluate_hetvae(
+#             net,
+#             dim,
+#             val_loader, # should be val_loader
+#             0.5,
+#             k_iwae=args.k_iwae,
+#             device=args.device
+#             )
         ###########################################
         if itr % args.save_at == 0 and args.save:
             #print('saving.................')
@@ -235,11 +235,11 @@ def train(trial, args, lcs):
 
                 
         ###### optuna stuff #######################        
-        trial.report(valid_nll_loss, itr)
+        trial.report(-avg_loglik / train_n, itr)
         if trial.should_prune():
             raise optuna.exceptions.TrialPruned()
             
-    return valid_nll_loss
+    return -avg_loglik / train_n
 
 def objective(trial):
     args = define_model_args(trial)

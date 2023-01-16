@@ -48,7 +48,7 @@ def define_model_args(trial):
         mse_weight=trial.suggest_int("mse_weight",1,20),
         data_folder = 'ZTF_gband_test',
         batch_size = 16,#trial.suggest_categorical("batch_size", [64,,256]),
-        dropout =trial.suggest_categorical("dropout", [.0,.1,.2,.3,.4,.5),
+        dropout =trial.suggest_float("dropout", 0.0,0.5,step=0.1),
         early_stopping = False,
         patience = 150,
         scheduler = False,

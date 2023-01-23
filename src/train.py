@@ -173,54 +173,54 @@ def main():
     warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
     parser = argparse.ArgumentParser()
     
-    # things we might want to change 
-    parser.add_argument('--device', type=str, default='cuda') 
-    parser.add_argument('--checkpoint', type=str, default='')
+    parser.add_argument('--n-union-tp', type=int, default='1000')
     
-    parser.add_argument('--early-stopping', action='store_true')
-    parser.add_argument('--patience', type=int, default='150')
-    
-    parser.add_argument('--save-at', type=int, default='50')
-    parser.add_argument('--scheduler', action='store_true')
-    parser.add_argument('--warmup', type=int, default='4000')
+    ## dataset stuff
     parser.add_argument('--data-folder', type=str, required=True)
+    parser.add_argument('--checkpoint', type=str, default='')
     parser.add_argument('--start-col', type=int, default='0')
     parser.add_argument('--inc-errors', action='store_true')
     parser.add_argument('--print-at', type=int, default='100')
-    parser.add_argument('--n-union-tp', type=int, default='1000')
+    
     
     ##### model architecture hypers 
-    parser.add_argument('--embed-time', type=int, default=32)  
-    parser.add_argument('--enc-num-heads', type=int, default=1) 
-    parser.add_argument('--intensity', action='store_true') 
-    parser.add_argument('--latent-dim', type=int, default=32)  
+    parser.add_argument('--embed-time', type=int, default=128)  
+    parser.add_argument('--enc-num-heads', type=int, default=4) 
+    parser.add_argument('--latent-dim', type=int, default=128)  
     parser.add_argument('--mixing', type=str, default='concat') 
-    parser.add_argument('--net', type=str, default='hetvae')
     parser.add_argument('--num-ref-points', type=int, default=32) 
-    parser.add_argument('--rec-hidden', type=int, default=32) 
+    parser.add_argument('--rec-hidden', type=int, default=128) 
     parser.add_argument('--width', type=int, default=512)
     
     ##### training hypers
-    parser.add_argument('--frac', type=float, default=0.9)
-    parser.add_argument('--batch-size', type=int, default=8) 
-    parser.add_argument('--niters', type=int, default=10) 
-    parser.add_argument('--bound-variance', action='store_true') 
-    parser.add_argument('--const-var', action='store_true') 
+    parser.add_argument('--save-at', type=int, default='1000000')
+    parser.add_argument('--patience', type=int, default='150')
+    parser.add_argument('--early-stopping', action='store_true')
+    parser.add_argument('--niters', type=int, default=10)
+    parser.add_argument('--frac', type=float, default=0.7)
+    parser.add_argument('--batch-size', type=int, default=128) 
+    parser.add_argument('--mse-weight', type=float, default=5.0)  
     parser.add_argument('--dropout', type=float, default=0.0)
-    parser.add_argument('--k-iwae', type=int, default=1)  
+      
+    ## learning rate
+    parser.add_argument('--lr', type=float, default=0.00001)
+    arser.add_argument('--scheduler', action='store_true')
+    parser.add_argument('--warmup', type=int, default='4000')
+    
+    
+    ## no need to mess with 
+    parser.add_argument('--kl-zero', action='store_true')
     parser.add_argument('--kl-annealing', action='store_true')
-    parser.add_argument('--kl-zero', action='store_true') 
-    parser.add_argument('--lr', type=float, default=0.00001)  
-    parser.add_argument('--mse-weight', type=float, default=5.0) 
-
-    parser.add_argument('--norm', action='store_true') 
-    parser.add_argument('--normalize-input', type=str, default='znorm') 
-    parser.add_argument('--save', action='store_false') 
-    parser.add_argument('--seed', type=int, default=0)
-    parser.add_argument('--shuffle', action='store_false') 
-    parser.add_argument('--std', type=float, default=0.1)  
+    parser.add_argument('--net', type=str, default='hetvae')
+    parser.add_argument('--device', type=str, default='cuda')
+    parser.add_argument('--bound-variance', action='store_true')
+    parser.add_argument('--const-var', action='store_true') 
     parser.add_argument('--var-per-dim', action='store_true')
-     
+    parser.add_argument('--std', type=float, default=0.1)
+    parser.add_argument('--seed', type=int, default=0) 
+    parser.add_argument('--save', action='store_false')
+    parser.add_argument('--k-iwae', type=int, default=1) 
+    
 
     args = parser.parse_args()
     train(args)

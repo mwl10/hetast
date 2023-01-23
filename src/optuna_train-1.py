@@ -12,11 +12,8 @@ import sys
 import logging
 import warnings
 
-## test encoding heads, latent space size might bottle neck this? 
-## fraction limits ability to learn small 
-
-
-
+# should test things a few at a time
+# mask frac, 
 
 warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
 LCS = utils.get_data('./datasets/ZTF_gband_test', seed = 0, start_col=1)

@@ -204,7 +204,7 @@ def main():
       
     ## learning rate
     parser.add_argument('--lr', type=float, default=0.00001)
-    arser.add_argument('--scheduler', action='store_true')
+    parser.add_argument('--scheduler', action='store_true')
     parser.add_argument('--warmup', type=int, default='4000')
     
     

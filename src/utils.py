@@ -127,7 +127,7 @@ def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=40,
         lcs.add_band(band, os.path.join(folder, band_folder))
     ### preprocessing functions ####################################################################
     lcs.filter()
-    lcs.prune_graham()
+    lcs.prune_outliers()
     lcs.chop_lcs()
     lcs.resample_lcs(num_resamples=num_resamples)
     ###################################

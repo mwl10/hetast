@@ -33,7 +33,6 @@ considering:
     rec_hidden
     latent_dim
     num_ref_points
-
 '''
 
 def define_model_args(trial):
@@ -48,10 +47,10 @@ def define_model_args(trial):
         latent_dim=128,#trial.suggest_categorical("latent_dim", [64,128,256]),
         lr=0.001,#trial.suggest_float('lr', 0.0001, 0.01, log=True),
         mixing='concat',#trial.suggest_categorical('mixing', ['concat','concat_and_mix']),
-        mse_weight=trial.suggest_int("mse_weight",1,20),
+        mse_weight=5,#trial.suggest_int("mse_weight",1,20),
         data_folder = 'ZTF_gband_test',
         batch_size = 16,#trial.suggest_categorical("batch_size", [64,,256]),
-        dropout =trial.suggest_float("dropout", 0.0,0.5,step=0.1),
+        dropout =0.0,#trial.suggest_float("dropout", 0.0,0.5,step=0.1),
         early_stopping = False,
         patience = 150,
         scheduler = False,

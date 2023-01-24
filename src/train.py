@@ -116,6 +116,13 @@ def train(args):
             #########################################################
             
         print(f'{itr},', end='', flush=True)
+        
+        ####### nnnnannnnnn #############
+        if np.isnan(train_loss / train_n):
+            print('nan in loss,,,,,,,,, stopping')
+            break
+        
+        
         if itr % args.print_at == 0:
             print(
                 '\tIter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg wnll: {:.4f}, avg kl: {:.4f}, '
@@ -129,14 +136,14 @@ def train(args):
                     wmse / train_n,
                     mae / train_n))
             
-            valid_nll_loss, _ = utils.evaluate_hetvae(
-                net,
-                dim,
-                train_loader, # should be val_loader
-                0.5,
-                k_iwae=args.k_iwae,
-                device=args.device
-                )
+#             _loss, _ = utils.evaluate_hetvae(
+#                 net,
+#                 dim,
+#                 train_loader, # should be val_loader
+#                 0.5,
+#                 k_iwae=args.k_iwae,
+#                 device=args.device
+#                 )
         ###########################################
         if itr % args.save_at == 0 and args.save:
             print('saving.................')

@@ -22,3 +22,4 @@ python3 $HOME/astr/hetast/src/train.py \
     --lr 0.001 \
     --print-at 10 \
     --frac 0.7
+    

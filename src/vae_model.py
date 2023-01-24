@@ -252,6 +252,7 @@ class HeTVAE(nn.Module):
         loss_info.wloglik = wloglik.mean()
         
         loss_info.mse = self.compute_mse(target_y, px.mean, 1.)
+            
         loss_info.wmse = self.compute_mse(target_y, px.mean, weights=weights)
         
         loss_info.mae = self.compute_mae(target_y, px.mean)

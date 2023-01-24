@@ -87,6 +87,10 @@ def train(args):
             recon_context_y = torch.cat((
                 train_batch[:,:,:,1] * recon_mask, recon_mask
             ), 1).transpose(2,1)
+            
+            if torch.isnan(train_batch).any():
+                print('NAN!!!!!!!!!!!!!!!!!')
+                     
             #############################################################
             loss_info = net.compute_unsupervised_loss(
                 train_batch[:, 0, :,0],

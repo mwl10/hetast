@@ -17,7 +17,6 @@ import warnings
 
 
 
-
 warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
 LCS = utils.get_data('./datasets/ZTF_gband_test', seed = 0, start_col=1)
 
@@ -36,20 +35,21 @@ considering:
 '''
 
 def define_model_args(trial):
+    size = trial.suggest_categorical('size', [128,256,512])
     
     args = Namespace(
         frac = trial.suggest_float('frac',0.5,0.9, step=0.1),
-        enc_num_heads=4,#trial.suggest_categorical("enc_num_heads", [1,2,4,8,16]),
-        embed_time =128,#trial.suggest_categorical("embed_time", [64,128,256]),
-        width=256,#trial.suggest_categorical("width", [128,256,512,1028]),
-        num_ref_points=32,#trial.suggest_categorical("num_ref_points", [16,32,64,128]),
-        rec_hidden=128,#trial.suggest_categorical("rec_hidden", [64,128,256]),
-        latent_dim=128,#trial.suggest_categorical("latent_dim", [64,128,256]),
-        lr=0.001,#trial.suggest_float('lr', 0.0001, 0.01, log=True),
+        enc_num_heads=trial.suggest_categorical("enc_num_heads", [4,8,16]),
+        embed_time = size,
+        width=size * 2,
+        num_ref_points=16,
+        rec_hidden=size,
+        latent_dim=size,
+        lr=0.003,
         mixing='concat',#trial.suggest_categorical('mixing', ['concat','concat_and_mix']),
         mse_weight=5,#trial.suggest_int("mse_weight",1,20),
         data_folder = 'ZTF_gband_test',
-        batch_size = 16,#trial.suggest_categorical("batch_size", [64,,256]),
+        batch_size = 32
         dropout =0.0,#trial.suggest_float("dropout", 0.0,0.5,step=0.1),
         early_stopping = False,
         patience = 150,

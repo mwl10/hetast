@@ -22,29 +22,17 @@ LCS = utils.get_data('./datasets/ZTF_gband_test', seed = 0, start_col=1)
 
 ### trials is first CL arg, niters per trial is second 
 
-'''
-considering:
-    batch_size
-    frac
-    enc_num_heads
-    mse_weight
-    width
-    rec_hidden
-    latent_dim
-    num_ref_points
-'''
-
 def define_model_args(trial):
     size = trial.suggest_categorical('size', [128,256,512])
     
     args = Namespace(
         frac = trial.suggest_float('frac',0.5,0.9, step=0.1),
-        enc_num_heads=trial.suggest_categorical("enc_num_heads", [4,8,16]),
+        enc_num_heads=trial.suggest_categorical("enc_num_heads", [4,8,12]),
         embed_time = size,
         width=size * 2,
         num_ref_points=16,
         rec_hidden=size,
-        latent_dim=size,
+        latent_dim=size / 2,
         lr=0.003,
         mixing='concat',#trial.suggest_categorical('mixing', ['concat','concat_and_mix']),
         mse_weight=5,#trial.suggest_int("mse_weight",1,20),

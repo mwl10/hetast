@@ -11,9 +11,23 @@ import os
 import sys
 import model
 import torch.optim as optim
-import logging
 from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand, gpSimFull
+
+
+## creates an array for kl annealing schedule (https://github.com/haofuml/cyclical_annealing)
+def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
+    L = np.ones(n_iter) * stop
+    period = n_iter/n_cycle
+    step = (stop-start)/(period*ratio) # linear schedule
+
+    for c in range(n_cycle):
+        v, i = start, 0
+        while v <= stop and (int(i+c*period) < n_iter):
+            L[int(i+c*period)] = v
+            v += step
+            i += 1
+    return L 
 
 
 # sys.path.insert(0, '/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping')
@@ -59,7 +73,6 @@ def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src
     for band_folder in band_folders:
         band = band_folder.lower()
         lcs.add_band(band, os.path.join(base_folder, band_folder))
-        
     lcs.filter()         
     lcs.prune_outliers()
     lcs.set_carma_fits(kernel=kernel)
@@ -216,14 +229,16 @@ def preview_lcs(dataloader, bands, batch_num = 0, N=1, figsize=(15,15)):
     fig.legend(lines, labels, bbox_to_anchor=(0.12, 0.92), loc='upper left')
     [ax[j][index].set_xlabel(bands[index]) for index in range(len(bands))]
      
-def load_checkpoint(filename, data_obj):
+def load_checkpoint(filename, data_obj, device='mps'):
     """
     loads a model checkpoint 
     """
     if os.path.isfile(filename):
-        logging.info("=> loading checkpoint '{}'".format(filename))
-        cp = torch.load(filename)
-        logging.info(cp['args'])
+        print("=> loading checkpoint '{}'".format(filename))
+        cp = torch.load(filename, map_location=torch.device(device))
+        cp['args'].device = device
+        print(cp['args'])
+        
         net = model.load_network(cp['args'], data_obj['input_dim'], data_obj['union_tp'])
         net.load_state_dict(cp['state_dict'])
         params = list(net.parameters())
@@ -324,7 +339,7 @@ def evaluate_hetvae(
             mean_mae += loss_info.mean_mae * num_context_points
             avg_loglik += loss_info.mogloglik * num_context_points
             train_n += num_context_points
-    logging.info(
+    print(
         'nll: {:.4f}, mse: {:.4f}, mae: {:.4f}, '
         'mean_mse: {:.4f}, mean_mae: {:.4f}'.format(
             - avg_loglik / train_n,

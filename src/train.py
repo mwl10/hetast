@@ -46,6 +46,8 @@ def train(args):
     best_loss = loss 
     patience_counter = 0
     ######################################## 4000
+    kl_coefs = utils.frange_cycle_linear(args.niters)
+    
     for itr in range(epoch, epoch+args.niters):
         train_loss = 0
         train_n = 0
@@ -57,11 +59,8 @@ def train(args):
                 g['lr'] = args.lr 
         ##################################################################    
         if args.kl_annealing:
-            wait_until_kl_inc = 10000
-            if itr < wait_until_kl_inc:
-                kl_coef = 0.
-            else:
-                kl_coef = (1 - 0.999999 ** (itr - wait_until_kl_inc))
+            print(itr-epoch, kl_coefs[itr-epoch])
+            kl_coef = kl_coefs[itr-epoch]
         elif args.kl_zero:
             kl_coef = 0
         else:
@@ -87,10 +86,7 @@ def train(args):
             recon_context_y = torch.cat((
                 train_batch[:,:,:,1] * recon_mask, recon_mask
             ), 1).transpose(2,1)
-            
-            if torch.isnan(train_batch).any():
-                print('NAN!!!!!!!!!!!!!!!!!')
-                     
+
             #############################################################
             loss_info = net.compute_unsupervised_loss(
                 train_batch[:, 0, :,0],
@@ -224,7 +220,7 @@ def main():
     parser.add_argument('--kl-annealing', action='store_true')
     parser.add_argument('--net', type=str, default='hetvae')
     parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--bound-variance', action='store_true')
+
     parser.add_argument('--const-var', action='store_true') 
     parser.add_argument('--var-per-dim', action='store_true')
     parser.add_argument('--std', type=float, default=0.1)

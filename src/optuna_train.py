@@ -27,7 +27,7 @@ def define_model_args(trial):
     
     args = Namespace(
         frac = trial.suggest_float('frac',0.5,0.9, step=0.1),
-        enc_num_heads=trial.suggest_categorical("enc_num_heads", [4,8,12]),
+        enc_num_heads=4,#trial.suggest_categorical("enc_num_heads", [4,8,12]),
         embed_time = size,
         width=size * 2,
         num_ref_points=16,
@@ -37,7 +37,7 @@ def define_model_args(trial):
         mixing='concat',#trial.suggest_categorical('mixing', ['concat','concat_and_mix']),
         mse_weight=5,#trial.suggest_int("mse_weight",1,20),
         data_folder = 'ZTF_gband_test',
-        batch_size = 32,
+        batch_size = 16,
         dropout =0.0,#trial.suggest_float("dropout", 0.0,0.5,step=0.1),
         early_stopping = False,
         patience = 150,

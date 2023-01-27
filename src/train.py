@@ -46,7 +46,8 @@ def train(args):
     best_loss = loss 
     patience_counter = 0
     ######################################## 4000
-    kl_coefs = utils.frange_cycle_linear(args.niters)
+    if args.kl_annealing:
+        kl_coefs = utils.frange_cycle_linear(args.niters)
     
     for itr in range(epoch, epoch+args.niters):
         train_loss = 0
@@ -59,7 +60,6 @@ def train(args):
                 g['lr'] = args.lr 
         ##################################################################    
         if args.kl_annealing:
-            print(itr-epoch, kl_coefs[itr-epoch])
             kl_coef = kl_coefs[itr-epoch]
         elif args.kl_zero:
             kl_coef = 0

@@ -238,7 +238,6 @@ def load_checkpoint(filename, data_obj, device='mps'):
         cp = torch.load(filename, map_location=torch.device(device))
         cp['args'].device = device
         print(cp['args'])
-        
         net = model.load_network(cp['args'], data_obj['input_dim'], data_obj['union_tp'])
         net.load_state_dict(cp['state_dict'])
         params = list(net.parameters())

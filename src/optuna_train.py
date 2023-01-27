@@ -49,7 +49,7 @@ def define_model_args(trial):
         mixing='concat',#trial.suggest_categorical('mixing', ['concat','concat_and_mix']),
         mse_weight=5,#trial.suggest_int("mse_weight",1,20),
         data_folder = 'ZTF_gband_test',
-        batch_size = 32
+        batch_size = 32,
         dropout =0.0,#trial.suggest_float("dropout", 0.0,0.5,step=0.1),
         early_stopping = False,
         patience = 150,

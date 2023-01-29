@@ -60,6 +60,7 @@ def train(args):
                 g['lr'] = args.lr 
         ##################################################################    
         if args.kl_annealing:
+            
             kl_coef = kl_coefs[itr-epoch]
         elif args.kl_zero:
             kl_coef = 0
@@ -122,7 +123,6 @@ def train(args):
             print('nan in loss,,,,,,,,, stopping')
             break
         
-        
         if itr % args.print_at == 0:
             print(
                 '\tIter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg wnll: {:.4f}, avg kl: {:.4f}, '
@@ -153,7 +153,7 @@ def train(args):
                 'state_dict': net.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss / train_n,
-            }, 'synth' + '_' + str(experiment_id) + '.h5')
+            }, 'synth' + '_' + str(-avg_loglik / train_n) + '.h5')
             print('done')
         ############################################
         if args.early_stopping:

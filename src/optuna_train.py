@@ -18,24 +18,23 @@ import warnings
 
 
 warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-LCS = utils.get_data('./datasets/ZTF_gband_test', seed = 0, start_col=1)
+LCS = utils.get_data('../datasets/ZTF_gband_test', seed = 0, start_col=1)
 
 ### trials is first CL arg, niters per trial is second 
 
 def define_model_args(trial):
-    size = trial.suggest_categorical('size', [128,256,512])
-    
+    size = 128
     args = Namespace(
         frac = trial.suggest_float('frac',0.5,0.9, step=0.1),
-        enc_num_heads=4,#trial.suggest_categorical("enc_num_heads", [4,8,12]),
+        enc_num_heads=16,
         embed_time = size,
-        width=size * 2,
+        width=512,
         num_ref_points=16,
         rec_hidden=size,
-        latent_dim=size / 2,
+        latent_dim= 64,
         lr=0.003,
         mixing='concat',#trial.suggest_categorical('mixing', ['concat','concat_and_mix']),
-        mse_weight=5,#trial.suggest_int("mse_weight",1,20),
+        mse_weight=trial.suggest_int("mse_weight",1,20),
         data_folder = 'ZTF_gband_test',
         batch_size = 16,
         dropout =0.0,#trial.suggest_float("dropout", 0.0,0.5,step=0.1),

@@ -18,8 +18,7 @@ def train(args):
     torch.cuda.manual_seed(seed)
     ##################################
     device = torch.device(args.device)
-    
-    lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp)
+    lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp)
     data_obj = lcs.data_obj
         
     train_loader = data_obj["train_loader"]
@@ -30,7 +29,7 @@ def train(args):
     union_tp = data_obj['union_tp']
     # what needs to be the same in args for continued run
     if args.checkpoint:
-        net, optimizer, _, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj)
+        net, optimizer, _, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj, device=args.device)
         epoch+=1
         print(f'loaded checkpoint with loss: {loss}')
     else:
@@ -45,10 +44,10 @@ def train(args):
     ############### have patience ##########
     best_loss = loss 
     patience_counter = 0
-    ######################################## 4000
+    ######################################## 
     if args.kl_annealing:
         kl_coefs = utils.frange_cycle_linear(args.niters)
-    
+    ##################
     for itr in range(epoch, epoch+args.niters):
         train_loss = 0
         train_n = 0
@@ -60,7 +59,6 @@ def train(args):
                 g['lr'] = args.lr 
         ##################################################################    
         if args.kl_annealing:
-            
             kl_coef = kl_coefs[itr-epoch]
         elif args.kl_zero:
             kl_coef = 0
@@ -201,7 +199,7 @@ def main():
     
     ##### training hypers
     parser.add_argument('--save-at', type=int, default='1000000')
-    parser.add_argument('--patience', type=int, default='150')
+    parser.add_argument('--patience', type=int, default='100')
     parser.add_argument('--early-stopping', action='store_true')
     parser.add_argument('--niters', type=int, default=10)
     parser.add_argument('--frac', type=float, default=0.7)

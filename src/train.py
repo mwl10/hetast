@@ -20,7 +20,6 @@ def train(args):
     device = torch.device(args.device)
     lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp)
     data_obj = lcs.data_obj
-        
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]
@@ -133,6 +132,8 @@ def train(args):
                     mse / train_n,
                     wmse / train_n,
                     mae / train_n))
+            with open('loss.txt', 'w') as f:
+                f.write(f"{str((-avg_loglik / train_n).item())}\n")
             
 #             _loss, _ = utils.evaluate_hetvae(
 #                 net,
@@ -151,7 +152,7 @@ def train(args):
                 'state_dict': net.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss / train_n,
-            }, 'synth' + '_' + str(-avg_loglik / train_n) + '.h5')
+            }, 'synth' + '_' + str((-avg_loglik / train_n).item()) + '.h5')
             print('done')
         ############################################
         if args.early_stopping:

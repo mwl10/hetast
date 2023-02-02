@@ -132,7 +132,7 @@ def train(args):
                     mse / train_n,
                     wmse / train_n,
                     mae / train_n))
-            with open('loss.txt', 'w') as f:
+            with open('loss.txt', 'a') as f:
                 f.write(f"{str((-avg_loglik / train_n).item())}\n")
             
 #             _loss, _ = utils.evaluate_hetvae(

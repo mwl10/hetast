@@ -18,7 +18,7 @@ def train(args):
     torch.cuda.manual_seed(seed)
     ##################################
     device = torch.device(args.device)
-    lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp)
+    lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp, num_resamples=args.num_resamples)
     data_obj = lcs.data_obj
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
@@ -154,7 +154,7 @@ def train(args):
                 'state_dict': net.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss / train_n,
-            }, 'synth' + '_' + str((-avg_loglik / train_n).item()) + '.h5')
+            }, str((-avg_loglik / train_n).item()) + '.h5')
             print('done')
         ############################################
         if args.early_stopping:
@@ -209,7 +209,7 @@ def main():
     parser.add_argument('--batch-size', type=int, default=128) 
     parser.add_argument('--mse-weight', type=float, default=5.0)  
     parser.add_argument('--dropout', type=float, default=0.0)
-      
+    parser.add_argument('--num-resamples', type=int, default=0)
     ## learning rate
     parser.add_argument('--lr', type=float, default=0.00001)
     parser.add_argument('--scheduler', action='store_true')

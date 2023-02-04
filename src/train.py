@@ -181,7 +181,7 @@ def main():
     warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('--n-union-tp', type=int, default='1000')
+    parser.add_argument('--n-union-tp', type=int, default='3500')
     
     ## dataset stuff
     parser.add_argument('--data-folder', type=str, required=True)
@@ -196,7 +196,7 @@ def main():
     parser.add_argument('--enc-num-heads', type=int, default=4) 
     parser.add_argument('--latent-dim', type=int, default=128)  
     parser.add_argument('--mixing', type=str, default='concat') 
-    parser.add_argument('--num-ref-points', type=int, default=32) 
+    parser.add_argument('--num-ref-points', type=int, default=16) 
     parser.add_argument('--rec-hidden', type=int, default=128) 
     parser.add_argument('--width', type=int, default=512)
     
@@ -205,16 +205,15 @@ def main():
     parser.add_argument('--patience', type=int, default='100')
     parser.add_argument('--early-stopping', action='store_true')
     parser.add_argument('--niters', type=int, default=10)
-    parser.add_argument('--frac', type=float, default=0.7)
+    parser.add_argument('--frac', type=float, default=0.5)
     parser.add_argument('--batch-size', type=int, default=128) 
     parser.add_argument('--mse-weight', type=float, default=5.0)  
     parser.add_argument('--dropout', type=float, default=0.0)
     parser.add_argument('--num-resamples', type=int, default=0)
     ## learning rate
-    parser.add_argument('--lr', type=float, default=0.00001)
+    parser.add_argument('--lr', type=float, default=0.0003)
     parser.add_argument('--scheduler', action='store_true')
     parser.add_argument('--warmup', type=int, default='4000')
-    
     
     ## no need to mess with 
     parser.add_argument('--kl-zero', action='store_true')

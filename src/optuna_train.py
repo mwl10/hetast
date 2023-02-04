@@ -18,28 +18,28 @@ import warnings
 
 
 warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-LCS = utils.get_data('../datasets/ZTF_gband_test', seed = 0, start_col=1)
+LCS = utils.get_data('../datasets/ZTF_gband_test', start_col=1)
 
 ### trials is first CL arg, niters per trial is second 
 
 def define_model_args(trial):
     size = 128
     args = Namespace(
-        frac = trial.suggest_float('frac',0.5,0.9, step=0.1),
+        frac = 0.5,
         enc_num_heads=16,
         embed_time = size,
         width=512,
         num_ref_points=16,
         rec_hidden=size,
         latent_dim= 64,
-        lr=0.003,
+        lr=0.0003,
         mixing='concat',#trial.suggest_categorical('mixing', ['concat','concat_and_mix']),
         mse_weight=trial.suggest_int("mse_weight",1,20),
         data_folder = 'ZTF_gband_test',
         batch_size = 16,
         dropout =0.0,#trial.suggest_float("dropout", 0.0,0.5,step=0.1),
         early_stopping = False,
-        patience = 150,
+        patience = 10000,
         scheduler = False,
         warmup = 4000,#trial.suggest_int('warmup', 3000,5000),
         k_iwae=1,
@@ -76,7 +76,9 @@ def train(trial, args, lcs):
 #     else:
 #         lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
 #         
-        
+    N_union_tp = trial.suggest_categorical('N_union_tp', [500,1000,1500,2000,2500,3000,3500, 4000, 4500, 5000])
+    lcs.set_union_tp(uniform=True, n=N_union_tp)
+
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]

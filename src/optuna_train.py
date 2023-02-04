@@ -18,7 +18,7 @@ import warnings
 
 
 warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-LCS = utils.get_data('../datasets/ZTF_gband_test', start_col=1)
+LCS = utils.get_data('./datasets/ZTF_gband_test', start_col=1)
 
 ### trials is first CL arg, niters per trial is second 
 
@@ -78,12 +78,12 @@ def train(trial, args, lcs):
 #         
     N_union_tp = trial.suggest_categorical('N_union_tp', [500,1000,1500,2000,2500,3000,3500, 4000, 4500, 5000])
     lcs.set_union_tp(uniform=True, n=N_union_tp)
-
+    
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]
     dim = data_obj["input_dim"]
-    union_tp = data_obj['union_tp']
+    union_tp = torch.tensor(lcs.union_tp)
     
     
     if args.checkpoint:

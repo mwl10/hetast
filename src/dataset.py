@@ -7,7 +7,7 @@ import torch
 
 
 class DataSet:
-    def __init__(self, name='', min_length=3, start_col=0, sep=','):
+    def __init__(self, name='', min_length=40, start_col=0, sep=','):
         """
         initializes some important aspects of the dataset
         
@@ -26,17 +26,15 @@ class DataSet:
         self.bands = [] 
         
         
-    def set_data_obj(self, batch_size=8, split=0.8, shuffle=False):
+    def set_data_obj(self, batch_size=8, split=0.8, shuffle=True):
         #############################################################
         # keep a consistent shuffle for unprocessing the light curves
         #############################################################
-        
         if shuffle==True:
-            shuffle = np.random.permutation(len(lcs.dataset)) 
+            shuffle = np.random.permutation(len(self.dataset)) 
             self.dataset = self.dataset[shuffle]
             self.unnormalized_data = [self.unnormalized_data[i] for i in shuffle]
-            self.valid_files_df = self.valid_files_df.reindex(shuffle)
-        
+            self.valid_files_df = self.valid_files_df.reindex(self.valid_files_df.index[shuffle])
         #######################################################################################################
         # validation and training set can be the same because light curves are conditioned on differing subsamples 
         ########################################################################################################
@@ -58,7 +56,6 @@ class DataSet:
             'union_tp': union_tp,
             "input_dim": len(self.bands),
         }
-
         
     def normalize(self): 
         """
@@ -66,10 +63,14 @@ class DataSet:
         """
         self.unnormalized_data = self.dataset.copy()
         for object_lcs in self.dataset:
+            ### for multivariate data, we want to subtract the earliest time value between
+            ### the two bands so we don't mess up time 
+            min_t = 1000000
             for lc in object_lcs:
-                if lc[:,1].sum() == 0: # means no light curve for this band/object
-                    continue
-                lc[:,0] = lc[:,0] - lc[0,0] 
+                if lc[0,0] < min_t:
+                    min_t = lc[0,0]
+            for lc in object_lcs:
+                lc[:,0] = lc[:,0] - min_t 
                 lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
                 lc[:,2] = lc[:,2] / np.std(lc[:,1])
                  
@@ -94,8 +95,6 @@ class DataSet:
         """
         for i, object_lcs in enumerate(self.dataset):
             for j, lc in enumerate(object_lcs):
-                if lc[:,1].sum() == 0: ## skip if there's no light curve for this band
-                    continue 
                 lc[:,1] = signal.medfilt(lc[:,1], kernel_size=med_filt)
                 quintic_fit = np.polyfit(lc[:,0], lc[:,1], deg=5)
                 quintic_y = np.array([lc[:,0]**5, lc[:,0]**4, lc[:,0]**3, lc[:,0]**2, \
@@ -146,8 +145,6 @@ class DataSet:
         """
         for i, object_lcs in enumerate(self.dataset):
             for j, lc in enumerate(object_lcs):
-                if lc[:,1].sum() == 0: ## skip if theres no light curve for this band
-                    continue
                 y = lc[:,1]
                 y_std = np.std(y)
                 y_mean = np.mean(y)
@@ -176,8 +173,9 @@ class DataSet:
                 if file.find('_') > 0:
                     obj_name = file.split('/')[-1].split('_')[0]
                 else:
+                    # take file name w/o  
                     obj_name = "".join(file.split('/')[-1].split('.')[:-1])
-                                       
+                           
                 valid_counter += 1
                 self.valid_files_df.loc[obj_name, band] = file
             print(f'validated {valid_counter} files out of {len(files)} for {band=}')
@@ -209,13 +207,13 @@ class DataSet:
     def filter(self):
         """rm lcs w/ g band magnitude fainter than 20.6 (close to the limiting magnitude of the ZTF images), 
         and brighter than 13.5 (to avoid saturated ob- servations) """
-        
-        # really only need to check intrinsic sig, __, for one of the band's light curves, but
-        valid_files = self.valid_files_df.dropna().values
+        self.valid_files_df = self.valid_files_df.dropna()
         dataset = []
-        for object_files in valid_files:
+        drops = []
+        print(len(self.valid_files_df.values), len(self.valid_files_df))
+        for i,object_files in enumerate(self.valid_files_df.values):
             object_lcs = []
-            for band_file in object_files:
+            for j,band_file in enumerate(object_files):
                 try: 
                     lc = pd.read_csv(band_file, sep=self.sep).to_numpy()
                     ##### filtering ZTF error codes #########
@@ -228,15 +226,23 @@ class DataSet:
                         excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) / np.mean(lc[:,1])
                         mean_mag = np.mean(lc[:,1])
                         ### more ZTF filtering 
-                        if (self.name.lower().find('ztf') > 0) and excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 13.5:
-                            object_lcs.append(lc)
+                        if self.name.lower().find('ztf') > 0:
+                            if excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 13.5:
+                                object_lcs.append(lc)
                         else:
                             object_lcs.append(lc)
-                        
                 except Exception:
                     pass
+            # don't append objects that have one of their bands removed due to filters  
             if len(object_lcs) == len(self.bands):
                 dataset.append(object_lcs)
+            else:
+                #print(len(object_lcs), len(self.bands))
+                ## drop from dataframe if that's the case
+                # whiy would i be greater? 
+                drops.append(i)
+                #print(self.valid_files_df.index[i])
+        self.valid_files_df.drop(self.valid_files_df.index[drops], inplace=True)
         self.dataset = dataset
                 
             
@@ -389,7 +395,7 @@ class DataSet:
         self.mean_mags = np.array(mean_mags)
         
         
-    def set_epoch_counts(self, sep_std=2, plot=False, index=1, figsize=(15,15)):
+    def set_segment_counts(self, sep_std=2, plot=False, index=1, figsize=(15,15)):
         ## count the epochs per lc
         epoch_counts = np.zeros((len(self.dataset), len(self.bands)))
         if plot==True:

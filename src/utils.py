@@ -30,8 +30,6 @@ def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
     return L 
 
 
-# sys.path.insert(0, '/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping')
-# import photRM
 
 def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src/test_data', save_folder='synth_test_data', seed = 0, kernel='drw',duration=730, n=180, uniform=False):
     """
@@ -97,7 +95,7 @@ def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src
 
 
 
-def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=1000, num_resamples=0):
+def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=3500, num_resamples=0):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -126,8 +124,7 @@ def get_data(folder, seed= 0, sep=',', start_col=0, batch_size=8, min_length=40,
     returns:
         the DataSet object we created containing the dictionary of pytorch dataloaders for the network
     """
-    
-    np.random.seed(seed) # for the shuffle
+
     if not os.path.isdir(folder):
         raise Exception(f"{folder} is not a directory")
     ##################################

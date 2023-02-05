@@ -30,7 +30,6 @@ def train(args):
     if args.checkpoint:
         net, optimizer, _, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj, device=args.device)
         epoch+=1
-        
         for g in optimizer.param_groups:
                 g['lr'] = args.lr    
         print(f'loaded checkpoint with loss: {loss}')
@@ -157,7 +156,7 @@ def train(args):
                 'state_dict': net.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': train_loss / train_n,
-            }, str((-avg_loglik / train_n).item()) + '.h5')
+            }, lcs.name + str((-avg_loglik / train_n).item()) + '.h5')
             print('done')
         ############################################
         if args.early_stopping:

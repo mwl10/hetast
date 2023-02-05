@@ -30,6 +30,9 @@ def train(args):
     if args.checkpoint:
         net, optimizer, _, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj, device=args.device)
         epoch+=1
+        
+        for g in optimizer.param_groups:
+                g['lr'] = args.lr    
         print(f'loaded checkpoint with loss: {loss}')
     else:
         net = load_network(args, dim, union_tp)
@@ -133,18 +136,18 @@ def train(args):
                     wmse / train_n,
                     mae / train_n))
             
-            
-            with open('loss.txt', 'a') as f:
-                f.write(f"{str((-avg_loglik / train_n).item())}\n")
-            
-#             _loss, _ = utils.evaluate_hetvae(
+#             test_nll, mse = utils.evaluate_hetvae(
 #                 net,
 #                 dim,
-#                 train_loader, # should be val_loader
+#                 test_loader, # should be val_loader
 #                 0.5,
 #                 k_iwae=args.k_iwae,
 #                 device=args.device
 #                 )
+            
+            with open('train_nll.txt', 'a') as f:
+                f.write(f"{str((-avg_loglik / train_n).item())}")
+                           
         ###########################################
         if itr % args.save_at == 0 and args.save:
             print('saving.................')

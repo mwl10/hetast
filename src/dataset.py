@@ -26,7 +26,7 @@ class DataSet:
         self.bands = [] 
         
         
-    def set_data_obj(self, batch_size=8, split=0.8, shuffle=True):
+    def set_data_obj(self, batch_size=8, split=0.90, shuffle=True):
         #############################################################
         # keep a consistent shuffle for unprocessing the light curves
         #############################################################

@@ -174,9 +174,12 @@ class HeTVAE(nn.Module):
         else:
             hidden = torch.cat((hidden[:, :, :, 0], hidden[:, :, :, 1]), -1)
             hidden = self.proj(hidden)
-
+    
         hidden = hidden.unsqueeze(0).repeat_interleave(num_samples, dim=0)
-        z = torch.cat((z, hidden), -1)
+        qz_mean = qz.mean.unsqueeze(0).repeat_interleave(num_samples, dim=0)
+        ### changing reconstruction to qz.mean for predictions
+        z = torch.cat((qz_mean, hidden), -1)
+        #z = torch.cat((z, hidden), -1)
         px = self.decode(z, target_x)
         return px, qz
 
@@ -202,7 +205,8 @@ class HeTVAE(nn.Module):
     def compute_loglik(self, target_y, px, norm=True, logerr=0.):
         target, mask = target_y[:, :, :self.dim], target_y[:, :, self.dim:]
         log_p = utils.log_normal_pdf(
-            target, px.mean, px.logvar, mask, logerr=logerr).sum(-1).sum(-1)
+            target, px.mean, px.logvar, mask, logerr=logerr)
+        log_p = log_p.sum(-1).sum(-1)
         if norm:
             return log_p / mask.sum(-1).sum(-1)
         return log_p
@@ -249,6 +253,8 @@ class HeTVAE(nn.Module):
         loss_info.kl = kl.mean()
         
         loss_info.loglik = loglik.mean()
+        loss_info.loglik_per_ex = loglik
+        
         loss_info.wloglik = wloglik.mean()
         
         loss_info.mse = self.compute_mse(target_y, px.mean, 1.)

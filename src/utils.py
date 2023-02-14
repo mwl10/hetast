@@ -95,7 +95,7 @@ def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src
 
 
 
-def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=3500, num_resamples=0):
+def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=3500, num_resamples=0,shuffle=False, extend=0):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -145,11 +145,11 @@ def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_
     lcs.set_mean_mags()
     ###################################
     lcs.normalize() 
-    lcs.formatting()
+    lcs.formatting(extend=extend)
     lcs.set_union_tp(uniform=True,n=n_union_tp) #maybe do this as some regularly sequenced bit
     print(f'dataset created w/ shape {lcs.dataset.shape}')
     ######## done preprocessing ########################################################################################################
-    lcs.set_data_obj(batch_size=batch_size)
+    lcs.set_data_obj(batch_size=batch_size, shuffle=shuffle)
     return lcs
 
 
@@ -287,7 +287,7 @@ def evaluate_hetvae(
     net,
     dim,
     train_loader,
-    sample_tp=0.5,
+    frac=0.5,
     k_iwae=1,
     device='cuda',
 ):
@@ -296,9 +296,10 @@ def evaluate_hetvae(
     train_n = 0
     train_loss,avg_loglik, mse, mae = 0, 0, 0,0
     mean_mae, mean_mse = 0, 0
+    individual_nlls = []
     with torch.no_grad():
         for train_batch in train_loader:
-            subsampled_mask = make_masks(train_batch)
+            subsampled_mask = make_masks(train_batch, frac=frac)
             ######################
             errorbars = torch.swapaxes(train_batch[:,:,:,2], 2,1)
             weights = errorbars.clone()
@@ -327,6 +328,9 @@ def evaluate_hetvae(
               weights,
               num_samples=k_iwae,
             )
+            
+            individual_nlls.append(loss_info.loglik_per_ex.cpu().numpy())
+            
             num_context_points = recon_mask.sum().item()
             train_loss += loss_info.composite_loss.item()* num_context_points
             mse += loss_info.mse * num_context_points
@@ -345,22 +349,23 @@ def evaluate_hetvae(
             mean_mae / train_n
         )
     )
-    #return train_loss / train_n
-    return -avg_loglik / train_n, mse / train_n,
+    return -avg_loglik / train_n, mse / train_n, np.concatenate(individual_nlls, axis=1)[0]
 
-def predict(dataloader, net, device='mps', k_iwae=2, subsample=False, target_x=None, plot=True, figsize=(25,15)):
+def predict(dataloader, net, device='mps', subsample=False, target_x=None):
+    k_iwae=2
     pred_mean, pred_std = [], []
     qz_mean, qz_std = [], []
-    masks = []
-    targets = []
+    mask = []
+    target = []
     tp =[]
     target_tp = []
     np.random.seed(0)
     with torch.no_grad():
         for i, batch in enumerate(dataloader):
+            print(f'{i},', end='', flush=True)
             batch_len = batch.shape[0]
-            
             if subsample == True:
+                
                 subsampled_mask = make_masks(batch, frac=0.5)
             else:
                 subsampled_mask = make_masks(batch, frac=1.0)
@@ -380,50 +385,35 @@ def predict(dataloader, net, device='mps', k_iwae=2, subsample=False, target_x=N
             pred_std.append(torch.exp(0.5 * px.logvar).cpu().numpy())
             qz_mean.append(qz.mean.cpu().numpy())
             qz_std.append(torch.exp(0.5 * qz.logvar).cpu().numpy())
-            
-            targets.append((batch[:, :, :,1]).cpu().numpy())
-            masks.append(subsampled_mask.cpu().numpy())
+            target.append((batch[:, :, :,1]).cpu().numpy())
+            mask.append(subsampled_mask.cpu().numpy())
             tp.append(batch[:, 0, :,0].cpu().numpy())
             target_tp.append(tx.cpu().numpy())
             
-      
+    # reconstructions
     pred_mean = np.concatenate(pred_mean, axis=1)
     pred_std = np.concatenate(pred_std, axis=1)
+    # latent space 
     qz_mean = np.concatenate(qz_mean, axis=0)
     qz_std = np.concatenate(qz_std, axis=0)
     
-    targets = np.concatenate(targets, axis=0)
-    masks = np.concatenate(masks, axis=0)
+    # targets are all ys, masks are masks, inputs are masked ys
+    target = np.concatenate(target, axis=0)
+    mask = np.concatenate(mask, axis=0)
+    inputs = np.ma.masked_where(mask < 1., target)
+    inputs = np.transpose(inputs, [0,2,1])
+    target = np.transpose(target, [0,2,1])
+    
+    # target tp are points we'd like to project to
     tp = np.concatenate(tp, axis=0)
     target_tp = np.concatenate(target_tp, axis=0)
-    inputs = np.ma.masked_where(masks < 1., targets)
-    targets = np.transpose(targets, [0,2,1])
-    inputs = np.transpose(inputs, [0,2,1])
-    # reparam trick
-    preds = np.random.randn(k_iwae//2, k_iwae, pred_mean.shape[1], pred_mean.shape[2], pred_mean.shape[3]) * pred_std + pred_mean
-    preds = preds.reshape(-1, pred_mean.shape[1], pred_mean.shape[2], pred_mean.shape[3])
+    pred_mean = pred_mean.mean(0)
+    pred_std = pred_std.mean(0)
+    recons = {'target_tp':target_tp, 'pred_mean':pred_mean,'pred_std':pred_std}
+    z = {'qz_mean':qz_mean, 'qz_std':qz_std}
+    examples = {'tp':tp,'target':target,'mask':mask,'inputs':inputs}
     
-    qz_preds = np.random.randn(k_iwae//2, k_iwae, qz_mean.shape[0], qz_mean.shape[1], qz_mean.shape[2]) * qz_std + qz_mean
-    qz_preds = qz_preds.reshape(-1, qz_mean.shape[0], qz_mean.shape[1], qz_mean.shape[2])
-    qz_median = preds.mean(0)
-    if plot == True:
-        median = preds.mean(0)
-        quantile2 = np.quantile(preds, 0.841, axis=0)
-        quantile1 = np.quantile(preds, 0.159, axis=0)
-        fig,ax = plt.subplots(5,1,figsize=figsize)
-        for i in range(4):
-            #### remove padding and masked vals
-            nonzero_pred = target_tp[i].nonzero()[0]
-            nonzero_in = inputs[i].nonzero()[0]
-            nonzero_targets = targets[i].nonzero()[0]
-            
-            ax[i].fill_between(target_tp[i,nonzero_pred], quantile1[i,nonzero_pred,0], quantile2[i,nonzero_pred,0], label='error envelope',color='lightcoral')
-            ax[i].errorbar(target_tp[i, nonzero_pred], median[i, nonzero_pred,0], yerr=(quantile2[i,nonzero_pred,0] - median[i, nonzero_pred,0]), c='blue', ecolor='#65c9f7', label='prediction')
-            # conditoned on points
-            #ax[i].scatter(tp[i, nonzero_in], inputs[i, nonzero_in], c='black', marker='x', zorder=30, label='conditioned on', s=100)
-            # all points 
-            ax[i].scatter(tp[i, nonzero_targets], targets[i, nonzero_targets], c='green', marker='.', s=100, zorder=100)       
-    return qz_preds, tp, targets, inputs, target_tp, preds
+    return examples, z, recons
 
 
 def count_parameters(model):

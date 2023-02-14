@@ -15,6 +15,9 @@ from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand, gpSimFull
 
 
+
+           
+
 ## creates an array for kl annealing schedule (https://github.com/haofuml/cyclical_annealing)
 def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
     L = np.ones(n_iter) * stop
@@ -415,6 +418,44 @@ def predict(dataloader, net, device='mps', subsample=False, target_x=None):
     
     return examples, z, recons
 
+
+def save_recon(examples, recons, z, obj_name, bands=['r','g'], one_ex=False, save_folder='interpolations'):
+    target_tp = recons['target_tp']
+    pred_mean = recons['pred_mean']
+    pred_std = recons['pred_std']
+    
+    target = examples['target']
+    inputs = examples['inputs']
+    tp = examples['tp']
+    
+    # one example
+    pred_mean= pred_mean.mean(0)[np.newaxis]  
+    pred_std = pred_std.mean(0)[np.newaxis]
+    z_mean = z['qz_mean'].mean(0)
+    z_std = z['qz_std'].mean(0)
+    zs = np.concatenate((z_mean.reshape(-1,1), z_std.reshape(-1,1)),axis=1)
+    
+    ######### SAVING INTERPOLATIONS ###############
+    pred_t = target_tp[0].nonzero()[0]
+    t = target_tp[:1,pred_t]
+    if os.path.isdir(save_folder):
+        obj_folder = os.path.join(save_folder, obj_name)
+        if not os.path.isdir(obj_folder):
+            os.mkdir(obj_folder)
+        for i,band in enumerate(bands):
+            mean_mag = pred_mean[:,pred_t,i]
+            mag_std = pred_std[:,pred_t,i]
+            lc = np.concatenate((t, mean_mag, mag_std), axis=0).T
+            save_file = os.path.join(save_folder,obj_name,f'{obj_name}_{band}.dat')
+            
+            np.savetxt(save_file, lc)
+            print(f'{lc.shape=} and {band=} saved to {save_file}')
+            
+        z_save_file = os.path.join(save_folder,obj_name,f'{obj_name}_qz.dat')
+        np.savetxt(z_save_file, zs)
+        
+        
+        
 
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)

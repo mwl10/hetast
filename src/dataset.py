@@ -34,7 +34,7 @@ class DataSet:
             shuffle = np.random.permutation(len(self.dataset)) 
             self.dataset = self.dataset[shuffle]
             self.unnormalized_data = [self.unnormalized_data[i] for i in shuffle]
-            self.valid_files_df = self.valid_files_df.reindex(self.valid_files_df.index[shuffle])
+            #self.valid_files_df = self.valid_files_df.reindex(self.valid_files_df.index[shuffle])
         #######################################################################################################
         # validation and training set can be the same because light curves are conditioned on differing subsamples 
         ########################################################################################################
@@ -136,7 +136,6 @@ class DataSet:
         self.dataset.extend(new_samples)
         
         
-        
     
     def prune_outliers(self, std_threshold=10):
         """
@@ -194,15 +193,13 @@ class DataSet:
         mean_range = np.mean(ranges)
         for i, object_lcs in enumerate(self.dataset):
             for j, lc in enumerate(object_lcs):
-                if lc[:,1].sum() == 0:
-                    continue
                 #num_splits = int(ranges[i*j] / (mean_range))#std_threshold * std_ranges))
-                else:
-                    split_threshold = lc[:,0].min() + (mean_range + (std_threshold * std_range))
-                    split_pt = np.where(lc[:,0] > split_threshold)[0]
-                    if np.any(split_pt):
-                        self.dataset[i][j] = lc[:split_pt[0]] # shouldn't be discarding here, but alas              
-        
+            
+                split_threshold = lc[:,0].min() + (mean_range + (std_threshold * std_range))
+                split_pt = np.where(lc[:,0] > split_threshold)[0]
+                if np.any(split_pt):
+                    self.dataset[i][j] = lc[:split_pt[0]] # shouldn't be discarding here, but alas              
+                        
     
     def filter(self):
         """rm lcs w/ g band magnitude fainter than 20.6 (close to the limiting magnitude of the ZTF images), 
@@ -246,7 +243,7 @@ class DataSet:
         self.dataset = dataset
                 
             
-    def formatting(self):
+    def formatting(self, extend=0):
         max_union_tp = []
         # iterating through each example
         for i, object_lcs in enumerate(self.dataset):
@@ -289,8 +286,11 @@ class DataSet:
             zs_to_append = len(max_union_tp) - example.shape[1]
             example = np.append(example, np.zeros((example.shape[0], zs_to_append, example.shape[2])), axis=1)
             self.dataset[i] = example
-            
-        self.dataset = np.array(self.dataset).astype(np.float32)
+        self.dataset = np.array(self.dataset)
+        if extend > 0:
+            self.dataset = np.concatenate((self.dataset, np.zeros((self.dataset.shape[0],self.dataset.shape[1],extend, self.dataset.shape[3]))), axis=2)   
+        self.dataset = self.dataset.astype(np.float32)
+        
 
         
     def set_carma_fits(self, kernel='drw'):
@@ -339,7 +339,7 @@ class DataSet:
                                           its length should we forecast? 
         """
         time = self.dataset[:,:,:,0]                            
-        zs_to_append = time.shape[2] - n
+        zs_to_append = time.shape[2] - n 
         self.target_x = np.zeros_like(time)
         
         for i, object_lcs_time in enumerate(time):
@@ -357,7 +357,7 @@ class DataSet:
                 except Exception:
                     print(f"can't predict to more points than {len(lc_time)}") 
                 self.target_x[i,j] = target_x
-
+######
                 
                 
     #########

@@ -42,6 +42,5 @@ for i, obj_folder in enumerate(glob.glob('./datasets/obj_dirs/*')):
     with open('losses.txt', 'a') as f:
         f.write(f'{obj_name},{train_nll},{mse}\n')
         
-    break
     
     

@@ -144,7 +144,7 @@ def train(args):
 #                 device=args.device
 #                 )
             
-            with open('train_nll.txt', 'a') as f:
+            with open(f'train_nll_{lcs.name}_{experiment_id}.txt', 'a') as f:
                 f.write(f"{str((-avg_loglik / train_n).item())}")
                            
         ###########################################

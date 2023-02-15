@@ -11,4 +11,4 @@
 source /etc/profile
 source activate $HOME/miniconda/envs/hetvae
 
-python3 $HOME/astr/hetast/src/eval.py
+python3 $HOME/astr/hetast/src/forecast_script.py

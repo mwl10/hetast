@@ -98,7 +98,7 @@ def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src
 
 
 
-def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=3500, num_resamples=0,shuffle=False, extend=0, chop==False):
+def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=3500, num_resamples=0,shuffle=False, extend=0, chop=False):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.

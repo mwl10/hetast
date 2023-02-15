@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def ZDCF(lcf1, lcf2, outfile, acf=False, mcmc=10000, uniform=False, omit_zero_lag=True, min_ppb=0, fortran_dir='/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping/fortran_dir'):
+def ZDCF(lcf1, lcf2, outfile, acf=False, mcmc=10000, uniform=False, omit_zero_lag=True, min_ppb=0, fortran_dir='/Users/mattlowery/Desktop/Desko/code/astro/hetvae/src/reverberation_mapping/fortran_dir'):
     """
     This function calls the ZDCF program compiled in fortran using the CL 
     params: 
@@ -32,7 +32,7 @@ def ZDCF(lcf1, lcf2, outfile, acf=False, mcmc=10000, uniform=False, omit_zero_la
 
     # Function that calls PLIKE from this notebook
 
-def PLIKE(ccf_file, lower, upper, fortran_dir='/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping/fortran_dir'):
+def PLIKE(ccf_file, lower, upper, fortran_dir='/Users/mattlowery/Desktop/Desko/code/astro/hetvae/src/reverberation_mapping/fortran_dir'):
     '''
     This function calls the PLIKE program compiled in fortran using the CL
     params 
@@ -54,7 +54,7 @@ def PLIKE(ccf_file, lower, upper, fortran_dir='/Users/mattlowery/Desktop/code/as
     os.chdir('../') # change back to current directory
     
     
-def load_results_ZDCF(acf_file, ccf_file, plot=False, fortran_dir='/Users/mattlowery/Desktop/code/astro/hetvae/src/reverberation_mapping/fortran_dir'):
+def load_results_ZDCF(acf_file, ccf_file, plot=False, fortran_dir='/Users/mattlowery/Desktop/Desko/code/astro/hetvae/src/reverberation_mapping/fortran_dir'):
     path = os.path.join(os.getcwd(), fortran_dir)
     cols = ['tau', '-sig(tau)', '+sig(tau)', 'dcf', '-err(dcf)', '+err(dcf)', '#bin']
     ccf = pd.read_csv(os.path.join(path, ccf_file), sep=" ", header=None, skipinitialspace=True)

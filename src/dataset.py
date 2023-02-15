@@ -26,7 +26,7 @@ class DataSet:
         self.bands = [] 
         
         
-    def set_data_obj(self, batch_size=8, split=0.90, shuffle=True):
+    def set_data_obj(self, batch_size=8, split=0.90, shuffle=False):
         #############################################################
         # keep a consistent shuffle for unprocessing the light curves
         #############################################################
@@ -194,8 +194,8 @@ class DataSet:
         for i, object_lcs in enumerate(self.dataset):
             for j, lc in enumerate(object_lcs):
                 #num_splits = int(ranges[i*j] / (mean_range))#std_threshold * std_ranges))
-            
-                split_threshold = lc[:,0].min() + (mean_range + (std_threshold * std_range))
+                split_threshold = lc[:,0].min() + (mean_range + (std_threshold * std_range)) 
+                split_threshold = 1550.2127838134766
                 split_pt = np.where(lc[:,0] > split_threshold)[0]
                 if np.any(split_pt):
                     self.dataset[i][j] = lc[:split_pt[0]] # shouldn't be discarding here, but alas              
@@ -317,6 +317,7 @@ class DataSet:
         
         """
         # max val? 
+        print(self.dataset.shape)
         self.union_tp = np.unique(self.dataset[:,:,:,0].flatten())
         # num points? 
         if uniform: 
@@ -343,7 +344,10 @@ class DataSet:
         self.target_x = np.zeros_like(time)
         
         for i, object_lcs_time in enumerate(time):
-            for j, lc_time in enumerate(object_lcs_time):                     
+            for j, lc_time in enumerate(object_lcs_time):   
+                
+                
+                
                 max_time = np.max(lc_time)
                 min_time = lc_time[0]
                 if forecast:

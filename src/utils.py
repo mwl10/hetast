@@ -98,7 +98,7 @@ def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src
 
 
 
-def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=3500, num_resamples=0,shuffle=False, extend=0):
+def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=3500, num_resamples=0,shuffle=False, extend=0, chop==False):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -141,7 +141,8 @@ def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_
     ### preprocessing functions ####################################################################
     lcs.filter()
     lcs.prune_outliers()
-    lcs.chop_lcs()
+    if chop == True:
+        lcs.chop_lcs()
     lcs.resample_lcs(num_resamples=num_resamples)
     ###################################
     lcs.set_excess_vars()
@@ -154,46 +155,6 @@ def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_
     ######## done preprocessing ########################################################################################################
     lcs.set_data_obj(batch_size=batch_size, shuffle=shuffle)
     return lcs
-
-
-def preview_masks(dataloader, bands, batch_num = 0, frac=0.5, N=1, figsize=(15,15)):
-    """
-    function to visualize masks on the light curves
-    
-    parameters:
-        dataloader
-        bands      (list)   --> list of bands for labeling the plots
-        
-        ----- optional -----
-        batch_num  (int)    0        --> which batch you want to plot
-        frac       (float)  0.5      --> fraction of points to mask 
-        N          (int)    1        --> number of object's light curves to plot
-        figsize    (tuple)  (15,15)  --> size of the plotting
-    """
-    batch_num = batch_num % len(dataloader) # in case batch_num given is out of range
-    for i, batch in enumerate(dataloader):
-        if batch_num == i:
-            dims = batch.size(1)
-            subsampled_mask = make_masks(batch, frac=frac)
-            fig, ax = plt.subplots(N, dims, figsize=figsize, squeeze=False)
-            if N > len(batch): N = len(batch)  # in case num light curves is out of range
-            print(N)
-            for j in range(N):
-                for k in range(dims):
-                    t = batch[j,k,:,0]
-                    y = batch[j,k,:,1]
-                    sub = subsampled_mask[j,k,:]
-                    rec = torch.logical_xor(sub, y)
-                    ## ignoring zeros as masks or as padding
-                    sub = (y*sub).nonzero()[:,0]
-                    rec = (y*rec).nonzero()[:,0]
-                    ax[j][k].scatter(t[rec],y[rec], c='black', marker='x', zorder=30, label='masked', s=100)
-                    ax[j][k].scatter(t[sub],y[sub], c='blue', label='input')
-                    
-    lines_labels = ax[0][0].get_legend_handles_labels()
-    lines,labels = lines_labels[0], lines_labels[1]
-    fig.legend(lines, labels, bbox_to_anchor=(0.12, 0.92), loc='upper left')
-    [ax[j][index].set_xlabel(bands[index]) for index in range(len(bands))]
 
     
 def preview_lcs(dataloader, bands, batch_num = 0, N=1, figsize=(15,15)):
@@ -229,6 +190,7 @@ def preview_lcs(dataloader, bands, batch_num = 0, N=1, figsize=(15,15)):
     fig.legend(lines, labels, bbox_to_anchor=(0.12, 0.92), loc='upper left')
     [ax[j][index].set_xlabel(bands[index]) for index in range(len(bands))]
      
+        
 def load_checkpoint(filename, data_obj, device='mps'):
     """
     loads a model checkpoint 
@@ -246,7 +208,7 @@ def load_checkpoint(filename, data_obj, device='mps'):
         return net,optimizer, cp['args'], cp['epoch'], cp['loss']
     
 
-def make_masks(batch, frac=0.5):
+def make_masks(batch, frac=0.5, forecast=False):
     """
     method to subsample a fraction of observed points in a light curve for
     hetvae's unsupervised training
@@ -271,10 +233,18 @@ def make_masks(batch, frac=0.5):
             subsampled_points = np.sort(np.random.choice(indexes, \
                                                   size=length, \
                                                   replace=False))
+            
+            if forecast:
+                # want ones at all points less than 1550.2127838134766 and nonzero
+                subsampled_points = np.intersect1d(indexes, np.where(lc[:,0] < 1550.2127838134766)[0])
+                
             ############################
             # set the mask at the subsampled points
             ############################
             subsampled_mask[i,j,subsampled_points] = 1
+            
+            
+            
     return subsampled_mask
 
     
@@ -293,6 +263,7 @@ def evaluate_hetvae(
     frac=0.5,
     k_iwae=1,
     device='cuda',
+    forecast=False
 ):
     torch.manual_seed(seed=0)
     np.random.seed(seed=0)
@@ -302,7 +273,7 @@ def evaluate_hetvae(
     individual_nlls = []
     with torch.no_grad():
         for train_batch in train_loader:
-            subsampled_mask = make_masks(train_batch, frac=frac)
+            subsampled_mask = make_masks(train_batch, frac=frac, forecast=forecast)
             ######################
             errorbars = torch.swapaxes(train_batch[:,:,:,2], 2,1)
             weights = errorbars.clone()
@@ -354,7 +325,7 @@ def evaluate_hetvae(
     )
     return -avg_loglik / train_n, mse / train_n, np.concatenate(individual_nlls, axis=1)[0]
 
-def predict(dataloader, net, device='mps', subsample=False, target_x=None):
+def predict(dataloader, net, device='mps', subsample=False, target_x=None, forecast=False):
     k_iwae=2
     pred_mean, pred_std = [], []
     qz_mean, qz_std = [], []
@@ -371,7 +342,7 @@ def predict(dataloader, net, device='mps', subsample=False, target_x=None):
                 
                 subsampled_mask = make_masks(batch, frac=0.5)
             else:
-                subsampled_mask = make_masks(batch, frac=1.0)
+                subsampled_mask = make_masks(batch, frac=1.0, forecast=forecast)
                 
             batch = batch.to(device)
             subsampled_mask = subsampled_mask.to(device)

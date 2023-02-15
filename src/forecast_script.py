@@ -11,7 +11,7 @@ for i, obj_folder in enumerate(glob.glob('./datasets/obj_dirs/*')):
     
     try:
         lcs = utils.get_data(obj_folder, sep=',', start_col=1, batch_size=1, min_length=40, \
-                             n_union_tp=3500, num_resamples=111, shuffle=False, chop==False)
+                             n_union_tp=3500, num_resamples=111, shuffle=False, chop=False)
         train = lcs.data_obj['train_loader']
 
     except Exception as e:

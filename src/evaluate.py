@@ -11,7 +11,7 @@ for i, obj_folder in enumerate(glob.glob('./datasets/obj_dirs/*')):
     
     try:
         lcs = utils.get_data(obj_folder, sep=',', start_col=1, batch_size=1, min_length=40,\
-                             n_union_tp=3500, num_resamples=111, shuffle=False, chop==True)
+                             n_union_tp=3500, num_resamples=111, shuffle=False, chop=True, extend=5000)
         
         train = lcs.data_obj['train_loader']
         lcs.set_target_x(5001)
@@ -42,5 +42,6 @@ for i, obj_folder in enumerate(glob.glob('./datasets/obj_dirs/*')):
     with open('losses.txt', 'a') as f:
         f.write(f'{obj_name},{train_nll},{mse}\n')
         
-        
+    break
+    
     

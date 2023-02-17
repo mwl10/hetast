@@ -178,8 +178,8 @@ class HeTVAE(nn.Module):
         hidden = hidden.unsqueeze(0).repeat_interleave(num_samples, dim=0)
         qz_mean = qz.mean.unsqueeze(0).repeat_interleave(num_samples, dim=0)
         ### changing reconstruction to qz.mean for predictions
-        z = torch.cat((qz_mean, hidden), -1)
-        #z = torch.cat((z, hidden), -1)
+        #z = torch.cat((qz_mean, hidden), -1)
+        z = torch.cat((z, hidden), -1)
         px = self.decode(z, target_x)
         return px, qz
 

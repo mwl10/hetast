@@ -195,7 +195,7 @@ class DataSet:
             for j, lc in enumerate(object_lcs):
                 #num_splits = int(ranges[i*j] / (mean_range))#std_threshold * std_ranges))
                 split_threshold = lc[:,0].min() + (mean_range + (std_threshold * std_range)) 
-                split_threshold = lc[:,0].min() + 1550.2127838134766
+                #split_threshold = lc[:,0].min() + 1550.2127838134766
                 split_pt = np.where(lc[:,0] > split_threshold)[0]
                 if np.any(split_pt):
                     self.dataset[i][j] = lc[:split_pt[0]] # shouldn't be discarding here, but alas              
@@ -219,12 +219,13 @@ class DataSet:
                     #########################################
                     if len(lc) > self.min_length:
                         lc = lc[:, self.start_col:self.start_col+3]
-                        lc = lc[lc[:,0].argsort()].astype(np.float32)
+                        lc = lc[lc[:,0].argsort()].astype(np.float16)
                         excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) / np.mean(lc[:,1])
                         mean_mag = np.mean(lc[:,1])
                         ### more ZTF filtering 
                         if self.name.lower().find('ztf') > 0:
                             if excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 13.5:
+                                
                                 object_lcs.append(lc)
                         else:
                             object_lcs.append(lc)
@@ -289,7 +290,7 @@ class DataSet:
         self.dataset = np.array(self.dataset)
         if extend > 0:
             self.dataset = np.concatenate((self.dataset, np.zeros((self.dataset.shape[0],self.dataset.shape[1],extend, self.dataset.shape[3]))), axis=2)   
-        self.dataset = self.dataset.astype(np.float32)
+        self.dataset = self.dataset.astype(np.float16)
         
 
         
@@ -324,7 +325,7 @@ class DataSet:
             step = np.ptp(self.union_tp) / n 
             self.union_tp = np.arange(np.min(self.union_tp), np.max(self.union_tp), step)
             
-        self.union_tp = self.union_tp.astype('float32')
+        self.union_tp = self.union_tp.astype('float16')
         print(f'created union_tp attribute of length {len(self.union_tp)}')
     
     

@@ -99,7 +99,9 @@ class UnTAN(nn.Module):
             normalizer = torch.max(un_scores.unsqueeze(-1), dim=-2)[0]
             intensity = torch.exp(torch.max(scores, dim=-2)[0] - normalizer)
         else:
-            intensity = torch.exp(torch.logsumexp(scores, dim=-2) - normalizer)
+            intensity = torch.logsumexp(scores, dim=-2)
+            intensity = torch.exp(intensity - normalizer)
+#             intensity = torch.exp(torch.logsumexp(scores, dim=-2) - normalizer)
         return torch.sum(p_attn * value.unsqueeze(-3), -2), intensity
 
     def forward(

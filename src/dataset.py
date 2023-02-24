@@ -219,7 +219,7 @@ class DataSet:
                     #########################################
                     if len(lc) > self.min_length:
                         lc = lc[:, self.start_col:self.start_col+3]
-                        lc = lc[lc[:,0].argsort()].astype(np.float16)
+                        lc = lc[lc[:,0].argsort()].astype(np.float32)
                         excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) / np.mean(lc[:,1])
                         mean_mag = np.mean(lc[:,1])
                         ### more ZTF filtering 
@@ -290,7 +290,7 @@ class DataSet:
         self.dataset = np.array(self.dataset)
         if extend > 0:
             self.dataset = np.concatenate((self.dataset, np.zeros((self.dataset.shape[0],self.dataset.shape[1],extend, self.dataset.shape[3]))), axis=2)   
-        self.dataset = self.dataset.astype(np.float16)
+        self.dataset = self.dataset.astype(np.float32)
         
 
         
@@ -325,7 +325,7 @@ class DataSet:
             step = np.ptp(self.union_tp) / n 
             self.union_tp = np.arange(np.min(self.union_tp), np.max(self.union_tp), step)
             
-        self.union_tp = self.union_tp.astype('float16')
+        self.union_tp = self.union_tp.astype('float32')
         print(f'created union_tp attribute of length {len(self.union_tp)}')
     
     

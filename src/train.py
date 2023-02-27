@@ -18,7 +18,7 @@ def train(args):
     torch.cuda.manual_seed(seed)
     ##################################
     device = torch.device(args.device)
-    lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp, num_resamples=args.num_resamples)
+    lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp, num_resamples=args.num_resamples, batch_size=args.batch_size)
     data_obj = lcs.data_obj
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
@@ -31,6 +31,7 @@ def train(args):
         net, optimizer, _, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj, device=args.device)
         epoch+=1
         for g in optimizer.param_groups:
+                ## update learning rate for checkpoint 
                 g['lr'] = args.lr    
         print(f'loaded checkpoint with loss: {loss}')
     else:
@@ -86,7 +87,6 @@ def train(args):
             recon_context_y = torch.cat((
                 train_batch[:,:,:,1] * recon_mask, recon_mask
             ), 1).transpose(2,1)
-
             #############################################################
             loss_info = net.compute_unsupervised_loss(
                 train_batch[:, 0, :,0],
@@ -144,8 +144,8 @@ def train(args):
 #                 device=args.device
 #                 )
             
-            with open(f'train_nll_{lcs.name}_{experiment_id}.txt', 'a') as f:
-                f.write(f"{str((-avg_loglik / train_n).item())}")
+#             with open(f'train_nll_{lcs.name}_{experiment_id}.txt', 'a') as f:
+#                 f.write(f"{str((-avg_loglik / train_n).item())}")
                            
         ###########################################
         if itr % args.save_at == 0 and args.save:

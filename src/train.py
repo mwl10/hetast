@@ -139,8 +139,8 @@ def train(args):
                     wmse / train_n,
                     mae / train_n))
             
-        if itr % 1 == 0:
-            test_nll, mse, indiv_nlls = utils.evaluate_hetvae(
+        if itr % 10 == 0:
+            test_nll, test_mse, indiv_nlls = utils.evaluate_hetvae(
                 net,
                 dim,
                 test_loader, 
@@ -148,8 +148,8 @@ def train(args):
                 device=args.device
                 )
             
-            train_losses.append((-avg_loglik / train_n).item())
-            test_losses.append(test_nll.item())
+            train_losses.append([(-avg_loglik / train_n).item(),(mse / train_n).item()])
+            test_losses.append([test_nll.item(),test_mse.item()])
         ###########################################
         if itr % args.save_at == 0 and args.save:
             print('saving.................')

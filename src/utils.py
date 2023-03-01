@@ -16,8 +16,6 @@ from eztao.ts import gpSimRand, gpSimFull
 
 
 
-           
-
 ## creates an array for kl annealing schedule (https://github.com/haofuml/cyclical_annealing)
 def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
     L = np.ones(n_iter) * stop
@@ -98,7 +96,7 @@ def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src
 
 
 
-def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_tp=3500, num_resamples=0,shuffle=False, extend=0, chop=False):
+def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=30, n_union_tp=3500, num_resamples=0,shuffle=True, extend=0, chop=True, norm=True):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -139,16 +137,15 @@ def get_data(folder, sep=',', start_col=0, batch_size=8, min_length=40, n_union_
         band = band_folder.lower()
         lcs.add_band(band, os.path.join(folder, band_folder))
     ### preprocessing functions ####################################################################
-    lcs.filter()
-    lcs.prune_outliers()
-    if chop == True:
-        lcs.chop_lcs()
+    lcs.filter()            # filter short light curves; points w/ bad catflags 
+    lcs.prune_outliers()    # filter points outside 10 std
+    if chop: lcs.chop_lcs() # points past 1 std beyon mean of lengths
     lcs.resample_lcs(num_resamples=num_resamples)
     ###################################
-    lcs.set_excess_vars()
-    lcs.set_mean_mags()
+#     lcs.set_excess_vars()
+#     lcs.set_mean_mags()
     ###################################
-    lcs.normalize() 
+    if norm: lcs.normalize()
     lcs.formatting(extend=extend)
     lcs.set_union_tp(uniform=True,n=n_union_tp) #maybe do this as some regularly sequenced bit
     print(f'dataset created w/ shape {lcs.dataset.shape}')
@@ -205,7 +202,7 @@ def load_checkpoint(filename, data_obj, device='mps'):
         params = list(net.parameters())
         optimizer = optim.Adam(params)
         optimizer.load_state_dict(cp['optimizer_state_dict'])
-        return net,optimizer, cp['args'], cp['epoch'], cp['loss']
+        return net,optimizer, cp['args'], cp['epoch'], cp['loss'], cp['train_losses'], cp['test_losses']
     
 
 def make_masks(batch, frac=0.5, forecast=False):
@@ -301,6 +298,7 @@ def evaluate_hetvae(
               logerr,
               weights,
               num_samples=k_iwae,
+              predict=True
             )
             
             individual_nlls.append(loss_info.loglik_per_ex.cpu().numpy())

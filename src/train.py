@@ -28,28 +28,32 @@ def train(args):
     union_tp = data_obj['union_tp']
     # what needs to be the same in args for continued run
     if args.checkpoint:
-        net, optimizer, _, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj, device=args.device)
+        net, optimizer, _, epoch, loss, train_losses, test_losses = utils.load_checkpoint(args.checkpoint, data_obj, device=args.device)
         epoch+=1
         for g in optimizer.param_groups:
                 ## update learning rate for checkpoint 
                 g['lr'] = args.lr    
-        print(f'loaded checkpoint with loss: {loss}')
+
+        print(f'loaded checkpoint w/ {loss=}')
     else:
         net = load_network(args, dim, union_tp)
         params = list(net.parameters())
         optimizer = optim.Adam(params, lr=args.lr)
         epoch = 1
         loss = 1000000
+        train_losses = []
+        test_losses = []
         
     model_size = utils.count_parameters(net) 
     print(f'{model_size=}')
     ############### have patience ##########
-    best_loss = loss 
+    best_loss = loss
     patience_counter = 0
     ######################################## 
     if args.kl_annealing:
         kl_coefs = utils.frange_cycle_linear(args.niters)
     ##################
+
     for itr in range(epoch, epoch+args.niters):
         train_loss = 0
         train_n = 0
@@ -135,18 +139,17 @@ def train(args):
                     wmse / train_n,
                     mae / train_n))
             
-#             test_nll, mse = utils.evaluate_hetvae(
-#                 net,
-#                 dim,
-#                 test_loader, # should be val_loader
-#                 0.5,
-#                 k_iwae=args.k_iwae,
-#                 device=args.device
-#                 )
+        if itr % 1 == 0:
+            test_nll, mse, indiv_nlls = utils.evaluate_hetvae(
+                net,
+                dim,
+                test_loader, 
+                0.5,
+                device=args.device
+                )
             
-#             with open(f'train_nll_{lcs.name}_{experiment_id}.txt', 'a') as f:
-#                 f.write(f"{str((-avg_loglik / train_n).item())}")
-                           
+            train_losses.append((-avg_loglik / train_n).item())
+            test_losses.append(test_nll.item())
         ###########################################
         if itr % args.save_at == 0 and args.save:
             print('saving.................')
@@ -155,7 +158,9 @@ def train(args):
                 'epoch': itr,
                 'state_dict': net.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
-                'loss': train_loss / train_n,
+                'loss' : train_loss / train_n,
+                'train_losses': train_losses,
+                'test_losses':test_losses,
             }, lcs.name + str((-avg_loglik / train_n).item()) + '.h5')
             print('done')
         ############################################
@@ -173,8 +178,10 @@ def train(args):
                     'epoch': itr,
                     'state_dict': net.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
-                    'loss': train_loss / train_n,
-                }, 'synth' + '_' + str(experiment_id) + '.h5')
+                    'loss' : train_loss / train_n,
+                    'train_losses': train_losses,
+                    'test_losses':test_losses,
+                }, lcs.name + str((-avg_loglik / train_n).item()) + '.h5')
                 break
 
     
@@ -226,7 +233,7 @@ def main():
     parser.add_argument('--const-var', action='store_true') 
     parser.add_argument('--var-per-dim', action='store_true')
     parser.add_argument('--std', type=float, default=0.1)
-    parser.add_argument('--seed', type=int, default=0) 
+    parser.add_argument('--seed', type=int, default=3) 
     parser.add_argument('--save', action='store_false')
     parser.add_argument('--k-iwae', type=int, default=1) 
     

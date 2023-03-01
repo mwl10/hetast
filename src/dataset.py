@@ -7,7 +7,7 @@ import torch
 
 
 class DataSet:
-    def __init__(self, name='', min_length=40, start_col=0, sep=','):
+    def __init__(self, name='', min_length=30, start_col=0, sep=','):
         """
         initializes some important aspects of the dataset
         
@@ -34,7 +34,7 @@ class DataSet:
             shuffle = np.random.permutation(len(self.dataset)) 
             self.dataset = self.dataset[shuffle]
             self.unnormalized_data = [self.unnormalized_data[i] for i in shuffle]
-            #self.valid_files_df = self.valid_files_df.reindex(self.valid_files_df.index[shuffle])
+            self.valid_files_df = self.valid_files_df.reindex(self.valid_files_df.index[shuffle])
         #######################################################################################################
         # validation and training set can be the same because light curves are conditioned on differing subsamples 
         ########################################################################################################
@@ -188,7 +188,7 @@ class DataSet:
         """
         cut light curves longer than std_thresholds beyond the mean of lengths
         """
-        ranges = [np.ptp(lc[:,0]) for object_lcs in self.dataset for lc in object_lcs] 
+        ranges = [np.ptp(lc[:,0]) for object_lcs in self.dataset for lc in object_lcs]
         std_range = np.std(ranges)
         mean_range = np.mean(ranges)
         for i, object_lcs in enumerate(self.dataset):
@@ -196,6 +196,8 @@ class DataSet:
                 #num_splits = int(ranges[i*j] / (mean_range))#std_threshold * std_ranges))
                 split_threshold = lc[:,0].min() + (mean_range + (std_threshold * std_range)) 
                 #split_threshold = lc[:,0].min() + 1550.2127838134766
+#                 print(split_threshold, 'split thres')
+#                 print(np.where(lc[:,0] > split_threshold))
                 split_pt = np.where(lc[:,0] > split_threshold)[0]
                 if np.any(split_pt):
                     self.dataset[i][j] = lc[:split_pt[0]] # shouldn't be discarding here, but alas              
@@ -368,7 +370,7 @@ class DataSet:
     #########
     # intrinsic vars & excess vars are essentially the same thing
     #########
-    def set_intrinsic_vars(self):
+    def set_intrinsic_var(self):
         intrinsic_vars = np.zeros((len(self.dataset),len(self.bands)))
         for i, object_lcs in enumerate(self.dataset):
             for j, lc in enumerate(object_lcs):
@@ -400,6 +402,22 @@ class DataSet:
         self.mean_mags = np.array(mean_mags)
         
         
+    def set_frac_var(self):
+        frac_vars = np.zeros((len(self.dataset),len(self.bands)))
+        frac_var_vars = np.zeros((len(self.dataset),len(self.bands)))
+        for i, object_lcs in enumerate(self.dataset):
+            for j, lc in enumerate(object_lcs):
+                mean = np.mean(lc[:,1])
+                f_var = (1 / mean) * np.sqrt((1/len(lc))*np.sum(np.square(lc[:,1]-mean)-np.square(lc[:,2])))
+                t1 = (np.sqrt(1/(2*len(lc))) * (np.mean(lc[:,2]**2) / ((mean**2)*f_var)))**2
+                t2 = (np.sqrt(np.mean(lc[:,2]**2)/len(lc)) * (1/mean))**2
+                f_var_var = t1 + t2
+                frac_vars[i,j] = f_var
+                frac_var_vars[i,j] = f_var_var
+        self.frac_vars = frac_vars
+        self.frac_var_vars = frac_var_vars
+
+
     def set_segment_counts(self, sep_std=2, plot=False, index=1, figsize=(15,15)):
         ## count the epochs per lc
         epoch_counts = np.zeros((len(self.dataset), len(self.bands)))

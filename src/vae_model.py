@@ -166,7 +166,7 @@ class HeTVAE(nn.Module):
         z = z.to(self.device)
         return self.decode(z, t)
 
-    def get_reconstruction(self, context_x, context_y, target_x, num_samples=1):
+    def get_reconstruction(self, context_x, context_y, target_x, num_samples=1, predict=False):
         qz, hidden = self.encode(context_x, context_y)
         z = self.sample(qz, num_samples)
         if self.mixing == 'interp_only':
@@ -178,8 +178,10 @@ class HeTVAE(nn.Module):
         hidden = hidden.unsqueeze(0).repeat_interleave(num_samples, dim=0)
         qz_mean = qz.mean.unsqueeze(0).repeat_interleave(num_samples, dim=0)
         ### changing reconstruction to qz.mean for predictions
-        #z = torch.cat((qz_mean, hidden), -1)
-        z = torch.cat((z, hidden), -1)
+        if predict:
+            z = torch.cat((qz_mean, hidden), -1)
+        else:
+            z = torch.cat((z, hidden), -1)
         px = self.decode(z, target_x)
         return px, qz
 
@@ -233,11 +235,11 @@ class HeTVAE(nn.Module):
         return utils.mean_absolute_error(target, pred.mean(0), mask)
 
     def compute_unsupervised_loss(
-        self, context_x, context_y, target_x, target_y, logerr, weights, num_samples=1, beta=1.
+        self, context_x, context_y, target_x, target_y, logerr, weights, num_samples=1, beta=1., predict=False
     ):
         loss_info = LossInfo()
         px, qz = self.get_reconstruction(
-            context_x, context_y, target_x, num_samples)
+            context_x, context_y, target_x, num_samples, predict=predict)
         mask = target_y[:, :, self.dim:]
         loglik = self.compute_loglik(target_y, px, self.norm)
         wloglik = self.compute_loglik(target_y, px, self.norm, logerr=logerr)

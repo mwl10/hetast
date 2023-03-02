@@ -59,12 +59,13 @@ class DataSet:
         
     def normalize(self): 
         """
-        
+        make time start at 0,
+        normalize y to have mean 0, std 1
+        normalize yerr as yerr/std(y)
         """
         self.unnormalized_data = self.dataset.copy()
         for object_lcs in self.dataset:
-            ### for multivariate data, we want to subtract the earliest time value between
-            ### the two bands so we don't mess up time 
+            ### subtract the earliest time value between all bands 
             min_t = 1000000
             for lc in object_lcs:
                 if lc[0,0] < min_t:
@@ -87,7 +88,8 @@ class DataSet:
         parameters:
             med_filt       (int)    --> number of points for the median filter 
             res_std        (bool)   --> if true, use the std_threshold not the mag_threshold
-            std_threshold  (float)  --> sets the initial clipping threshold by a residual std value of the quintic polynomial fit
+            std_threshold  (float)  --> sets the initial clipping threshold by a residual 
+                                        std value of the quintic polynomial fit
             mag_threshold  (float)  --> sets the initial clipping threshold by a magnitude value
             plot           (bool)   --> if you want to plot the light curve & the outliers of its quintic polynomial fit 
             index          (int)    --> which light curve index you'd like to plot if plot==True
@@ -123,7 +125,6 @@ class DataSet:
                 
                 
     def resample_lcs(self, num_resamples=10):
-        
         new_samples = []
         for _ in range(num_resamples):
             for i, object_lcs in enumerate(self.dataset):
@@ -140,7 +141,6 @@ class DataSet:
     def prune_outliers(self, std_threshold=10):
         """
         removes all points further than a given number of std deviations in the dataset
-        
         """
         for i, object_lcs in enumerate(self.dataset):
             for j, lc in enumerate(object_lcs):
@@ -152,7 +152,6 @@ class DataSet:
                                            (y < (y_mean - y_std*std_threshold)))[0]
                 
                 self.dataset[i][j] = np.delete(lc, outliers, axis=0)
-                
                 ## remove outliers with >= 1 mag error for ZTF
                 if self.name.lower().find('ztf') > 0:
                     outliers = np.where(lc[:,2] >=1)[0]
@@ -162,7 +161,8 @@ class DataSet:
     def add_band(self, band, folder): 
         """
         when we add a band via a folder filled with light_curve files, a dataframe keeps track of all the 
-        the new stellar objects with their according files so that when another band is added the same dataframe can be used 
+        the new stellar objects with their according files so that when another band 
+        is added the same dataframe can be used 
         """
         if os.path.isdir(folder):
             valid_counter = 0
@@ -226,16 +226,16 @@ class DataSet:
                         mean_mag = np.mean(lc[:,1])
                         ### more ZTF filtering 
                         if self.name.lower().find('ztf') > 0:
-                            if excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 13.5:
-                                
+                            if excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 13.5:  
                                 object_lcs.append(lc)
+                                #print(band_file, 'made it')
                         else:
                             object_lcs.append(lc)
                 except Exception:
                     pass
-            # don't append objects that have one of their bands removed due to filters  
+            # don't append objects that have one of their bands removed due to these filters  
             if len(object_lcs) == len(self.bands):
-                dataset.append(object_lcs)
+                  dataset.append(object_lcs)
             else:
                 #print(len(object_lcs), len(self.bands))
                 ## drop from dataframe if that's the case
@@ -295,7 +295,6 @@ class DataSet:
         self.dataset = self.dataset.astype(np.float32)
         
 
-        
     def set_carma_fits(self, kernel='drw'):
         carma_fits = []
         for i, object_lcs in enumerate(self.dataset):
@@ -306,11 +305,10 @@ class DataSet:
             else:
                 fit = dho_fit(lc[:,0], lc[:,1], lc[:,2])
                 
-            carma_fits.append(fit)
-                     
+            carma_fits.append(fit)          
         self.carma_fits = carma_fits
         
-     
+      
     def set_union_tp(self, uniform=False, n=1000):
         """
         calcluates an array of the union of all the time points across the dataset &
@@ -348,9 +346,6 @@ class DataSet:
         
         for i, object_lcs_time in enumerate(time):
             for j, lc_time in enumerate(object_lcs_time):   
-                
-                
-                
                 max_time = np.max(lc_time)
                 min_time = lc_time[0]
                 if forecast:
@@ -364,9 +359,7 @@ class DataSet:
                 except Exception:
                     print(f"can't predict to more points than {len(lc_time)}") 
                 self.target_x[i,j] = target_x
-######
-                
-                
+    
     #########
     # intrinsic vars & excess vars are essentially the same thing
     #########
@@ -379,28 +372,26 @@ class DataSet:
                 avg_sq_err = np.matmul(lc[:,2], lc[:,2]) / len(lc)
                 intrinsic_var = avg_sq_dev_from_mean - avg_sq_err
                 intrinsic_vars[i,j] = intrinsic_var
-        self.intrinsic_vars = intrinsic_vars
+        self.intrinsic_var = intrinsic_vars
        
     def set_snr(self):
-        snr = np.zeros((len(self.dataset),len(self.bands)))
-        for i, object_lcs in enumerate(self.dataset):
-            for j, lc in enumerate(object_lcs):
-                rms = np.sqrt(np.mean(np.square(lc[:,1])))
-                snr[i,j] = rms / np.median(lc[:,2])
-        self.snr = snr
+        fn = lambda lc: np.sqrt(np.mean(np.square(lc[:,1]))) / np.median(lc[:,2])
+        snr = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
+        self.snr = np.array(snr).reshape(-1,len(self.bands))
                 
-    def set_excess_vars(self):
-        excess_vars = np.zeros((len(self.dataset),len(self.bands)))
-        for i, object_lcs in enumerate(self.dataset):
-            for j, lc in enumerate(object_lcs):
-                excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) / np.mean(lc[:,1])
-                excess_vars[i,j] = excess_var    
-        self.excess_vars = excess_vars
+    def set_excess_var(self):
+        fn = lambda lc: ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) / np.mean(lc[:,1])
+        excess_var = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
+        self.excess_var = np.array(excess_var).reshape(-1,len(self.bands))
         
-    def set_mean_mags(self):
-        mean_mags = [np.mean(lc[:,1]) for object_lcs in self.dataset for lc in object_lcs]
-        self.mean_mags = np.array(mean_mags)
+    def set_mean_mag(self):
+        mean_mag = [np.mean(lc[:,1]) for object_lcs in self.dataset for lc in object_lcs]
+        self.mean_mag = np.array(mean_mag).reshape(-1,len(self.bands))
         
+    def set_med_cadence(self):
+        fn = lambda lc: np.median(lc[1:,0]-lc[:-1,0])
+        med_cadence = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
+        self.med_cadence = np.array(med_cadence).reshape(-1,len(self.bands))
         
     def set_frac_var(self):
         frac_vars = np.zeros((len(self.dataset),len(self.bands)))
@@ -414,12 +405,11 @@ class DataSet:
                 f_var_var = t1 + t2
                 frac_vars[i,j] = f_var
                 frac_var_vars[i,j] = f_var_var
-        self.frac_vars = frac_vars
-        self.frac_var_vars = frac_var_vars
+        self.frac_var = frac_vars
+        self.frac_var_var = frac_var_vars
 
 
     def set_segment_counts(self, sep_std=2, plot=False, index=1, figsize=(15,15)):
-        ## count the epochs per lc
         epoch_counts = np.zeros((len(self.dataset), len(self.bands)))
         if plot==True:
             fig, ax = plt.subplots(len(self.bands),1, figsize=figsize, squeeze=False)

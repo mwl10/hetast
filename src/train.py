@@ -85,6 +85,7 @@ def train(args):
             train_batch = train_batch.to(device)
             subsampled_mask = subsampled_mask.to(device)
             recon_mask = torch.logical_xor(subsampled_mask, train_batch[:,:,:,1])
+
             context_y = torch.cat((
               train_batch[:,:,:,1] * subsampled_mask, subsampled_mask
             ), 1).transpose(2,1)

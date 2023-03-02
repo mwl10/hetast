@@ -68,12 +68,13 @@ class DataSet:
             ### subtract the earliest time value between all bands 
             min_t = 1000000
             for lc in object_lcs:
-                if lc[0,0] < min_t:
+                if lc[0,0] < min_t and (lc[:,1] > 0).sum() != 0:
                     min_t = lc[0,0]
             for lc in object_lcs:
-                lc[:,0] = lc[:,0] - min_t 
-                lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
-                lc[:,2] = lc[:,2] / np.std(lc[:,1])
+                if (lc[:,1] > 0).sum() != 0:
+                    lc[:,0] = lc[:,0] - min_t 
+                    lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
+                    lc[:,2] = lc[:,2] / np.std(lc[:,1])
                  
 
     def prune_graham(self, med_filt=3, res_std=True, std_threshold=3, mag_threshold=0.25, plot=False, index=2):
@@ -212,6 +213,7 @@ class DataSet:
         print(len(self.valid_files_df.values), len(self.valid_files_df))
         for i,object_files in enumerate(self.valid_files_df.values):
             object_lcs = []
+            zero_count = 0
             for j,band_file in enumerate(object_files):
                 try: 
                     lc = pd.read_csv(band_file, sep=self.sep).to_numpy()
@@ -222,24 +224,29 @@ class DataSet:
                     if len(lc) > self.min_length:
                         lc = lc[:, self.start_col:self.start_col+3]
                         lc = lc[lc[:,0].argsort()].astype(np.float32)
-                        excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) / np.mean(lc[:,1])
+                        excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) \
+                        / np.mean(lc[:,1])
                         mean_mag = np.mean(lc[:,1])
                         ### more ZTF filtering 
                         if self.name.lower().find('ztf') > 0:
-                            if excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 13.5:  
+                            print(mean_mag)
+                            if excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 12.7:  
                                 object_lcs.append(lc)
-                                #print(band_file, 'made it')
                         else:
                             object_lcs.append(lc)
+                            
+                    elif len(lc) == 0:
+                        object_lcs.append(np.zeros((1,3)))
+                        zero_count += 1
+                        
+                # no file for band        
                 except Exception:
-                    pass
-            # don't append objects that have one of their bands removed due to these filters  
-            if len(object_lcs) == len(self.bands):
+                    object_lcs.append(np.zeros((1,3)))
+                    zero_count += 1
+              
+            if (len(object_lcs) == len(self.bands)) and (zero_count != len(self.bands)):
                   dataset.append(object_lcs)
             else:
-                #print(len(object_lcs), len(self.bands))
-                ## drop from dataframe if that's the case
-                # whiy would i be greater? 
                 drops.append(i)
                 #print(self.valid_files_df.index[i])
         self.valid_files_df.drop(self.valid_files_df.index[drops], inplace=True)

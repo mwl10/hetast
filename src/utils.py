@@ -96,7 +96,7 @@ def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src
 
 
 
-def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=25, n_union_tp=3500, num_resamples=0,shuffle=True, extend=0, chop=True, norm=True):
+def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True, extend=0, chop=False, norm=True):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -238,7 +238,10 @@ def make_masks(batch, frac=0.5, forecast=False):
             ############################
             # set the mask at the subsampled points
             ############################
-            subsampled_mask[i,j,subsampled_points] = 1
+                
+            if (lc[:,1] > 0).sum() != 0:
+                
+                subsampled_mask[i,j,subsampled_points] = 1
             
             
             
@@ -352,7 +355,7 @@ def predict(dataloader, net, device='mps', subsample=False, target_x=None, forec
             else:
                 tx = batch[:, 0, :,0]
 
-            px, qz = net.get_reconstruction(batch[:, 0, :,0], context_y, tx, num_samples=k_iwae)
+            px, qz = net.get_reconstruction(batch[:, 0, :,0], context_y, tx, num_samples=k_iwae,predict=True)
             pred_mean.append(px.mean.cpu().numpy())
             pred_std.append(torch.exp(0.5 * px.logvar).cpu().numpy())
             qz_mean.append(qz.mean.cpu().numpy())

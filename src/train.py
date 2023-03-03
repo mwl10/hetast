@@ -234,7 +234,7 @@ def main():
     parser.add_argument('--const-var', action='store_true') 
     parser.add_argument('--var-per-dim', action='store_true')
     parser.add_argument('--std', type=float, default=0.1)
-    parser.add_argument('--seed', type=int, default=3) 
+    parser.add_argument('--seed', type=int, default=2) 
     parser.add_argument('--save', action='store_false')
     parser.add_argument('--k-iwae', type=int, default=1) 
     

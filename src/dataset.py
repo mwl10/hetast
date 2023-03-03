@@ -7,19 +7,19 @@ import torch
 
 
 class DataSet:
-    def __init__(self, name='', min_length=30, start_col=0, sep=','):
+    def __init__(self, name='', min_length=1, start_col=0, sep=','):
         """
         initializes some important aspects of the dataset
         
-        parameters:
-            min_length
-            start_col
-            sep 
+        params:
+            min_length: min # of epochs 
+            start_col: first column where time exists, then mag/flux, then magerr/fluxerr -> lots of odd bugs if left unset
+            sep: delimiter for files
         """
         ############################
         self.name = name
         self.min_length = min_length
-        self.start_col = start_col # lots of odd errors if you don't set this properly
+        self.start_col = start_col 
         self.sep = sep
         ############################
         self.valid_files_df = pd.DataFrame()
@@ -61,7 +61,8 @@ class DataSet:
         """
         make time start at 0,
         normalize y to have mean 0, std 1
-        normalize yerr as yerr/std(y)
+        normalize yerr as yerr/std(y),
+        skip if light curve is missing for a particular multivariate dimension  
         """
         self.unnormalized_data = self.dataset.copy()
         for object_lcs in self.dataset:
@@ -126,6 +127,10 @@ class DataSet:
                 
                 
     def resample_lcs(self, num_resamples=10):
+        """
+        sample from dist w/ mean 0, std as the light curves observational errors 
+        and add these values to original light curves to create new examples 
+        """
         new_samples = []
         for _ in range(num_resamples):
             for i, object_lcs in enumerate(self.dataset):
@@ -134,7 +139,6 @@ class DataSet:
                     new_lc = np.array([lc[:,0], lc[:,1] + np.random.normal(0,lc[:,2]), lc[:,2]]).T
                     new_sample.append(new_lc)
                 new_samples.append(new_sample)
-        
         self.dataset.extend(new_samples)
         
         
@@ -151,7 +155,6 @@ class DataSet:
                 # can do this with quantiles?
                 outliers = np.where((y > (y_mean + y_std*std_threshold)) | \
                                            (y < (y_mean - y_std*std_threshold)))[0]
-                
                 self.dataset[i][j] = np.delete(lc, outliers, axis=0)
                 ## remove outliers with >= 1 mag error for ZTF
                 if self.name.lower().find('ztf') > 0:
@@ -162,7 +165,7 @@ class DataSet:
     def add_band(self, band, folder): 
         """
         when we add a band via a folder filled with light_curve files, a dataframe keeps track of all the 
-        the new stellar objects with their according files so that when another band 
+        the new objects with their according files so that when another band 
         is added the same dataframe can be used 
         """
         if os.path.isdir(folder):
@@ -187,7 +190,8 @@ class DataSet:
         
     def chop_lcs(self, std_threshold=1):
         """
-        cut light curves longer than std_thresholds beyond the mean of lengths
+        cut light curves longer than std_thresholds beyond the mean of lengths,
+        important if some time series have anomolous ranges 
         """
         ranges = [np.ptp(lc[:,0]) for object_lcs in self.dataset for lc in object_lcs]
         std_range = np.std(ranges)
@@ -196,9 +200,6 @@ class DataSet:
             for j, lc in enumerate(object_lcs):
                 #num_splits = int(ranges[i*j] / (mean_range))#std_threshold * std_ranges))
                 split_threshold = lc[:,0].min() + (mean_range + (std_threshold * std_range)) 
-                #split_threshold = lc[:,0].min() + 1550.2127838134766
-#                 print(split_threshold, 'split thres')
-#                 print(np.where(lc[:,0] > split_threshold))
                 split_pt = np.where(lc[:,0] > split_threshold)[0]
                 if np.any(split_pt):
                     self.dataset[i][j] = lc[:split_pt[0]] # shouldn't be discarding here, but alas              
@@ -206,7 +207,7 @@ class DataSet:
     
     def filter(self):
         """rm lcs w/ g band magnitude fainter than 20.6 (close to the limiting magnitude of the ZTF images), 
-        and brighter than 13.5 (to avoid saturated ob- servations) """
+        and brighter than 12.7 (to avoid saturated observations) """
         self.valid_files_df = self.valid_files_df.dropna()
         dataset = []
         drops = []
@@ -219,36 +220,36 @@ class DataSet:
                     lc = pd.read_csv(band_file, sep=self.sep).to_numpy()
                     ##### filtering ZTF error codes #########
                     if self.name.lower().find('ztf') > 0:
-                        lc = lc[np.where(lc[:,4] == 0)[0]]  
+                        lc = lc[np.where(lc[:,4] == 0)[0]]     
                     #########################################
                     if len(lc) > self.min_length:
                         lc = lc[:, self.start_col:self.start_col+3]
                         lc = lc[lc[:,0].argsort()].astype(np.float32)
-                        excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) \
-                        / np.mean(lc[:,1])
+#                         excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) \
+#                         / np.mean(lc[:,1])
                         mean_mag = np.mean(lc[:,1])
                         ### more ZTF filtering 
-                        if self.name.lower().find('ztf') > 0:
-                            print(mean_mag)
-                            if excess_var >= 0 and mean_mag <= 20.6 and mean_mag >= 12.7:  
+                        if self.name.lower().find('ztf') > 0: 
+                            if mean_mag <= 20.6 and mean_mag >= 12.7:  
                                 object_lcs.append(lc)
+                            else:
+                                object_lcs.append(np.zeros((1,3)))
+                                zero_count += 1
                         else:
-                            object_lcs.append(lc)
-                            
+                            object_lcs.append(lc) 
                     elif len(lc) == 0:
                         object_lcs.append(np.zeros((1,3)))
-                        zero_count += 1
-                        
-                # no file for band        
+                        zero_count += 1      
                 except Exception:
                     object_lcs.append(np.zeros((1,3)))
                     zero_count += 1
-              
+            # a bit ugly and hacky, but hopefully we've added zeros where a light curve is missing, 
+            # made sure that not all light curves across bands are empty
+            # and filtered light curves we do have by min length, excess var, and mean mag 
             if (len(object_lcs) == len(self.bands)) and (zero_count != len(self.bands)):
                   dataset.append(object_lcs)
             else:
                 drops.append(i)
-                #print(self.valid_files_df.index[i])
         self.valid_files_df.drop(self.valid_files_df.index[drops], inplace=True)
         self.dataset = dataset
                 
@@ -264,39 +265,29 @@ class DataSet:
                 max_union_tp = union_tp
             # iterating through each dimension    
             for j, lc in enumerate(object_lcs):
-                ####################################
                 # removing duplicates 
-                ####################################
                 _, unique = np.unique(lc[:, 0], return_index=True)
                 lc = lc[unique]
-                ########################################################
                 # need to reformat the observations relative to union_tp 
-                ########################################################
                 new_y = np.zeros_like(union_tp)
                 new_yerr = np.zeros_like(union_tp)
                 subsampled_mask = np.zeros_like(union_tp)
                 recon_mask = np.zeros_like(union_tp)
-                
                 mask = np.isin(union_tp, lc[:,0])
                 indexes = np.nonzero(mask)[0]
                 new_y[indexes] = lc[:,1]
                 new_yerr[indexes] = lc[:,2]
-                
-                #####################################################
                 # set the new time series that is correctly formatted 
-                #####################################################
                 formatted_lc = np.array([union_tp, new_y, new_yerr]).T
-                self.dataset[i][j] = formatted_lc
-                
-        ##################################################################
+                self.dataset[i][j] = formatted_lc         
         # set the no longer ragged multivariate dataset as one numpy array
-        ##################################################################
         for i, object_lcs in enumerate(self.dataset):
             example = np.concatenate(([lc[np.newaxis] for lc in object_lcs]), axis=0)
             zs_to_append = len(max_union_tp) - example.shape[1]
             example = np.append(example, np.zeros((example.shape[0], zs_to_append, example.shape[2])), axis=1)
             self.dataset[i] = example
         self.dataset = np.array(self.dataset)
+        ### interpolations are limited by length of formatted light curves, add zeros so we can interpolate to better resolutions
         if extend > 0:
             self.dataset = np.concatenate((self.dataset, np.zeros((self.dataset.shape[0],self.dataset.shape[1],extend, self.dataset.shape[3]))), axis=2)   
         self.dataset = self.dataset.astype(np.float32)
@@ -310,8 +301,7 @@ class DataSet:
             if kernel == 'drw':
                 fit = drw_fit(lc[:,0], lc[:,1], lc[:,2])
             else:
-                fit = dho_fit(lc[:,0], lc[:,1], lc[:,2])
-                
+                fit = dho_fit(lc[:,0], lc[:,1], lc[:,2])   
             carma_fits.append(fit)          
         self.carma_fits = carma_fits
         
@@ -322,16 +312,12 @@ class DataSet:
         sets it as self.union_x
         
         if uniform == True, set union_tp to n uniformly spaced points between the light curves length range 
-        
-        """
-        # max val? 
+        """ 
         print(self.dataset.shape)
-        self.union_tp = np.unique(self.dataset[:,:,:,0].flatten())
-        # num points? 
+        self.union_tp = np.unique(self.dataset[:,:,:,0].flatten()) 
         if uniform: 
             step = np.ptp(self.union_tp) / n 
-            self.union_tp = np.arange(np.min(self.union_tp), np.max(self.union_tp), step)
-            
+            self.union_tp = np.arange(np.min(self.union_tp), np.max(self.union_tp), step)    
         self.union_tp = self.union_tp.astype('float32')
         print(f'created union_tp attribute of length {len(self.union_tp)}')
     
@@ -358,8 +344,7 @@ class DataSet:
                 if forecast:
                     max_time = forecast_frac * max_time
                 if lc_time.sum() == 0:
-                    max_time = 1
-                                       
+                    max_time = 1                       
                 target_x = np.arange(min_time,max_time, (max_time - min_time)/n)
                 try:
                     target_x = np.append(target_x, np.zeros((zs_to_append)), axis=0)[:time.shape[2]]

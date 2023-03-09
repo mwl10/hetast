@@ -6,6 +6,7 @@ from random import SystemRandom
 from model import load_network
 import utils
 import warnings
+import time
 
 
 def train(args):
@@ -19,6 +20,7 @@ def train(args):
     ##################################
     device = torch.device(args.device)
     lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp, num_resamples=args.num_resamples, batch_size=args.batch_size)
+    print(lcs.name)
     data_obj = lcs.data_obj
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
@@ -148,7 +150,7 @@ def train(args):
                 0.5,
                 device=args.device
                 )
-            
+            print(time.time())
             train_losses.append([(-avg_loglik / train_n).item(),(mse / train_n).item(),(avg_kl / train_n).item()])
             test_losses.append([test_nll.item(),test_mse.item()])
         ###########################################

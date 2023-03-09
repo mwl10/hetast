@@ -255,14 +255,12 @@ class DataSet:
                         mean_mag = np.mean(lc[:,1])
                         ### more ZTF filtering order is j=0:r, j=1:i, j=2:g ----limiting mags: g = 20.8, r = 20.6, i = 19.9 mag
                         if self.name.lower().find('ztf') > 0: 
-                            if j==0 and mean_mag <= 20.4 and mean_mag >= 13.5:   ###### filter r mags
+                            if self.bands[j] == 'r' and mean_mag <= 20.4 and mean_mag >= 13.5:   ###### filter r mags
                                 object_lcs.append(lc)
-                            elif j==1 and mean_mag <= 19.7 and mean_mag >= 13.5: ###### filter i mags
+                            elif self.bands[j] == 'i' and mean_mag <= 19.7 and mean_mag >= 13.5: ###### filter i mags
                                 object_lcs.append(lc)
-                            elif j==2 and mean_mag<= 20.6 and mean_mag >= 13.5:  ###### filter g mags 
+                            elif self.bands[j] == 'g' and mean_mag<= 20.6 and mean_mag >= 13.5:  ###### filter g mags 
                                 object_lcs.append(lc)
-#                             if mean_mag <= 20.6 and mean_mag >= 12.7:
-#                                 object_lcs.append(lc)
                             else:
                                 object_lcs.append(np.zeros((1,3)))
                                 zero_count += 1

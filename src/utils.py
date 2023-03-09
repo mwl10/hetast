@@ -15,13 +15,11 @@ from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand, gpSimFull
 
 
-
-## creates an array for kl annealing schedule (https://github.com/haofuml/cyclical_annealing)
+## creates an array for kl annealing schedule, credits to: https://github.com/haofuml/cyclical_annealing
 def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
     L = np.ones(n_iter) * stop
     period = n_iter/n_cycle
     step = (stop-start)/(period*ratio) # linear schedule
-
     for c in range(n_cycle):
         v, i = start, 0
         while v <= stop and (int(i+c*period) < n_iter):
@@ -31,72 +29,7 @@ def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
     return L 
 
 
-
-def save_synth_data(base_folder='/Users/mattlowery/Desktop/code/astro/hetvae/src/test_data', save_folder='synth_test_data', seed = 0, kernel='drw',duration=730, n=180, uniform=False):
-    """
-    This function creates and loads a synthetic dataset relative to a given kernel (drw or dho), 
-    distributing the kernel params relative to a real dataset  
-    
-    parameters:
-        folder             (str)      --> synthetic data will be fit to the light curves in this folder to get an honest distribution of params
-         ----- optional -----
-        seed               (int)      --> random seed, this matters to keep the shuffles consistent
-        batch_size         (int)      --> for the network, usually a multiple of 2
-        kernel             (str)      --> 'drw' (dampled random walk), a carma(1) process; 'dho' (damped harmonic oscillator), a carma(2,1) process
-        n
-        duration 
-        
-    drw_kernel params --> 'tau' is decorelation timescale, 'amp' is the amplitude
-    dho_kernel params --> a1 = 2 * Xi * w0
-                       a2 = w0 ** 2
-                       b0 = sigma
-                       b1 = tau * b0
-                       wherein Xi is the damping ratio, w0 is the natural oscillation frequency, sigma is the amplitude
-                       of the short term perturbing white noise, tau is the characteristic timescale of the perturbation process
-    returns:
-        a dictionary of torch dataloaders with data formatted as necessary for network training 
-        , as well as the dimension and union of all the time points
-    """
-    synth_band_name = 'simband1'
-    
-    np.random.seed(seed)
-    if not os.path.isdir(base_folder):
-        raise Exception(f"{base_folder} is not a directory")
-        
-    if not os.path.isdir(save_folder):
-        os.mkdir(save_folder)
-        os.mkdir(os.path.join(save_folder,synth_band_name))   
-        
-    lcs = DataSet(name=base_folder, min_length=50, sep=',', start_col=1)
-    band_folders = os.listdir(base_folder)
-    for band_folder in band_folders:
-        band = band_folder.lower()
-        lcs.add_band(band, os.path.join(base_folder, band_folder))
-    lcs.filter()         
-    lcs.prune_outliers()
-    lcs.set_carma_fits(kernel=kernel)
-    lcs.set_snr()
-    
-    synth_lcs = []
-    for i, params in enumerate(lcs.carma_fits):
-        if np.isnan(params[0]):
-            continue
-        if kernel == 'drw':
-            term = DRW_term(*np.log(params))
-        else:
-            term = DHO_term(*np.log(params))
-                
-        # kernel, snr, duration (days), n      
-        if uniform == True:
-            lc = np.array(gpSimFull(term,lcs.snr[i,0], duration, n)).transpose(1,0)
-        else: 
-            lc = np.array(gpSimRand(term,lcs.snr[i,0], duration, n)).transpose(1,0)   
-        fpath = f'{os.path.join(save_folder, synth_band_name,str(i))}_.csv'
-        np.savetxt(fpath,lc, delimiter=',', header=' , , ', comments='')
-
-
-
-def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True, extend=0, chop=False, norm=True):
+def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True, extend=0, chop=False, norm=True, correct_z=True):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -131,62 +64,24 @@ def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=1, n_union_t
     ##################################
     # initializing the DataSet objects 
     ##################################
-    lcs = DataSet(name=folder, min_length=min_length, sep=sep, start_col=start_col)
+    lcs = DataSet(folder, sep=sep, start_col=start_col)
     band_folders = os.listdir(folder)
     for band_folder in band_folders:
-        band = band_folder.lower()
-        lcs.add_band(band, os.path.join(folder, band_folder))
+        lcs.add_band(band_folder, os.path.join(folder, band_folder))
     ### preprocessing functions ####################################################################
-    lcs.filter()            # filter short light curves; points w/ bad catflags 
+    lcs.filter(min_length=min_length)            # filter short light curves; points w/ bad catflags 
     lcs.prune_outliers()    # filter points outside 10 std
     if chop: lcs.chop_lcs() # points past 1 std beyon mean of lengths
     lcs.resample_lcs(num_resamples=num_resamples)
-    ###################################
-#     lcs.set_excess_vars()
-#     lcs.set_mean_mags()
-    ###################################
+    if correct_z: lcs.correct_z()
     if norm: lcs.normalize()
-    lcs.formatting(extend=extend)
-    lcs.set_union_tp(uniform=True,n=n_union_tp) #maybe do this as some regularly sequenced bit
+    lcs.format(extend=extend)
+    lcs.set_union_tp(uniform=True,n=n_union_tp)
     print(f'dataset created w/ shape {lcs.dataset.shape}')
-    ######## done preprocessing ########################################################################################################
+    ######## done preprocessing ######################################################################
     lcs.set_data_obj(batch_size=batch_size, shuffle=shuffle)
     return lcs
 
-    
-def preview_lcs(dataloader, bands, batch_num = 0, N=1, figsize=(15,15)):
-    """
-    preview some of the loaded light curves
-    
-    parameters:
-        dataloader
-        bands      (list)   --> list of bands for labeling the plots
-        
-        ----- optional -----
-        batch_num  (int)    0        --> which batch you want to plot 
-        N          (int)    1        --> number of object's light curves to plot
-        figsize    (tuple)  (15,15)  --> size of the plotting
-    """
-    batch_num = batch_num % len(dataloader) # in case batch_num given is out of range
-    for i, batch in enumerate(dataloader):
-        if batch_num == i:
-            dims = batch.size(1)
-            fig, ax = plt.subplots(N, dims, figsize=figsize, squeeze=False)
-            if N > len(batch): N = len(batch)  # in case num light curves is out of range
-            for j in range(N):
-                for k in range(dims):
-                    t = batch[j,k,:,0]
-                    y = batch[j,k,:,1]
-                    yerr = batch[j,k,:,2]
-                    ## ignoring zeros as masks or as padding
-                    pts = y.nonzero()[:,0]
-                    ax[j][k].errorbar(t[pts],y[pts], yerr=yerr[pts], c='blue', fmt='.', markersize=4, ecolor='red', elinewidth=1, capsize=2)
-                    
-    lines_labels = ax[0][0].get_legend_handles_labels()
-    lines,labels = lines_labels[0], lines_labels[1]
-    fig.legend(lines, labels, bbox_to_anchor=(0.12, 0.92), loc='upper left')
-    [ax[j][index].set_xlabel(bands[index]) for index in range(len(bands))]
-     
         
 def load_checkpoint(filename, data_obj, device='mps'):
     """
@@ -230,21 +125,15 @@ def make_masks(batch, frac=0.5, forecast=False):
             subsampled_points = np.sort(np.random.choice(indexes, \
                                                   size=length, \
                                                   replace=False))
-            
             if forecast:
                 # want ones at all points less than 1550.2127838134766 and nonzero
                 subsampled_points = np.intersect1d(indexes, np.where(lc[:,0] < 1550.2127838134766)[0])
-                
             ############################
             # set the mask at the subsampled points
             ############################
-                
-            if (lc[:,1] > 0).sum() != 0:
-                
+            if lc[:,1].any():
                 subsampled_mask[i,j,subsampled_points] = 1
-            
-            
-            
+   
     return subsampled_mask
 
     
@@ -427,8 +316,6 @@ def save_recon(examples, recons, z, obj_name, bands=['r','g'], one_ex=False, sav
         np.savetxt(z_save_file, zs)
         
         
-        
-
 def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 

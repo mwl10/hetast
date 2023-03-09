@@ -5,12 +5,10 @@ import matplotlib.pyplot as plt
 from scipy import signal
 import torch
 
-
 class DataSet:
-    def __init__(self, name='', min_length=1, start_col=0, sep=','):
+    def __init__(self, name, start_col=0, sep=','):
         """
-        initializes some important aspects of the dataset
-        
+        constructor,
         params:
             min_length: min # of epochs 
             start_col: first column where time exists, then mag/flux, then magerr/fluxerr -> lots of odd bugs if left unset
@@ -18,7 +16,6 @@ class DataSet:
         """
         ############################
         self.name = name
-        self.min_length = min_length
         self.start_col = start_col 
         self.sep = sep
         ############################
@@ -56,7 +53,33 @@ class DataSet:
             'union_tp': union_tp,
             "input_dim": len(self.bands),
         }
-        
+     
+    
+    def correct_z(self, catalog='catalogs/sample_cat'):
+        """
+        get z from catalog files, 
+        match to object, then t_rest = t_obs/(1+z)
+        """
+        rm_objs_z = {'Mrk876':0.1211,'Mrk817':0.15838,'3C273':0.158339,'H2106-099': 0.026515009927301107, \
+                  '3C120': 0.03357276087555472, 'NGC5548': 0.01627, 'Mrk142': 0.04459, 'NGC2617': 0.014325776576655791, \
+                  'MCG+08-11-011': 0.02004386648045696}
+        catalog = os.path.join(os.path.dirname(self.name), catalog)
+        if os.path.isfile(catalog) and self.name.lower().find('ztf') > 0:
+            sample_df = pd.read_csv(catalog)
+            sample_df = sample_df.set_index('SDSS')
+            # want z array relative to order of dataset/valid_files_df
+            for i,obj in enumerate(self.valid_files_df.index):
+                try:
+                    z = sample_df.loc[obj]['z']
+                except Exception:
+                    # obj is separate rm obj
+                    z = rm_objs_z[obj]
+                for lc in self.dataset[i]:
+                    if lc[:,1].any():
+                        lc[:,0] = lc[:,0] * (1 / (1+z))
+
+                        
+                   
     def normalize(self): 
         """
         make time start at 0,
@@ -64,15 +87,15 @@ class DataSet:
         normalize yerr as yerr/std(y),
         skip if light curve is missing for a particular multivariate dimension  
         """
-        self.unnormalized_data = self.dataset.copy()
+        
         for object_lcs in self.dataset:
             ### subtract the earliest time value between all bands 
             min_t = 1000000
             for lc in object_lcs:
-                if lc[0,0] < min_t and (lc[:,1] > 0).sum() != 0:
+                if lc[0,0] < min_t and lc[:,1].any():
                     min_t = lc[0,0]
             for lc in object_lcs:
-                if (lc[:,1] > 0).sum() != 0:
+                if lc[:,1].any():
                     lc[:,0] = lc[:,0] - min_t 
                     lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
                     lc[:,2] = lc[:,2] / np.std(lc[:,1])
@@ -142,7 +165,6 @@ class DataSet:
         self.dataset.extend(new_samples)
         
         
-    
     def prune_outliers(self, std_threshold=10):
         """
         removes all points further than a given number of std deviations in the dataset
@@ -152,7 +174,6 @@ class DataSet:
                 y = lc[:,1]
                 y_std = np.std(y)
                 y_mean = np.mean(y)
-                # can do this with quantiles?
                 outliers = np.where((y > (y_mean + y_std*std_threshold)) | \
                                            (y < (y_mean - y_std*std_threshold)))[0]
                 self.dataset[i][j] = np.delete(lc, outliers, axis=0)
@@ -177,8 +198,7 @@ class DataSet:
                     obj_name = file.split('/')[-1].split('_')[0]
                 else:
                     # take file name w/o  
-                    obj_name = "".join(file.split('/')[-1].split('.')[:-1])
-                           
+                    obj_name = "".join(file.split('/')[-1].split('.')[:-1])          
                 valid_counter += 1
                 self.valid_files_df.loc[obj_name, band] = file
             print(f'validated {valid_counter} files out of {len(files)} for {band=}')
@@ -202,19 +222,24 @@ class DataSet:
                 split_threshold = lc[:,0].min() + (mean_range + (std_threshold * std_range)) 
                 split_pt = np.where(lc[:,0] > split_threshold)[0]
                 if np.any(split_pt):
-                    self.dataset[i][j] = lc[:split_pt[0]] # shouldn't be discarding here, but alas              
+                    self.dataset[i][j] = lc[:split_pt[0]] # could add this as new example            
                         
     
-    def filter(self):
+    def filter(self, min_length=1):
         """rm lcs w/ g band magnitude fainter than 20.6 (close to the limiting magnitude of the ZTF images), 
-        and brighter than 12.7 (to avoid saturated observations) """
+        and brighter than 12.7 (to avoid saturated observations) 
+        
+        a bit ugly and hacky, but hopefully we've added zeros where a light curve is missing, 
+        made sure that not all light curves across bands are empty
+        and filtered light curves we do have by min length, excess var, and mean mag 
+            """
         self.valid_files_df = self.valid_files_df.dropna()
         dataset = []
         drops = []
         print(len(self.valid_files_df.values), len(self.valid_files_df))
         for i,object_files in enumerate(self.valid_files_df.values):
             object_lcs = []
-            zero_count = 0
+            zero_count = 0 # i.e. light curve file w/ no observations
             for j,band_file in enumerate(object_files):
                 try: 
                     lc = pd.read_csv(band_file, sep=self.sep).to_numpy()
@@ -222,39 +247,47 @@ class DataSet:
                     if self.name.lower().find('ztf') > 0:
                         lc = lc[np.where(lc[:,4] == 0)[0]]     
                     #########################################
-                    if len(lc) > self.min_length:
+                    if len(lc) > min_length:
                         lc = lc[:, self.start_col:self.start_col+3]
                         lc = lc[lc[:,0].argsort()].astype(np.float32)
 #                         excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) \
 #                         / np.mean(lc[:,1])
                         mean_mag = np.mean(lc[:,1])
-                        ### more ZTF filtering 
+                        ### more ZTF filtering order is j=0:r, j=1:i, j=2:g ----limiting mags: g = 20.8, r = 20.6, i = 19.9 mag
                         if self.name.lower().find('ztf') > 0: 
-                            if mean_mag <= 20.6 and mean_mag >= 12.7:  
+                            if j==0 and mean_mag <= 20.4 and mean_mag >= 13.5:   ###### filter r mags
                                 object_lcs.append(lc)
+                            elif j==1 and mean_mag <= 19.7 and mean_mag >= 13.5: ###### filter i mags
+                                object_lcs.append(lc)
+                            elif j==2 and mean_mag<= 20.6 and mean_mag >= 13.5:  ###### filter g mags 
+                                object_lcs.append(lc)
+#                             if mean_mag <= 20.6 and mean_mag >= 12.7:
+#                                 object_lcs.append(lc)
                             else:
                                 object_lcs.append(np.zeros((1,3)))
                                 zero_count += 1
                         else:
-                            object_lcs.append(lc) 
+                            object_lcs.append(lc)
+                            
                     elif len(lc) == 0:
                         object_lcs.append(np.zeros((1,3)))
                         zero_count += 1      
                 except Exception:
                     object_lcs.append(np.zeros((1,3)))
                     zero_count += 1
-            # a bit ugly and hacky, but hopefully we've added zeros where a light curve is missing, 
-            # made sure that not all light curves across bands are empty
-            # and filtered light curves we do have by min length, excess var, and mean mag 
+            # make sure we have three bands, and not all of them are missing
             if (len(object_lcs) == len(self.bands)) and (zero_count != len(self.bands)):
                   dataset.append(object_lcs)
             else:
                 drops.append(i)
+                
         self.valid_files_df.drop(self.valid_files_df.index[drops], inplace=True)
         self.dataset = dataset
-                
+        self.unnormalized_data = self.dataset.copy()
+        
+    
             
-    def formatting(self, extend=0):
+    def format(self, extend=0):
         max_union_tp = []
         # iterating through each example
         for i, object_lcs in enumerate(self.dataset):
@@ -271,8 +304,6 @@ class DataSet:
                 # need to reformat the observations relative to union_tp 
                 new_y = np.zeros_like(union_tp)
                 new_yerr = np.zeros_like(union_tp)
-                subsampled_mask = np.zeros_like(union_tp)
-                recon_mask = np.zeros_like(union_tp)
                 mask = np.isin(union_tp, lc[:,0])
                 indexes = np.nonzero(mask)[0]
                 new_y[indexes] = lc[:,1]
@@ -287,25 +318,15 @@ class DataSet:
             example = np.append(example, np.zeros((example.shape[0], zs_to_append, example.shape[2])), axis=1)
             self.dataset[i] = example
         self.dataset = np.array(self.dataset)
-        ### interpolations are limited by length of formatted light curves, add zeros so we can interpolate to better resolutions
+        
+        ### the number of points we can interpolate to is limited by length of formatted light curves, 
+        ### so add zeros so we can interpolate to better resolutions
         if extend > 0:
-            self.dataset = np.concatenate((self.dataset, np.zeros((self.dataset.shape[0],self.dataset.shape[1],extend, self.dataset.shape[3]))), axis=2)   
+            self.dataset = np.concatenate((self.dataset, np.zeros((self.dataset.shape[0],self.dataset.shape[1],extend,\
+                                                                   self.dataset.shape[3]))), axis=2)   
         self.dataset = self.dataset.astype(np.float32)
         
-
-    def set_carma_fits(self, kernel='drw'):
-        carma_fits = []
-        for i, object_lcs in enumerate(self.dataset):
-            print(i, end='')
-            lc = object_lcs[0]
-            if kernel == 'drw':
-                fit = drw_fit(lc[:,0], lc[:,1], lc[:,2])
-            else:
-                fit = dho_fit(lc[:,0], lc[:,1], lc[:,2])   
-            carma_fits.append(fit)          
-        self.carma_fits = carma_fits
-        
-      
+             
     def set_union_tp(self, uniform=False, n=1000):
         """
         calcluates an array of the union of all the time points across the dataset &
@@ -376,15 +397,6 @@ class DataSet:
         excess_var = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
         self.excess_var = np.array(excess_var).reshape(-1,len(self.bands))
         
-    def set_mean_mag(self):
-        mean_mag = [np.mean(lc[:,1]) for object_lcs in self.dataset for lc in object_lcs]
-        self.mean_mag = np.array(mean_mag).reshape(-1,len(self.bands))
-        
-    def set_med_cadence(self):
-        fn = lambda lc: np.median(lc[1:,0]-lc[:-1,0])
-        med_cadence = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
-        self.med_cadence = np.array(med_cadence).reshape(-1,len(self.bands))
-        
     def set_frac_var(self):
         frac_vars = np.zeros((len(self.dataset),len(self.bands)))
         frac_var_vars = np.zeros((len(self.dataset),len(self.bands)))
@@ -399,7 +411,15 @@ class DataSet:
                 frac_var_vars[i,j] = f_var_var
         self.frac_var = frac_vars
         self.frac_var_var = frac_var_vars
-
+        
+    def set_mean_mag(self):
+        mean_mag = [np.mean(lc[:,1]) for object_lcs in self.dataset for lc in object_lcs]
+        self.mean_mag = np.array(mean_mag).reshape(-1,len(self.bands))
+        
+    def set_med_cadence(self):
+        fn = lambda lc: np.median(lc[1:,0]-lc[:-1,0])
+        med_cadence = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
+        self.med_cadence = np.array(med_cadence).reshape(-1,len(self.bands))
 
     def set_segment_counts(self, sep_std=2, plot=False, index=1, figsize=(15,15)):
         epoch_counts = np.zeros((len(self.dataset), len(self.bands)))

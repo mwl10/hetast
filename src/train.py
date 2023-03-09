@@ -51,7 +51,7 @@ def train(args):
     patience_counter = 0
     ######################################## 
     if args.kl_annealing:
-        kl_coefs = utils.frange_cycle_linear(args.niters)
+        kl_coefs = utils.frange_cycle_linear(1500)
     ##################
 
     for itr in range(epoch, epoch+args.niters):
@@ -65,7 +65,7 @@ def train(args):
                 g['lr'] = args.lr 
         ##################################################################    
         if args.kl_annealing:
-            kl_coef = kl_coefs[itr-epoch]
+            kl_coef = kl_coefs[itr] # need global number of epochs to continue on based on schedule
         elif args.kl_zero:
             kl_coef = 0
         else:
@@ -149,7 +149,7 @@ def train(args):
                 device=args.device
                 )
             
-            train_losses.append([(-avg_loglik / train_n).item(),(mse / train_n).item()])
+            train_losses.append([(-avg_loglik / train_n).item(),(mse / train_n).item(),(avg_kl / train_n).item()])
             test_losses.append([test_nll.item(),test_mse.item()])
         ###########################################
         if itr % args.save_at == 0 and args.save:
@@ -214,7 +214,7 @@ def main():
     parser.add_argument('--save-at', type=int, default='1000000')
     parser.add_argument('--patience', type=int, default='100')
     parser.add_argument('--early-stopping', action='store_true')
-    parser.add_argument('--niters', type=int, default=10)
+    parser.add_argument('--niters', type=int, default=1500)
     parser.add_argument('--frac', type=float, default=0.5)
     parser.add_argument('--batch-size', type=int, default=128) 
     parser.add_argument('--mse-weight', type=float, default=5.0)  

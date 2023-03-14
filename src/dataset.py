@@ -96,9 +96,7 @@ class DataSet:
                     min_t = lc[0,0]
             for lc in object_lcs:
                 if lc[:,1].any():
-                    lc[:,0] = lc[:,0] - min_t 
-                    if norm_t: lc[:,0] = lc[:,0] / np.max(lc[:,0]) 
-#                     lc[:,0] = lc[:,0] * (1/365)   
+                    lc[:,0] = lc[:,0] - min_t   
                     lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
                     lc[:,2] = lc[:,2] / np.std(lc[:,1])
                  

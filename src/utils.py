@@ -29,7 +29,7 @@ def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
     return L 
 
 
-def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True, extend=0, chop=False, norm_t=False, correct_z=False):
+def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True, extend=0, chop=False,correct_z=False):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -74,7 +74,7 @@ def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=1, n_union_t
     if chop: lcs.chop_lcs() # points past 1 std beyon mean of lengths
     lcs.resample_lcs(num_resamples=num_resamples)
     if correct_z: lcs.correct_z()
-    lcs.normalize(norm_t=norm_t)
+    lcs.normalize()
     lcs.format(extend=extend)
     lcs.set_union_tp(uniform=True,n=n_union_tp)
     print(f'dataset created w/ shape {lcs.dataset.shape}')

@@ -80,7 +80,7 @@ class DataSet:
 
                         
                    
-    def normalize(self): 
+    def normalize(self, norm_t=False): 
         """
         make time start at 0,
         normalize y to have mean 0, std 1
@@ -97,6 +97,8 @@ class DataSet:
             for lc in object_lcs:
                 if lc[:,1].any():
                     lc[:,0] = lc[:,0] - min_t 
+                    if norm_t: lc[:,0] = lc[:,0] / np.max(lc[:,0]) 
+#                     lc[:,0] = lc[:,0] * (1/365)   
                     lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
                     lc[:,2] = lc[:,2] / np.std(lc[:,1])
                  
@@ -394,22 +396,22 @@ class DataSet:
         fn = lambda lc: ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) / np.mean(lc[:,1])
         excess_var = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
         self.excess_var = np.array(excess_var).reshape(-1,len(self.bands))
-        
-    def set_frac_var(self):
-        frac_vars = np.zeros((len(self.dataset),len(self.bands)))
-        frac_var_vars = np.zeros((len(self.dataset),len(self.bands)))
+            
+    def set_sigma_nxs(self):
+        sigma_nxs = np.zeros((len(self.dataset),len(self.bands)))
         for i, object_lcs in enumerate(self.dataset):
             for j, lc in enumerate(object_lcs):
-                mean = np.mean(lc[:,1])
-                f_var = (1 / mean) * np.sqrt((1/len(lc))*np.sum(np.square(lc[:,1]-mean)-np.square(lc[:,2])))
-                t1 = (np.sqrt(1/(2*len(lc))) * (np.mean(lc[:,2]**2) / ((mean**2)*f_var)))**2
-                t2 = (np.sqrt(np.mean(lc[:,2]**2)/len(lc)) * (1/mean))**2
-                f_var_var = t1 + t2
-                frac_vars[i,j] = f_var
-                frac_var_vars[i,j] = f_var_var
-        self.frac_var = frac_vars
-        self.frac_var_var = frac_var_vars
+                if len(lc) > 1:
+                    sigma_nxs[i,j] = \
+                    ((1/(len(lc)-1)) * ((lc[:,1] - np.mean(lc[:,1]))**2).sum() - np.mean(lc[:,2]**2)) \
+                    / np.mean(lc[:,1])**2
+                else:
+                    sigma_nxs[i,j] = 0
+                    
+        self.sigma_nxs =  sigma_nxs      
         
+        
+       
     def set_mean_mag(self):
         mean_mag = [np.mean(lc[:,1]) for object_lcs in self.dataset for lc in object_lcs]
         self.mean_mag = np.array(mean_mag).reshape(-1,len(self.bands))

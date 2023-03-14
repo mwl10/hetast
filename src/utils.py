@@ -29,7 +29,7 @@ def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
     return L 
 
 
-def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True, extend=0, chop=False, norm=True, correct_z=True):
+def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True, extend=0, chop=False, norm_t=False, correct_z=False):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -74,7 +74,7 @@ def get_data(folder, sep=',', start_col=1, batch_size=8, min_length=1, n_union_t
     if chop: lcs.chop_lcs() # points past 1 std beyon mean of lengths
     lcs.resample_lcs(num_resamples=num_resamples)
     if correct_z: lcs.correct_z()
-    if norm: lcs.normalize()
+    lcs.normalize(norm_t=norm_t)
     lcs.format(extend=extend)
     lcs.set_union_tp(uniform=True,n=n_union_tp)
     print(f'dataset created w/ shape {lcs.dataset.shape}')
@@ -125,14 +125,13 @@ def make_masks(batch, frac=0.5, forecast=False):
             subsampled_points = np.sort(np.random.choice(indexes, \
                                                   size=length, \
                                                   replace=False))
-            if forecast:
-                # want ones at all points less than 1550.2127838134766 and nonzero
-                subsampled_points = np.intersect1d(indexes, np.where(lc[:,0] < 1550.2127838134766)[0])
+#             if forecast:
+#                 # want ones at all points less than 1550.2127838134766 and nonzero
+#                 subsampled_points = np.intersect1d(indexes, np.where(lc[:,0] < 1550.2127838134766)[0])
             ############################
             # set the mask at the subsampled points
             ############################
-            if lc[:,1].any():
-                subsampled_mask[i,j,subsampled_points] = 1
+            subsampled_mask[i,j,subsampled_points] = 1
    
     return subsampled_mask
 

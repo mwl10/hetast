@@ -80,7 +80,7 @@ class DataSet:
 
                         
                    
-    def normalize(self, norm_t=False): 
+    def normalize(self, mult=False): 
         """
         make time start at 0,
         normalize y to have mean 0, std 1
@@ -90,15 +90,25 @@ class DataSet:
         
         for object_lcs in self.dataset:
             ### subtract the earliest time value between all bands 
+            mr = 1000000
             min_t = 1000000
             for lc in object_lcs:
-                if lc[0,0] < min_t and lc[:,1].any():
-                    min_t = lc[0,0]
+                if lc[:,1].any():
+                    if lc[0,0] < min_t:
+                        min_t = lc[0,0]
+                    
+                    if np.ptp(lc[:,1]) < mr:
+                        mr = np.ptp(lc[:,1])
+                
             for lc in object_lcs:
                 if lc[:,1].any():
-                    lc[:,0] = lc[:,0] - min_t   
-                    lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
-                    lc[:,2] = lc[:,2] / np.std(lc[:,1])
+                    lc[:,0] = lc[:,0] - min_t
+                    if mult==True:
+                        lc[:,1] = lc[:,1] / mr
+                        lc[:,2] = lc[:,2] / mr
+                    else:
+                        lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
+                        lc[:,2] = lc[:,2] / np.std(lc[:,1])
                  
 
     def prune_graham(self, med_filt=3, res_std=True, std_threshold=3, mag_threshold=0.25, plot=False, index=2):

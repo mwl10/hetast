@@ -71,20 +71,13 @@ def train(trial, args, lcs):
     device = torch.device(args.device)
     
     data_obj = lcs.data_obj
-#     if args.data_folder == 'synth':
-#         data_obj = utils.get_synthetic_data(seed=seed, uniform=True)
-#     else:
-#         lcs = utils.get_data(seed = seed, folder=args.data_folder, start_col=args.start_col)
-#         
-    N_union_tp = trial.suggest_categorical('N_union_tp', [500,1000,1500,2000,2500,3000,3500, 4000, 4500, 5000])
+    N_union_tp = trial.suggest_categorical('N_union_tp', [500,1000,1500,2000,2500,3000,3500,4000,4500,5000])
     lcs.set_union_tp(uniform=True, n=N_union_tp)
-    
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
     val_loader = data_obj["valid_loader"]
     dim = data_obj["input_dim"]
     union_tp = torch.tensor(lcs.union_tp)
-    
     
     if args.checkpoint:
         net, optimizer, args, epoch, loss = utils.load_checkpoint(args.checkpoint, data_obj)

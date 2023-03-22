@@ -44,6 +44,7 @@ class HeTVAE(nn.Module):
         norm=True,
         mixing='concat',
         device='cuda',
+        dropout=0.0,
     ):
         super().__init__()
         self.dim = input_dim
@@ -65,6 +66,7 @@ class HeTVAE(nn.Module):
         self.embed_time = embed_time
         self.intensity = intensity
         self.union_tp = union_tp
+        self.dropout = dropout
         k = 2 if self.mixing == 'concat' else 1
         if self.mixing == 'concat_and_mix':
             self.h2z = nn.Sequential(
@@ -99,14 +101,16 @@ class HeTVAE(nn.Module):
             intensity=self.intensity,
             union_tp=self.union_tp,
             no_mix=True,
-            device=self.device
+            device=self.device,
+            dropout=self.dropout,
         )
         self.decoder = UnTAN(
             input_dim=2 * self.latent_dim,
             nhidden=self.nhidden,
             embed_time=self.embed_time,
             num_heads=self.num_heads,
-            device=self.device
+            device=self.device,
+            dropout=self.dropout,
         )
 
     def h2z_mixing(self, hidden):
@@ -177,13 +181,14 @@ class HeTVAE(nn.Module):
     
         hidden = hidden.unsqueeze(0).repeat_interleave(num_samples, dim=0)
         qz_mean = qz.mean.unsqueeze(0).repeat_interleave(num_samples, dim=0)
-        ### changing reconstruction to qz.mean for predictions
+        
         if predict:
             z = torch.cat((qz_mean, hidden), -1)
         else:
             z = torch.cat((z, hidden), -1)
         px = self.decode(z, target_x)
         return px, qz
+    
 
     def compute_logvar(self, sigma):
         if self.is_constant:
@@ -245,30 +250,22 @@ class HeTVAE(nn.Module):
         wloglik = self.compute_loglik(target_y, px, self.norm, logerr=logerr)
         
         kl = self.kl_div(qz, mask, self.norm)
-        
-
         loss_info.elbo = -(
             torch.logsumexp(loglik - beta * kl, dim=0).mean(0) - np.log(num_samples))
         loss_info.welbo = -(
             torch.logsumexp(wloglik - beta * kl, dim=0).mean(0) - np.log(num_samples))
         
         loss_info.kl = kl.mean()
-        
         loss_info.loglik = loglik.mean()
         loss_info.loglik_per_ex = loglik
-        
         loss_info.wloglik = wloglik.mean()
-        
         loss_info.mse = self.compute_mse(target_y, px.mean, 1.)
-            
         loss_info.wmse = self.compute_mse(target_y, px.mean, weights=weights)
-        
         loss_info.mae = self.compute_mae(target_y, px.mean)
         loss_info.mean_mse = self.compute_mean_mse(
             target_y, px.mean, weights)
         loss_info.mean_mae = self.compute_mean_mae(target_y, px.mean)
         loss_info.mogloglik = self.compute_mog_loglik(target_y, px)
-        
         loss_info.composite_loss = self.elbo_weight * loss_info.elbo \
             + self.mse_weight * loss_info.mse
         loss_info.weighted_comp_loss = self.elbo_weight * loss_info.welbo \

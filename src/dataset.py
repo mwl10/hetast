@@ -4,15 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import signal
 import torch
+import copy
 
 class DataSet:
-    def __init__(self, name, start_col=0, sep=','):
+    def __init__(self, name, start_col=1, sep=','):
         """
-        constructor,
         params:
-            min_length: min # of epochs 
-            start_col: first column where time exists, then mag/flux, then magerr/fluxerr -> lots of odd bugs if left unset
-            sep: delimiter for files
+            start_col: first column where time exists, then mag, then magerr -> lots of odd bugs if left unset
+            sep: delimiter for files in the dataset
         """
         ############################
         self.name = name
@@ -39,7 +38,7 @@ class DataSet:
         training, test = np.split(self.dataset, [splindex])
         valid_splindex = int(np.floor(split*len(training)))
         _, valid = np.split(training, [valid_splindex])
-        self.split_index = splindex # keep this for deprocessing too
+        self.split_index = splindex # keep this for denormalizing later
         print(f'train size: {len(training)}, valid size: {len(valid)}, test size: {len(test)}')
         train_loader = torch.utils.data.DataLoader(training, batch_size=batch_size)
         valid_loader = torch.utils.data.DataLoader(valid, batch_size=batch_size)
@@ -54,7 +53,6 @@ class DataSet:
             "input_dim": len(self.bands),
         }
      
-    
     def correct_z(self, catalog='catalogs/sample_cat'):
         """
         get z from catalog files, 
@@ -78,39 +76,31 @@ class DataSet:
                     if lc[:,1].any():
                         lc[:,0] = lc[:,0] * (1 / (1+z))
 
-                        
-                   
-    def normalize(self, mult=False): 
+                                   
+    def normalize(self): 
         """
         make time start at 0,
         normalize y to have mean 0, std 1
         normalize yerr as yerr/std(y),
         skip if light curve is missing for a particular multivariate dimension  
         """
-        
+        self.unnormalized_data = copy.deepcopy(self.dataset)
         for object_lcs in self.dataset:
             ### subtract the earliest time value between all bands 
-            mr = 1000000
             min_t = 1000000
             for lc in object_lcs:
                 if lc[:,1].any():
                     if lc[0,0] < min_t:
                         min_t = lc[0,0]
-                    
-                    if np.ptp(lc[:,1]) < mr:
-                        mr = np.ptp(lc[:,1])
-                
             for lc in object_lcs:
                 if lc[:,1].any():
                     lc[:,0] = lc[:,0] - min_t
-                    if mult==True:
-                        lc[:,1] = lc[:,1] / mr
-                        lc[:,2] = lc[:,2] / mr
-                    else:
-                        lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
-                        lc[:,2] = lc[:,2] / np.std(lc[:,1])
+                    #lc[:,0] = lc[:,0] / (np.max(lc[:,0]))
+                    lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
+                    lc[:,2] = lc[:,2] / np.std(lc[:,1])
                  
 
+                
     def prune_graham(self, med_filt=3, res_std=True, std_threshold=3, mag_threshold=0.25, plot=False, index=2):
         """
         prunes outliers by the given method in Graham et al. 2015
@@ -193,27 +183,36 @@ class DataSet:
                     self.dataset[i][j] = np.delete(lc, outliers, axis=0)
                     
                 
-    def add_band(self, band, folder): 
+    def add_band(self,band_folder): 
         """
-        when we add a band via a folder filled with light_curve files, a dataframe keeps track of all the 
+        When we add a band via a folder filled with light curve files, a dataframe keeps track of all the 
         the new objects with their according files so that when another band 
-        is added the same dataframe can be used 
+        is added the same dataframe can be used. 
+        
+        parameters:
+            band_folder
+            
+        side effects:
+            --places file appropriately in self.valid_files_df
+            --appends new band dimension to self.band
         """
-        if os.path.isdir(folder):
+    
+        if os.path.isdir(band_folder):
+            band = os.path.basename(band_folder)
             valid_counter = 0
             dataset = []
-            files = [os.path.join(folder, file) for file in os.listdir(folder)]
+            files = [os.path.join(band_folder, file) for file in os.listdir(band_folder)]
             for file in files:
                 if file.find('_') > 0:
                     obj_name = file.split('/')[-1].split('_')[0]
                 else:
-                    # take file name w/o  
+                    # if no underscore to separate obj name, take filename as is 
                     obj_name = "".join(file.split('/')[-1].split('.')[:-1])          
                 valid_counter += 1
                 self.valid_files_df.loc[obj_name, band] = file
             print(f'validated {valid_counter} files out of {len(files)} for {band=}')
             if valid_counter == 0:
-                raise Exception(f"No readable files in {folder=}")
+                raise Exception(f"No readable files in {band_folder=}")
             else:
                 self.bands.append(band)
          
@@ -221,7 +220,10 @@ class DataSet:
     def chop_lcs(self, std_threshold=1):
         """
         cut light curves longer than std_thresholds beyond the mean of lengths,
-        important if some time series have anomolous ranges 
+        which is important for training if dataset has very right skewed ranges 
+        
+        parameters:
+            std_threshold     (int)       threshold number of stds beyond mean of lengths in which observations are lopped off
         """
         ranges = [np.ptp(lc[:,0]) for object_lcs in self.dataset for lc in object_lcs]
         std_range = np.std(ranges)
@@ -236,17 +238,21 @@ class DataSet:
                         
     
     def filter(self, min_length=1):
-        """rm lcs w/ g band magnitude fainter than 20.6 (close to the limiting magnitude of the ZTF images), 
-        and brighter than 12.7 (to avoid saturated observations) 
-        
+        """
         a bit ugly and hacky, but hopefully we've added zeros where a light curve is missing, 
         made sure that not all light curves across bands are empty
         and filtered light curves we do have by min length, excess var, and mean mag 
+        
+        for ZTF datasets remove lcs w/ 
+            mean g band magnitude fainter than 20.6
+            mean r fainter than 20.4,
+            mean i fainter than 19.7,
+            and brighter than 13.5 (to avoid saturated observations) 
+        parameters   min_length     (int)      -->    minimum number of observations allowed 
             """
         self.valid_files_df = self.valid_files_df.dropna()
         dataset = []
         drops = []
-        print(len(self.valid_files_df.values), len(self.valid_files_df))
         for i,object_files in enumerate(self.valid_files_df.values):
             object_lcs = []
             zero_count = 0 # i.e. light curve file w/ no observations
@@ -263,7 +269,7 @@ class DataSet:
 #                         excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) \
 #                         / np.mean(lc[:,1])
                         mean_mag = np.mean(lc[:,1])
-                        ### more ZTF filtering order is j=0:r, j=1:i, j=2:g ----limiting mags: g = 20.8, r = 20.6, i = 19.9 mag
+                        ### ZTF limiting mags: g = 20.8, r = 20.6, i = 19.9 mag
                         if self.name.lower().find('ztf') > 0: 
                             if self.bands[j] == 'r' and mean_mag <= 20.4 and mean_mag >= 13.5:   ###### filter r mags
                                 object_lcs.append(lc)
@@ -291,11 +297,18 @@ class DataSet:
                 
         self.valid_files_df.drop(self.valid_files_df.index[drops], inplace=True)
         self.dataset = dataset
-        self.unnormalized_data = self.dataset.copy()
+        
         
     
             
     def format(self, extend=0):
+        """
+        
+        
+        parameters: 
+            extend      (int)   --> number of points to extend the length of the formatted light curves by
+        
+        """
         max_union_tp = []
         # iterating through each example
         for i, object_lcs in enumerate(self.dataset):
@@ -337,12 +350,20 @@ class DataSet:
              
     def set_union_tp(self, uniform=False, n=1000):
         """
-        calcluates an array of the union of all the time points across the dataset &
-        sets it as self.union_x
+        calcluates an array of the union of all the time points across the dataset unless uniform==True,
+        in that case set union_tp to n uniformly spaced points between the maximum and minimum observed time
+        across the dataset
         
-        if uniform == True, set union_tp to n uniformly spaced points between the light curves length range 
+        parameters:
+            uniform       (boolean)   --> uniformly spread?
+            n             (int)       --> number of uniformly spread pts
+            
+        side effects
+            - sets self.union_tp 
+            - prints length of union tp
         """ 
-        print(self.dataset.shape)
+        
+        
         self.union_tp = np.unique(self.dataset[:,:,:,0].flatten()) 
         if uniform: 
             step = np.ptp(self.union_tp) / n 
@@ -351,16 +372,17 @@ class DataSet:
         print(f'created union_tp attribute of length {len(self.union_tp)}')
     
     
-    def set_target_x(self, n=40, forecast=False, forecast_frac=1.2):
+    def set_target_x(self, n=40, forecast=False):
         """
-        sets the target time values we might want to interpolate the light curve to. 
- 
+        sets the target time values we want to interpolate the light curve to. 
+        
         parameters:
-            -----optional-----
-            num_points     (int)      --> how many points do we want 
+            num_points     (int)      --> how many points do we want? 
             forecast       (boolean)  --> do we want to forecast?
-            forecast_frac  (float)    --> what percentage of the light curve relative to 
-                                          its length should we forecast? 
+            
+        side effects:
+            - sets self.target_x as a numpy array with dimensions as (len(self.dataset), len(self.bands), len of the formatted light curve)
+              i.e. like (2683, 3, 4428))
         """
         time = self.dataset[:,:,:,0]                            
         zs_to_append = time.shape[2] - n 
@@ -370,42 +392,23 @@ class DataSet:
             for j, lc_time in enumerate(object_lcs_time):   
                 max_time = np.max(lc_time)
                 min_time = lc_time[0]
-                if forecast:
-                    max_time = forecast_frac * max_time
                 if lc_time.sum() == 0:
-                    max_time = 1                       
+                    max_time = 1 
                 target_x = np.arange(min_time,max_time, (max_time - min_time)/n)
                 try:
                     target_x = np.append(target_x, np.zeros((zs_to_append)), axis=0)[:time.shape[2]]
                 except Exception:
-                    print(f"can't predict to more points than {len(lc_time)}") 
+                    print(f"can't predict to more points than {len(lc_time)}, use extend param in get_data") 
                 self.target_x[i,j] = target_x
     
-    #########
-    # intrinsic vars & excess vars are essentially the same thing
-    #########
-    def set_intrinsic_var(self):
-        intrinsic_vars = np.zeros((len(self.dataset),len(self.bands)))
-        for i, object_lcs in enumerate(self.dataset):
-            for j, lc in enumerate(object_lcs):
-                dev_from_mean = (lc[:,1] - np.mean(lc[:,1]))
-                avg_sq_dev_from_mean = np.matmul(dev_from_mean, dev_from_mean) * (1 / (len(lc) - 1))
-                avg_sq_err = np.matmul(lc[:,2], lc[:,2]) / len(lc)
-                intrinsic_var = avg_sq_dev_from_mean - avg_sq_err
-                intrinsic_vars[i,j] = intrinsic_var
-        self.intrinsic_var = intrinsic_vars
-       
-    def set_snr(self):
-        fn = lambda lc: np.sqrt(np.mean(np.square(lc[:,1]))) / np.median(lc[:,2])
-        snr = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
-        self.snr = np.array(snr).reshape(-1,len(self.bands))
-                
-    def set_excess_var(self):
-        fn = lambda lc: ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) / np.mean(lc[:,1])
-        excess_var = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
-        self.excess_var = np.array(excess_var).reshape(-1,len(self.bands))
-            
+    
     def set_sigma_nxs(self):
+        """
+        setting the normalized excess variance, as per the definition in Vaughan et al. 2003.
+        
+        side effects:
+            sets self.sigma_nxs as a numpy array with dimensions as (len(self.dataset), len(self.bands)) 
+        """
         sigma_nxs = np.zeros((len(self.dataset),len(self.bands)))
         for i, object_lcs in enumerate(self.dataset):
             for j, lc in enumerate(object_lcs):
@@ -415,16 +418,26 @@ class DataSet:
                     / np.mean(lc[:,1])**2
                 else:
                     sigma_nxs[i,j] = 0
-                    
         self.sigma_nxs =  sigma_nxs      
-        
-        
        
+    
     def set_mean_mag(self):
+        """
+        setting the mean magnitude of the light curve
+        
+        side effects:
+            sets self.mean_mag as a numpy array with dimensions as (len(self.dataset), len(self.bands)) 
+        """
         mean_mag = [np.mean(lc[:,1]) for object_lcs in self.dataset for lc in object_lcs]
         self.mean_mag = np.array(mean_mag).reshape(-1,len(self.bands))
         
     def set_med_cadence(self):
+        """
+        setting the median cadence of the light curve
+        
+        side effects:
+            sets self.med_cadence as a numpy array with dimensions as (len(self.dataset), len(self.bands)) 
+        """
         fn = lambda lc: np.median(lc[1:,0]-lc[:-1,0])
         med_cadence = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
         self.med_cadence = np.array(med_cadence).reshape(-1,len(self.bands))

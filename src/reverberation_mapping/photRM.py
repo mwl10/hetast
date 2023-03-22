@@ -349,7 +349,7 @@ def filters_viz(z=0, phot_sys='LSST', save=False):
     #                xytext =(Lya_wave, 0.21), size=13)
     
     if save == True:
-        plt.savefig('filters.pdf',dpi=10)
+        plt.savefig('filters.png')
     
     
 def LC_plot(tt, yy, T):

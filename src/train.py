@@ -20,7 +20,6 @@ def train(args):
     ##################################
     device = torch.device(args.device)
     lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp, num_resamples=args.num_resamples, batch_size=args.batch_size)
-    print(lcs.name)
     data_obj = lcs.data_obj
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
@@ -55,7 +54,6 @@ def train(args):
     if args.kl_annealing:
         kl_coefs = utils.frange_cycle_linear(1500)
     ##################
-
     for itr in range(epoch, epoch+args.niters):
         train_loss = 0
         train_n = 0
@@ -72,6 +70,7 @@ def train(args):
             kl_coef = 0
         else:
             kl_coef = 1
+        print(kl_coef)
         ###################################################################  
         for train_batch in train_loader:
             batch_len = train_batch.shape[0]

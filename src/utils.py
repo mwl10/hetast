@@ -31,7 +31,7 @@ def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
     return L 
 
 
-def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True, extend=0, chop=False,correct_z=False,split=0.9):
+def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True,chop=False,correct_z=False,split=0.9,seed=2):
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -60,6 +60,8 @@ def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_t
     returns:
         the DataSet object we created containing the dictionary of pytorch dataloaders for the network
     """
+    np.random.seed(seed=seed) ## keep same shuffled as was trained on 
+    torch.manual_seed(seed=seed)
 
     if not os.path.isdir(folder):
         raise Exception(f"{folder} is not a directory")
@@ -75,40 +77,14 @@ def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_t
     lcs.resample_lcs(num_resamples=num_resamples)
     if correct_z: lcs.correct_z()
     lcs.normalize()
-    lcs.format(extend=extend)
+    lcs.format()
     lcs.set_union_tp(uniform=True,n=n_union_tp)
     print(f'dataset created w/ shape {lcs.dataset.shape}')
     ######## done preprocessing ######################################################################
     lcs.set_data_obj(batch_size=batch_size, shuffle=shuffle,split=split)
     return lcs
 
-
-
-def plot_recons(examples, recons, N=7, figsize=(35,5)):
-    target_tp = recons['target_tp']
-    pred_mean = recons['pred_mean']
-    pred_std = recons['pred_std']
-    
-    target = examples['target']
-    inputs = examples['inputs']
-    tp = examples['tp']
-    dims = pred_mean.shape[2]
-
-    fig,ax = plt.subplots(N,dims,figsize=figsize, squeeze=False)
-    for ex in range(N):
-        pred_t = target_tp[ex].nonzero()[0]
-        input_t = tp[ex].nonzero()[0]
-        for band in range(dims):
-            std = pred_std[ex,pred_t,band]
-            # preds plotting
-            ax[ex,band].plot(target_tp[ex, pred_t],pred_mean[ex,pred_t,band])
-            ax[ex,band].fill_between(target_tp[ex,pred_t],pred_mean[ex,pred_t,band]-std ,pred_mean[ex,pred_t,band]+std, label='error envelope',color='lightcoral')
-            ax[ex,band].errorbar(target_tp[ex,pred_t], pred_mean[ex,pred_t,band], yerr=std, c='blue', ecolor='#65c9f7', label='prediction')
-            # inputs the preds are conditioned on
-            ax[ex,band].scatter(tp[ex,input_t], inputs[ex,input_t,band], c='black', marker='x', zorder=30, label='conditioned on', s=25)
-            #ax[ex,band].set_ylim([-2,2])
             
-    
 def load_checkpoint(filename, data_obj, device='mps'):
     """
     loads a model checkpoint 
@@ -124,6 +100,7 @@ def load_checkpoint(filename, data_obj, device='mps'):
         optimizer = optim.Adam(params)
         optimizer.load_state_dict(cp['optimizer_state_dict'])
         return net,optimizer, cp['args'], cp['epoch'], cp['loss'], cp['train_losses'], cp['test_losses']
+
     
 
 def make_masks(batch, frac=0.5, forecast=False):
@@ -144,7 +121,7 @@ def make_masks(batch, frac=0.5, forecast=False):
             indexes = lc[:,1].nonzero()[:,0] # where the observations are
             length = int(np.round(len(indexes) * frac)) # take a fraction of those
             if forecast:
-                # take first half of the points explicitly
+                # take first section of the points explicitly
                 subsampled_points = indexes[:length]
             else:
                 subsampled_points = np.sort(np.random.choice(indexes, \
@@ -167,83 +144,76 @@ def update_lr(model_size, itr, warmup):
 def evaluate_hetvae(
     net,
     dim,
-    train_loader,
+    dataloader,
     frac=0.5,
     k_iwae=1,
-    device='cuda',
+    device='mps',
     forecast=False,
-    seed=0
+    qz_mean=False
 ):
-    torch.manual_seed(seed=seed)
-    np.random.seed(seed=seed)
     train_n = 0
     train_loss,avg_loglik, mse, mae = 0, 0, 0,0
     mean_mae, mean_mse = 0, 0
     individual_nlls = []
+    indy_nlls = []
+    mses= []
     with torch.no_grad():
-        for train_batch in tqdm(train_loader):
-            subsampled_mask = make_masks(train_batch, frac=frac, forecast=forecast)
+        for batch in tqdm(dataloader):
+            batch_len = batch.shape[0]
+            # forecasting if this mask is set to first section of points only, not random selection
+            subsampled_mask = make_masks(batch, frac=frac, forecast=forecast)
             ######################
-            errorbars = torch.swapaxes(train_batch[:,:,:,2], 2,1)
+            errorbars = torch.swapaxes(batch[:,:,:,2], 2,1)
             weights = errorbars.clone()
             weights[weights!=0] = 1 / weights[weights!=0]
             errorbars[errorbars!=0] = torch.log(errorbars[errorbars!=0])
             logerr = errorbars.to(device)
             weights = weights.to(device)
             ######################
-            train_batch = train_batch.to(device)
+            batch = batch.to(device)
             subsampled_mask = subsampled_mask.to(device)
-            recon_mask = torch.logical_xor(subsampled_mask, train_batch[:,:,:,1])
+            recon_mask = torch.logical_xor(subsampled_mask, batch[:,:,:,1])
 
             context_y = torch.cat((
-              train_batch[:,:,:,1] * subsampled_mask, subsampled_mask
+              batch[:,:,:,1] * subsampled_mask, subsampled_mask
             ), 1).transpose(2,1)
             recon_context_y = torch.cat((
-              train_batch[:,:,:,1] * recon_mask, recon_mask
+              batch[:,:,:,1] * recon_mask, recon_mask
             ), 1).transpose(2,1)
             
             loss_info = net.compute_unsupervised_loss(
-              train_batch[:, 0, :,0],
+              batch[:, 0, :,0],
               context_y,
-              train_batch[:, 0, :,0],
+              batch[:, 0, :,0],
               recon_context_y,
               logerr,
               weights,
               num_samples=k_iwae,
-              predict=False
+              qz_mean=qz_mean
             )
             
             individual_nlls.append(loss_info.loglik_per_ex.cpu().numpy())
+            train_loss += loss_info.composite_loss.item() * batch_len
+            avg_loglik += loss_info.loglik * batch_len
+            mse += loss_info.mse * batch_len
+            train_n += batch_len
             
-            num_context_points = recon_mask.sum().item()
-            train_loss += loss_info.composite_loss.item()* num_context_points
-            mse += loss_info.mse * num_context_points
-            mae += loss_info.mae * num_context_points
-            mean_mse += loss_info.mean_mse * num_context_points
-            mean_mae += loss_info.mean_mae * num_context_points
-            avg_loglik += loss_info.mogloglik * num_context_points
-            train_n += num_context_points
-    print(
-        'nll: {:.4f}, mse: {:.4f}, mae: {:.4f}, '
-        'mean_mse: {:.4f}, mean_mae: {:.4f}'.format(
-            - avg_loglik / train_n,
-            mse / train_n,
-            mae / train_n,
-            mean_mse / train_n,
-            mean_mae / train_n
-        )
-    )
-    return -avg_loglik / train_n, mse / train_n, np.concatenate(individual_nlls, axis=1)[0]
+
+    avg_nll =  -avg_loglik / train_n
+    avg_mse = -avg_loglik / train_n
+
+    return avg_nll, avg_mse, -1 * np.concatenate(individual_nlls, axis=1)[0]
 
 
-def encode(dataloader, net, subsample=False, forecast=False, device='mps'):
+
+
+def encode(dataloader, net, device='mps',subsample=False):
     qz_mean, qz_std = [], []
     disc_path = [] ## deterministic/discrete pathway
     with torch.no_grad():
         for i, batch in enumerate(tqdm(dataloader)):
             if subsample == True:
-                # forecasting right now
-                subsampled_mask = make_masks(batch, frac=0.5, forecast=forecast)
+                subsampled_mask = make_masks(batch, frac=0.5)
             else:
                 subsampled_mask = make_masks(batch, frac=1.0)
             batch = batch.to(device)
@@ -290,66 +260,90 @@ def decode(net,zs,disc_path,target_x,device='mps',batch_size=2):
     return interps
                   
     
-def predict(dataloader, net, device='mps', subsample=False, target_x=None, forecast=False):
-    k_iwae=2
+def predict(dataloader, net,target_x=None,device='mps',forecast=False,k_iwae=1,frac=0.5,qz_mean=False):
     pred_mean, pred_std = [], []
-    qz_mean, qz_std = [], []
+    qz_mu, qz_std = [], []
     mask = []
     target = []
     tp =[]
     target_tp = []
     with torch.no_grad():
-        for i, batch in enumerate(dataloader):
-            print(f'{i},', end='', flush=True)
-            batch_len = batch.shape[0]
-            if subsample == True:
-                subsampled_mask = make_masks(batch, frac=0.5)
-            else:
-                subsampled_mask = make_masks(batch, frac=1.0, forecast=forecast)
+        for i, batch in enumerate(tqdm(dataloader)):
+            batch_len = batch.shape[0] 
+            subsampled_mask = make_masks(batch, frac=frac, forecast=forecast)
             batch = batch.to(device)
             subsampled_mask = subsampled_mask.to(device)
             recon_mask = torch.logical_xor(batch[:,:,:,1], subsampled_mask)
             context_y = torch.cat((batch[:,:,:,1] * subsampled_mask, subsampled_mask), 1).transpose(2,1)
             recon_context_y=torch.cat((batch[:,:,:,1] * recon_mask, recon_mask), 1).transpose(2,1)
+            
             if target_x is not None:
                 tx = torch.tensor(target_x[i*batch_len:(i*batch_len + batch_len)])[:,0]
             else:
                 tx = batch[:, 0, :,0]
-
-            px, qz = net.get_reconstruction(batch[:, 0, :,0], context_y, tx, num_samples=k_iwae,predict=True)
+                
+            px, qz = net.get_reconstruction(batch[:, 0, :,0], context_y, tx, num_samples=k_iwae,qz_mean=qz_mean)
+            
             pred_mean.append(px.mean.cpu().numpy())
             pred_std.append(torch.exp(0.5 * px.logvar).cpu().numpy())
-            qz_mean.append(qz.mean.cpu().numpy())
+            qz_mu.append(qz.mean.cpu().numpy())
             qz_std.append(torch.exp(0.5 * qz.logvar).cpu().numpy())
-            target.append((batch[:, :, :,1]).cpu().numpy())
-            mask.append(subsampled_mask.cpu().numpy())
+            target.append((batch[:, :, :,1]).cpu().numpy()) # only targets when we don't have a specific target_x
+            mask.append(subsampled_mask.cpu().numpy()) 
             tp.append(batch[:, 0, :,0].cpu().numpy())
-            target_tp.append(tx.cpu().numpy())
-            
+            target_tp.append(tx.cpu().numpy())       
     # reconstructions
     pred_mean = np.concatenate(pred_mean, axis=1)
     pred_std = np.concatenate(pred_std, axis=1)
     # latent space 
-    qz_mean = np.concatenate(qz_mean, axis=0)
+    qz_mu = np.concatenate(qz_mu, axis=0)
     qz_std = np.concatenate(qz_std, axis=0)
-    
     # targets are all ys, masks are masks, inputs are masked ys
     target = np.concatenate(target, axis=0)
     mask = np.concatenate(mask, axis=0)
     inputs = np.ma.masked_where(mask < 1., target)
     inputs = np.transpose(inputs, [0,2,1])
     target = np.transpose(target, [0,2,1])
+    mask = np.transpose(mask, [0,2,1])
     # target tp are points we'd like to project to
+    target_tp = np.concatenate(target_tp,axis=0)
     tp = np.concatenate(tp, axis=0)
-    
     pred_mean = pred_mean.mean(0)
     pred_std = pred_std.mean(0)
+    
     recons = {'target_tp':target_tp, 'pred_mean':pred_mean,'pred_std':pred_std}
-    zs = {'qz_mean':qz_mean, 'qz_std':qz_std}
+    zs = {'qz_mu':qz_mu, 'qz_std':qz_std}
     examples = {'tp':tp,'target':target,'mask':mask,'inputs':inputs}
     recon_info = {'examples':examples,'recons':recons, 'zs':zs}
     return recon_info
 
+
+
+def plot_recons(examples, recons, N=7, figsize=(35,5)):
+    target_tp = recons['target_tp']
+    pred_mean = recons['pred_mean']
+    pred_std = recons['pred_std']
+    
+    target = examples['target']
+    inputs = examples['inputs']
+    tp = examples['tp']
+    print(target_tp.shape, pred_mean)
+    dims = pred_mean.shape[2]
+    fig,ax = plt.subplots(N,dims,figsize=figsize, squeeze=False)
+    for ex in range(N):
+        pred_t = target_tp[ex].nonzero()[0]
+        input_t = tp[ex].nonzero()[0]
+        for band in range(dims):
+            std = pred_std[ex,pred_t,band]
+            # preds plotting
+            ax[ex,band].plot(target_tp[ex, pred_t],pred_mean[ex,pred_t,band])
+            ax[ex,band].fill_between(target_tp[ex,pred_t],pred_mean[ex,pred_t,band]-std ,pred_mean[ex,pred_t,band]+std, label='error envelope',color='lightcoral')
+            ax[ex,band].errorbar(target_tp[ex,pred_t], pred_mean[ex,pred_t,band], yerr=std, c='blue', ecolor='#65c9f7', label='prediction')
+            # inputs the preds are conditioned on
+            ax[ex,band].scatter(tp[ex,input_t], inputs[ex,input_t,band], c='black', marker='x', zorder=30, label='conditioned on', s=25)
+            #ax[ex,band].set_ylim([-2,2])
+            
+            
 
 def preview_lcs(lcs, n=1, figsize=(15,15), fs=15):
     dims = lcs.dataset.shape[1]
@@ -378,7 +372,10 @@ def log_normal_pdf(x, mean, logvar, mask, logerr=0.):
     const = torch.log(const)
     logerr = logerr * mask
     logvar = logvar + logerr
-    return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
+    return -0.5 * (const + torch.log(torch.exp(logerr) + torch.exp(logvar)) \
+            +  (x - mean) ** 2.0 / (torch.exp(logvar)+torch.exp(logerr))) * mask
+    
+    #return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
 
 
 def mog_log_pdf(x, mean, logvar, mask):

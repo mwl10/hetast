@@ -1,0 +1,17 @@
+Namespace(n_union_tp=3500, data_folder='datasets/ZTF_gr', checkpoint='ZTF_gr0.9500744938850403.h5', start_col=0, inc_errors=False, print_at=100, embed_time=128, enc_num_heads=4, latent_dim=128, mixing='concat', num_ref_points=16, rec_hidden=128, width=512, save_at=1000000, patience=100, early_stopping=False, niters=1500, frac=0.5, batch_size=128, mse_weight=5.0, dropout=0.0, num_resamples=0, lr=0.0003, scheduler=False, warmup=4000, kl_zero=False, kl_annealing=False, net='hetvae', device='cuda', const_var=False, var_per_dim=False, std=0.1, seed=2, save=True, k_iwae=1) 5703884
+validated 3407 files out of 3407 for band='r'
+3407 3407
+(0,)
+Traceback (most recent call last):
+  File "/home2/fggr82/astr/hetast/src/trainkl.py", line 249, in <module>
+    main()
+  File "/home2/fggr82/astr/hetast/src/trainkl.py", line 245, in main
+    train(args)
+  File "/home2/fggr82/astr/hetast/src/trainkl.py", line 22, in train
+    lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp, num_resamples=args.num_resamples, batch_size=args.batch_size, correct_z=False)
+  File "/home2/fggr82/astr/hetast/src/utils.py", line 79, in get_data
+    lcs.set_union_tp(uniform=True,n=n_union_tp)
+  File "/home2/fggr82/astr/hetast/src/dataset.py", line 346, in set_union_tp
+    self.union_tp = np.unique(self.dataset[:,:,:,0].flatten()) 
+IndexError: too many indices for array: array is 1-dimensional, but 4 were indexed
+/var/spool/slurmd/job247373/slurm_script: line 17: --device: command not found

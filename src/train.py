@@ -52,7 +52,7 @@ def train(args):
     patience_counter = 0
     ######################################## 
     if args.kl_annealing:
-        kl_coefs = utils.frange_cycle_linear(1500)
+        kl_coefs = utils.frange_cycle_linear(6000, n_cycle=8)
     ##################
     for itr in range(epoch, epoch+args.niters):
         train_loss = 0
@@ -78,15 +78,14 @@ def train(args):
             errorbars = torch.swapaxes(train_batch[:,:,:,2], 2,1)
             weights = errorbars.clone()
             weights[weights!=0] = 1 / weights[weights!=0]
-            errorbars[errorbars!=0] = torch.log(errorbars[errorbars!=0])
-            logerr = errorbars.to(device)
+            errorbars[errorbars!=0] = torch.log(errorbars[errorbars!=0]**2)
+            logerr = errorbars.to(device) # log variance on observations 
             weights = weights.to(device)
             ############################################################
             subsampled_mask = utils.make_masks(train_batch, frac=args.frac)
             train_batch = train_batch.to(device)
             subsampled_mask = subsampled_mask.to(device)
             recon_mask = torch.logical_xor(subsampled_mask, train_batch[:,:,:,1])
-
             context_y = torch.cat((
               train_batch[:,:,:,1] * subsampled_mask, subsampled_mask
             ), 1).transpose(2,1)
@@ -127,7 +126,7 @@ def train(args):
         if np.isnan(train_loss / train_n):
             print('nan in loss,,,,,,,,, stopping')
             break
-        
+
         if itr % args.print_at == 0:
             print(
                 '\tIter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg wnll: {:.4f}, avg kl: {:.4f}, '

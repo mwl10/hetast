@@ -301,12 +301,9 @@ class DataSet:
         
     
             
-    def format(self, extend=0):
+    def format(self):
         """
         
-        
-        parameters: 
-            extend      (int)   --> number of points to extend the length of the formatted light curves by
         
         """
         max_union_tp = []
@@ -339,12 +336,7 @@ class DataSet:
             example = np.append(example, np.zeros((example.shape[0], zs_to_append, example.shape[2])), axis=1)
             self.dataset[i] = example
         self.dataset = np.array(self.dataset)
-        
-        ### the number of points we can interpolate to is limited by length of formatted light curves, 
-        ### so add zeros so we can interpolate to better resolutions
-        if extend > 0:
-            self.dataset = np.concatenate((self.dataset, np.zeros((self.dataset.shape[0],self.dataset.shape[1],extend,\
-                                                                   self.dataset.shape[3]))), axis=2)   
+    
         self.dataset = self.dataset.astype(np.float32)
         
              
@@ -372,34 +364,40 @@ class DataSet:
         print(f'created union_tp attribute of length {len(self.union_tp)}')
     
     
-    def set_target_x(self, n=40, forecast=False):
+    def set_target_x(self, n=40, uniform=False, r=1500):
         """
-        sets the target time values we want to interpolate the light curve to. 
+        sets the target time values we want to interpolate the light curve to. If uniform is false,
+        we set n points between the min and max t for each light curve. 
+        If its true, we set n evenly spaced points between 0 and r. 
         
         parameters:
-            num_points     (int)      --> how many points do we want? 
-            forecast       (boolean)  --> do we want to forecast?
+        
+            n       (int)      --> how many points do we want? 
+            uniform (boolean)  --> should we do uniform?
+            r       (int)      --> if uniform, whats the range of points? 
             
         side effects:
-            - sets self.target_x as a numpy array with dimensions as (len(self.dataset), len(self.bands), len of the formatted light curve)
-              i.e. like (2683, 3, 4428))
+            - sets self.target_x as a numpy array with dimensions as (len(self.dataset), len(self.bands), n)
         """
-        time = self.dataset[:,:,:,0]                            
-        zs_to_append = time.shape[2] - n 
-        self.target_x = np.zeros_like(time)
-        
-        for i, object_lcs_time in enumerate(time):
-            for j, lc_time in enumerate(object_lcs_time):   
-                max_time = np.max(lc_time)
-                min_time = lc_time[0]
-                if lc_time.sum() == 0:
-                    max_time = 1 
-                target_x = np.arange(min_time,max_time, (max_time - min_time)/n)
-                try:
-                    target_x = np.append(target_x, np.zeros((zs_to_append)), axis=0)[:time.shape[2]]
-                except Exception:
-                    print(f"can't predict to more points than {len(lc_time)}, use extend param in get_data") 
-                self.target_x[i,j] = target_x
+       
+        if uniform==True:
+            target_x = np.arange(0,r,step=r/n)[:n]
+            # format it... want (num exs x num bands x num tps)
+            self.target_x = target_x[np.newaxis,len(self.bands)].repeat(self.dataset.shape[0],axis=0)
+            
+        else:
+            self.target_x = np.zeros((self.dataset.shape[0],self.dataset.shape[1],n))
+            for i, obj_lcs in enumerate(self.dataset):
+                for j,lc in enumerate(obj_lcs):
+                    max_t = np.max(lc[:,0])
+                    min_t = lc[0,0]
+                    if max_t == 0:
+                        max_t=1500
+                        
+                    tx = np.arange(min_t,max_t, ((max_t - min_t)/n))
+                    self.target_x[i,j] = tx[:n]
+                
+        self.target_x = self.target_x.astype(np.float32)
     
     
     def set_sigma_nxs(self):

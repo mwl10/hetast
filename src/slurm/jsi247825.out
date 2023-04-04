@@ -1,0 +1,753 @@
+Namespace(n_union_tp=3500, data_folder='datasets/ZTF_i', checkpoint='datasets/ZTF_i0.07395125925540924.h5', start_col=1, inc_errors=False, print_at=1, embed_time=128, enc_num_heads=16, latent_dim=64, mixing='concat', num_ref_points=16, rec_hidden=128, width=512, save_at=30, patience=100, early_stopping=False, niters=20000, frac=0.5, batch_size=2, mse_weight=5.0, dropout=0.0, num_resamples=0, lr=5e-07, scheduler=False, warmup=4000, kl_zero=False, kl_annealing=True, net='hetvae', device='cuda', const_var=False, var_per_dim=False, std=0.1, seed=2, save=True, k_iwae=1) 5083217
+validated 3407 files out of 3407 for band='i'
+3407 3407
+(1731, 1, 539, 3)
+created union_tp attribute of length 3500
+dataset created w/ shape (1731, 1, 539, 3)
+train size: 1557, valid size: 156, test size: 174
+datasets/ZTF_i
+=> loading checkpoint 'datasets/ZTF_i0.07395125925540924.h5'
+Namespace(n_union_tp=3500, data_folder='datasets/ZTF_i', checkpoint='datasets/ZTF_i0.5990962982177734.h5', start_col=1, inc_errors=False, print_at=1, embed_time=128, enc_num_heads=16, latent_dim=64, mixing='concat', num_ref_points=16, rec_hidden=128, width=512, save_at=30, patience=100, early_stopping=False, niters=20000, frac=0.5, batch_size=2, mse_weight=5.0, dropout=0.0, num_resamples=0, lr=5e-06, scheduler=False, warmup=4000, kl_zero=False, kl_annealing=True, net='hetvae', device='cuda', const_var=False, var_per_dim=False, std=0.1, seed=2, save=True, k_iwae=1)
+loaded checkpoint w/ loss=1.4093853794827855
+model_size=498882
+2011,	Iter: 2011, train loss: 44.7124, avg nll: 39.7820, avg wnll: 618.4427, avg kl: 0.0461, mse: 0.979379, wmse: 15.203213, mae: 0.753223
+2012,	Iter: 2012, train loss: 40.0196, avg nll: 35.0047, avg wnll: 575.5394, avg kl: 0.0461, mse: 0.996238, wmse: 15.450462, mae: 0.759129
+2013,	Iter: 2013, train loss: 28.8572, avg nll: 23.9622, avg wnll: 349.1573, avg kl: 0.0485, mse: 0.971850, wmse: 14.853956, mae: 0.750407
+2014,	Iter: 2014, train loss: 26.5892, avg nll: 21.6615, avg wnll: 330.4735, avg kl: 0.0492, mse: 0.978242, wmse: 15.073035, mae: 0.751243
+2015,	Iter: 2015, train loss: 22.7341, avg nll: 17.7347, avg wnll: 268.6192, avg kl: 0.0502, mse: 0.992402, wmse: 15.318956, mae: 0.757792
+2016,	Iter: 2016, train loss: 19.2830, avg nll: 14.3742, avg wnll: 207.8750, avg kl: 0.0565, mse: 0.973276, wmse: 15.260111, mae: 0.749772
+2017,	Iter: 2017, train loss: 15.7525, avg nll: 10.6897, avg wnll: 170.4177, avg kl: 0.0613, mse: 1.003262, wmse: 15.722771, mae: 0.760001
+2018,	Iter: 2018, train loss: 12.8057, avg nll: 7.8243, avg wnll: 121.4736, avg kl: 0.0694, mse: 0.985698, wmse: 15.522443, mae: 0.759067
+2019,	Iter: 2019, train loss: 12.3398, avg nll: 7.3115, avg wnll: 107.0220, avg kl: 0.0801, mse: 0.993340, wmse: 15.697170, mae: 0.756226
+2020,	Iter: 2020, train loss: 11.8756, avg nll: 6.7555, avg wnll: 117.7368, avg kl: 0.0970, mse: 1.009010, wmse: 16.186924, mae: 0.763131
+nll: 1.4478, mse: 0.7273, mae: 0.6416, mean_mse: 12.7389, mean_mae: 0.6416
+1679438050.860432
+2021,	Iter: 2021, train loss: 3.0531, avg nll: 0.9280, avg wnll: 8.4080, avg kl: 0.0856, mse: 0.411681, wmse: 6.937864, mae: 0.476268
+2022,	Iter: 2022, train loss: 2.8995, avg nll: 0.9180, avg wnll: 8.6967, avg kl: 0.0694, mse: 0.385432, wmse: 6.570693, mae: 0.460783
+2023,	Iter: 2023, train loss: 2.8782, avg nll: 0.8987, avg wnll: 8.4806, avg kl: 0.0635, mse: 0.385874, wmse: 6.541780, mae: 0.458171
+2024,	Iter: 2024, train loss: 2.7006, avg nll: 0.8395, avg wnll: 8.6896, avg kl: 0.0563, mse: 0.363271, wmse: 6.248468, mae: 0.439956
+2025,	Iter: 2025, train loss: 2.5786, avg nll: 0.7882, avg wnll: 8.1943, avg kl: 0.0535, mse: 0.349527, wmse: 5.873179, mae: 0.432237
+2026,	Iter: 2026, train loss: 2.4610, avg nll: 0.7501, avg wnll: 7.2337, avg kl: 0.0479, mse: 0.334472, wmse: 5.533518, mae: 0.420815
+2027,	Iter: 2027, train loss: 2.3382, avg nll: 0.6770, avg wnll: 6.5683, avg kl: 0.0457, mse: 0.324827, wmse: 5.337380, mae: 0.412376
+2028,	Iter: 2028, train loss: 2.3276, avg nll: 0.6878, avg wnll: 7.7896, avg kl: 0.0417, mse: 0.321156, wmse: 5.213897, mae: 0.409688
+2029,	Iter: 2029, train loss: 2.0953, avg nll: 0.5671, avg wnll: 6.3639, avg kl: 0.0394, mse: 0.299188, wmse: 4.941810, mae: 0.392530
+2030,	Iter: 2030, train loss: 1.9808, avg nll: 0.4954, avg wnll: 5.7277, avg kl: 0.0372, mse: 0.290929, wmse: 4.760528, mae: 0.380807
+nll: 1.5625, mse: 0.6990, mae: 0.6270, mean_mse: 12.2508, mean_mae: 0.6270
+1679438274.9176474
+2031,	Iter: 2031, train loss: 2.0781, avg nll: 0.5307, avg wnll: 7.1354, avg kl: 0.0377, mse: 0.303196, wmse: 4.902293, mae: 0.389302
+2032,	Iter: 2032, train loss: 1.9319, avg nll: 0.4614, avg wnll: 6.3964, avg kl: 0.0361, mse: 0.288052, wmse: 4.674946, mae: 0.377945
+2033,	Iter: 2033, train loss: 1.9714, avg nll: 0.4485, avg wnll: 6.9077, avg kl: 0.0376, mse: 0.298242, wmse: 4.824147, mae: 0.383222
+2034,	Iter: 2034, train loss: 1.9168, avg nll: 0.4211, avg wnll: 6.7406, avg kl: 0.0365, mse: 0.292934, wmse: 4.778706, mae: 0.377600
+2035,	Iter: 2035, train loss: 1.7952, avg nll: 0.3395, avg wnll: 5.6648, avg kl: 0.0384, mse: 0.284576, wmse: 4.600272, mae: 0.370511
+2036,	Iter: 2036, train loss: 1.7822, avg nll: 0.3540, avg wnll: 6.3482, avg kl: 0.0377, mse: 0.279172, wmse: 4.514713, mae: 0.365400
+2037,	Iter: 2037, train loss: 1.7230, avg nll: 0.2828, avg wnll: 5.4429, avg kl: 0.0394, mse: 0.281236, wmse: 4.530277, mae: 0.364662
+2038,	Iter: 2038, train loss: 1.6920, avg nll: 0.2880, avg wnll: 5.9272, avg kl: 0.0379, mse: 0.274224, wmse: 4.411236, mae: 0.358658
+2039,	Iter: 2039, train loss: 1.6024, avg nll: 0.2388, avg wnll: 5.7699, avg kl: 0.0380, mse: 0.266064, wmse: 4.332104, mae: 0.353063
+2040,	Iter: 2040, train loss: 1.6088, avg nll: 0.2236, avg wnll: 5.4098, avg kl: 0.0372, mse: 0.270495, wmse: 4.391356, mae: 0.354219
+nll: 2.0866, mse: 0.6969, mae: 0.6257, mean_mse: 12.2074, mean_mae: 0.6257
+1679438504.8142145
+saving.................
+done
+2041,	Iter: 2041, train loss: 1.7665, avg nll: 0.3046, avg wnll: 7.0763, avg kl: 0.0393, mse: 0.285433, wmse: 4.597445, mae: 0.367218
+2042,	Iter: 2042, train loss: 1.6390, avg nll: 0.2475, avg wnll: 6.1039, avg kl: 0.0382, mse: 0.271516, wmse: 4.405904, mae: 0.356863
+2043,	Iter: 2043, train loss: 1.7272, avg nll: 0.2689, avg wnll: 6.5297, avg kl: 0.0401, mse: 0.284475, wmse: 4.601432, mae: 0.366955
+2044,	Iter: 2044, train loss: 1.7250, avg nll: 0.2750, avg wnll: 6.5021, avg kl: 0.0389, mse: 0.282972, wmse: 4.613342, mae: 0.365593
+2045,	Iter: 2045, train loss: 1.6471, avg nll: 0.2293, avg wnll: 5.6856, avg kl: 0.0407, mse: 0.276194, wmse: 4.458251, mae: 0.360279
+2046,	Iter: 2046, train loss: 1.6549, avg nll: 0.2546, avg wnll: 6.4344, avg kl: 0.0398, mse: 0.272798, wmse: 4.411666, mae: 0.357170
+2047,	Iter: 2047, train loss: 1.6433, avg nll: 0.2152, avg wnll: 5.7350, avg kl: 0.0413, mse: 0.278042, wmse: 4.474387, mae: 0.359681
+2048,	Iter: 2048, train loss: 1.6103, avg nll: 0.2222, avg wnll: 6.0600, avg kl: 0.0397, mse: 0.270288, wmse: 4.348217, mae: 0.353280
+2049,	Iter: 2049, train loss: 1.5573, avg nll: 0.1970, avg wnll: 6.1009, avg kl: 0.0398, mse: 0.264679, wmse: 4.308129, mae: 0.350571
+2050,	Iter: 2050, train loss: 1.5778, avg nll: 0.1891, avg wnll: 5.7502, avg kl: 0.0387, mse: 0.270527, wmse: 4.390275, mae: 0.353484
+nll: 2.2938, mse: 0.6978, mae: 0.6261, mean_mse: 12.2195, mean_mae: 0.6261
+1679438732.2311559
+2051,	Iter: 2051, train loss: 1.7498, avg nll: 0.2862, avg wnll: 7.4423, avg kl: 0.0408, mse: 0.285073, wmse: 4.589803, mae: 0.366477
+2052,	Iter: 2052, train loss: 1.6018, avg nll: 0.2155, avg wnll: 6.1972, avg kl: 0.0395, mse: 0.269800, wmse: 4.376964, mae: 0.354802
+2053,	Iter: 2053, train loss: 1.6769, avg nll: 0.2276, avg wnll: 6.3860, avg kl: 0.0413, mse: 0.282034, wmse: 4.562517, mae: 0.364014
+2054,	Iter: 2054, train loss: 1.6802, avg nll: 0.2363, avg wnll: 6.3694, avg kl: 0.0398, mse: 0.281180, wmse: 4.584170, mae: 0.363162
+2055,	Iter: 2055, train loss: 1.6123, avg nll: 0.1984, avg wnll: 5.6441, avg kl: 0.0416, mse: 0.274781, wmse: 4.434591, mae: 0.358330
+2056,	Iter: 2056, train loss: 1.6118, avg nll: 0.2160, avg wnll: 6.2866, avg kl: 0.0407, mse: 0.271294, wmse: 4.388121, mae: 0.355124
+2057,	Iter: 2057, train loss: 1.6191, avg nll: 0.1903, avg wnll: 5.7489, avg kl: 0.0423, mse: 0.277541, wmse: 4.466630, mae: 0.358718
+2058,	Iter: 2058, train loss: 1.5823, avg nll: 0.1964, avg wnll: 6.0346, avg kl: 0.0405, mse: 0.269263, wmse: 4.333275, mae: 0.351827
+2059,	Iter: 2059, train loss: 1.5349, avg nll: 0.1736, avg wnll: 6.0899, avg kl: 0.0404, mse: 0.264346, wmse: 4.303700, mae: 0.349806
+2060,	Iter: 2060, train loss: 1.5633, avg nll: 0.1705, avg wnll: 5.8412, avg kl: 0.0391, mse: 0.270845, wmse: 4.394879, mae: 0.353450
+nll: 2.4043, mse: 0.6983, mae: 0.6264, mean_mse: 12.2269, mean_mae: 0.6264
+1679438959.7739873
+2061,	Iter: 2061, train loss: 1.7384, avg nll: 0.2724, avg wnll: 7.5512, avg kl: 0.0412, mse: 0.285031, wmse: 4.589090, mae: 0.366235
+2062,	Iter: 2062, train loss: 1.5820, avg nll: 0.1962, avg wnll: 6.1906, avg kl: 0.0399, mse: 0.269203, wmse: 4.367498, mae: 0.353932
+2063,	Iter: 2063, train loss: 1.6533, avg nll: 0.2057, avg wnll: 6.3106, avg kl: 0.0416, mse: 0.281205, wmse: 4.550180, mae: 0.362826
+2064,	Iter: 2064, train loss: 1.6599, avg nll: 0.2170, avg wnll: 6.3483, avg kl: 0.0400, mse: 0.280578, wmse: 4.574558, mae: 0.362213
+2065,	Iter: 2065, train loss: 1.5900, avg nll: 0.1783, avg wnll: 5.6730, avg kl: 0.0418, mse: 0.273961, wmse: 4.421300, mae: 0.357077
+2066,	Iter: 2066, train loss: 1.5851, avg nll: 0.1918, avg wnll: 6.2334, avg kl: 0.0409, mse: 0.270496, wmse: 4.376325, mae: 0.354005
+2067,	Iter: 2067, train loss: 1.6006, avg nll: 0.1727, avg wnll: 5.7397, avg kl: 0.0426, mse: 0.277061, wmse: 4.459566, mae: 0.357884
+2068,	Iter: 2068, train loss: 1.5667, avg nll: 0.1806, avg wnll: 6.0394, avg kl: 0.0408, mse: 0.269046, wmse: 4.330620, mae: 0.351298
+2069,	Iter: 2069, train loss: 1.5191, avg nll: 0.1572, avg wnll: 6.0271, avg kl: 0.0407, mse: 0.264251, wmse: 4.303445, mae: 0.349526
+2070,	Iter: 2070, train loss: 1.5497, avg nll: 0.1562, avg wnll: 5.8443, avg kl: 0.0393, mse: 0.270829, wmse: 4.394819, mae: 0.353216
+nll: 2.4806, mse: 0.6988, mae: 0.6266, mean_mse: 12.2353, mean_mae: 0.6266
+1679439188.5323076
+saving.................
+done
+2071,	Iter: 2071, train loss: 1.7233, avg nll: 0.2581, avg wnll: 7.5316, avg kl: 0.0414, mse: 0.284775, wmse: 4.585294, mae: 0.365763
+2072,	Iter: 2072, train loss: 1.5657, avg nll: 0.1815, avg wnll: 6.1767, avg kl: 0.0400, mse: 0.268852, wmse: 4.361974, mae: 0.353378
+2073,	Iter: 2073, train loss: 1.6357, avg nll: 0.1898, avg wnll: 6.2635, avg kl: 0.0419, mse: 0.280798, wmse: 4.544190, mae: 0.362090
+2074,	Iter: 2074, train loss: 1.6472, avg nll: 0.2049, avg wnll: 6.3952, avg kl: 0.0403, mse: 0.280393, wmse: 4.571795, mae: 0.361786
+2075,	Iter: 2075, train loss: 1.5754, avg nll: 0.1653, avg wnll: 5.6693, avg kl: 0.0421, mse: 0.273609, wmse: 4.415740, mae: 0.356507
+2076,	Iter: 2076, train loss: 1.5648, avg nll: 0.1734, avg wnll: 6.1608, avg kl: 0.0411, mse: 0.270056, wmse: 4.369902, mae: 0.353283
+2077,	Iter: 2077, train loss: 1.5863, avg nll: 0.1597, avg wnll: 5.7304, avg kl: 0.0428, mse: 0.276750, wmse: 4.454978, mae: 0.357353
+2078,	Iter: 2078, train loss: 1.5534, avg nll: 0.1679, avg wnll: 6.0351, avg kl: 0.0410, mse: 0.268899, wmse: 4.328876, mae: 0.350908
+2079,	Iter: 2079, train loss: 1.5042, avg nll: 0.1430, avg wnll: 5.9670, avg kl: 0.0408, mse: 0.264086, wmse: 4.301732, mae: 0.349147
+2080,	Iter: 2080, train loss: 1.5366, avg nll: 0.1440, avg wnll: 5.8581, avg kl: 0.0395, mse: 0.270640, wmse: 4.391935, mae: 0.352833
+nll: 2.5611, mse: 0.6991, mae: 0.6267, mean_mse: 12.2399, mean_mae: 0.6267
+1679439420.8811443
+2081,	Iter: 2081, train loss: 1.7087, avg nll: 0.2448, avg wnll: 7.5012, avg kl: 0.0415, mse: 0.284481, wmse: 4.580820, mae: 0.365286
+2082,	Iter: 2082, train loss: 1.5507, avg nll: 0.1677, avg wnll: 6.1413, avg kl: 0.0401, mse: 0.268574, wmse: 4.357896, mae: 0.352875
+2083,	Iter: 2083, train loss: 1.6218, avg nll: 0.1771, avg wnll: 6.2339, avg kl: 0.0421, mse: 0.280525, wmse: 4.540507, mae: 0.361557
+2084,	Iter: 2084, train loss: 1.6339, avg nll: 0.1928, avg wnll: 6.3669, avg kl: 0.0404, mse: 0.280145, wmse: 4.567937, mae: 0.361340
+2085,	Iter: 2085, train loss: 1.5634, avg nll: 0.1545, avg wnll: 5.6535, avg kl: 0.0422, mse: 0.273335, wmse: 4.411423, mae: 0.356014
+2086,	Iter: 2086, train loss: 1.5473, avg nll: 0.1577, avg wnll: 6.0916, avg kl: 0.0412, mse: 0.269697, wmse: 4.364799, mae: 0.352666
+2087,	Iter: 2087, train loss: 1.5749, avg nll: 0.1491, avg wnll: 5.7265, avg kl: 0.0429, mse: 0.276573, wmse: 4.452587, mae: 0.356998
+2088,	Iter: 2088, train loss: 1.5429, avg nll: 0.1577, avg wnll: 6.0379, avg kl: 0.0411, mse: 0.268831, wmse: 4.328171, mae: 0.350628
+2089,	Iter: 2089, train loss: 1.4909, avg nll: 0.1304, avg wnll: 5.9125, avg kl: 0.0409, mse: 0.263935, wmse: 4.299954, mae: 0.348783
+2090,	Iter: 2090, train loss: 1.5257, avg nll: 0.1337, avg wnll: 5.8740, avg kl: 0.0395, mse: 0.270497, wmse: 4.389719, mae: 0.352530
+nll: 2.6388, mse: 0.6992, mae: 0.6268, mean_mse: 12.2418, mean_mae: 0.6268
+1679439649.5404296
+2091,	Iter: 2091, train loss: 1.6965, avg nll: 0.2337, avg wnll: 7.4786, avg kl: 0.0415, mse: 0.284269, wmse: 4.577571, mae: 0.364909
+2092,	Iter: 2092, train loss: 1.5383, avg nll: 0.1562, avg wnll: 6.1178, avg kl: 0.0401, mse: 0.268384, wmse: 4.355213, mae: 0.352502
+2093,	Iter: 2093, train loss: 1.6095, avg nll: 0.1659, avg wnll: 6.2075, avg kl: 0.0422, mse: 0.280291, wmse: 4.537272, mae: 0.361092
+2094,	Iter: 2094, train loss: 1.6225, avg nll: 0.1825, avg wnll: 6.3446, avg kl: 0.0404, mse: 0.279937, wmse: 4.564651, mae: 0.360962
+2095,	Iter: 2095, train loss: 1.5532, avg nll: 0.1453, avg wnll: 5.6456, avg kl: 0.0423, mse: 0.273128, wmse: 4.408194, mae: 0.355621
+2096,	Iter: 2096, train loss: 1.5326, avg nll: 0.1444, avg wnll: 6.0390, avg kl: 0.0412, mse: 0.269410, wmse: 4.360652, mae: 0.352146
+2097,	Iter: 2097, train loss: 1.5649, avg nll: 0.1399, avg wnll: 5.7284, avg kl: 0.0430, mse: 0.276407, wmse: 4.450314, mae: 0.356679
+2098,	Iter: 2098, train loss: 1.5336, avg nll: 0.1487, avg wnll: 6.0466, avg kl: 0.0411, mse: 0.268764, wmse: 4.327427, mae: 0.350380
+2099,	Iter: 2099, train loss: 1.4802, avg nll: 0.1201, avg wnll: 5.8845, avg kl: 0.0409, mse: 0.263843, wmse: 4.299044, mae: 0.348513
+2100,	Iter: 2100, train loss: 1.5165, avg nll: 0.1251, avg wnll: 5.8941, avg kl: 0.0395, mse: 0.270368, wmse: 4.387694, mae: 0.352264
+nll: 2.7165, mse: 0.6993, mae: 0.6268, mean_mse: 12.2439, mean_mae: 0.6268
+1679439873.6808975
+saving.................
+done
+2101,	Iter: 2101, train loss: 1.6861, avg nll: 0.2240, avg wnll: 7.4614, avg kl: 0.0416, mse: 0.284110, wmse: 4.575046, mae: 0.364599
+2102,	Iter: 2102, train loss: 1.5280, avg nll: 0.1466, avg wnll: 6.1038, avg kl: 0.0402, mse: 0.268242, wmse: 4.353079, mae: 0.352217
+2103,	Iter: 2103, train loss: 1.5987, avg nll: 0.1561, avg wnll: 6.1885, avg kl: 0.0422, mse: 0.280092, wmse: 4.534348, mae: 0.360701
+2104,	Iter: 2104, train loss: 1.6121, avg nll: 0.1731, avg wnll: 6.3246, avg kl: 0.0404, mse: 0.279732, wmse: 4.561443, mae: 0.360601
+2105,	Iter: 2105, train loss: 1.5442, avg nll: 0.1372, avg wnll: 5.6455, avg kl: 0.0422, mse: 0.272948, wmse: 4.405425, mae: 0.355284
+2106,	Iter: 2106, train loss: 1.5202, avg nll: 0.1331, avg wnll: 6.0038, avg kl: 0.0411, mse: 0.269178, wmse: 4.357356, mae: 0.351710
+2107,	Iter: 2107, train loss: 1.5561, avg nll: 0.1317, avg wnll: 5.7304, avg kl: 0.0429, mse: 0.276284, wmse: 4.448624, mae: 0.356427
+2108,	Iter: 2108, train loss: 1.5254, avg nll: 0.1407, avg wnll: 6.0584, avg kl: 0.0411, mse: 0.268711, wmse: 4.326907, mae: 0.350169
+2109,	Iter: 2109, train loss: 1.4708, avg nll: 0.1112, avg wnll: 5.8656, avg kl: 0.0409, mse: 0.263761, wmse: 4.298009, mae: 0.348274
+2110,	Iter: 2110, train loss: 1.5089, avg nll: 0.1179, avg wnll: 5.9186, avg kl: 0.0395, mse: 0.270297, wmse: 4.386634, mae: 0.352066
+nll: 2.7943, mse: 0.6994, mae: 0.6268, mean_mse: 12.2450, mean_mae: 0.6268
+1679440100.0074987
+2111,	Iter: 2111, train loss: 1.6757, avg nll: 0.2147, avg wnll: 7.4393, avg kl: 0.0416, mse: 0.283889, wmse: 4.571640, mae: 0.364247
+2112,	Iter: 2112, train loss: 1.5179, avg nll: 0.1374, avg wnll: 6.0900, avg kl: 0.0401, mse: 0.268083, wmse: 4.350718, mae: 0.351912
+2113,	Iter: 2113, train loss: 1.5888, avg nll: 0.1470, avg wnll: 6.1736, avg kl: 0.0422, mse: 0.279910, wmse: 4.531648, mae: 0.360345
+2114,	Iter: 2114, train loss: 1.6028, avg nll: 0.1647, avg wnll: 6.3149, avg kl: 0.0403, mse: 0.279541, wmse: 4.558515, mae: 0.360277
+2115,	Iter: 2115, train loss: 1.5359, avg nll: 0.1298, avg wnll: 5.6456, avg kl: 0.0422, mse: 0.272784, wmse: 4.402948, mae: 0.354973
+2116,	Iter: 2116, train loss: 1.5090, avg nll: 0.1231, avg wnll: 5.9763, avg kl: 0.0411, mse: 0.268956, wmse: 4.354211, mae: 0.351315
+2117,	Iter: 2117, train loss: 1.5476, avg nll: 0.1239, avg wnll: 5.7320, avg kl: 0.0429, mse: 0.276167, wmse: 4.447139, mae: 0.356170
+2118,	Iter: 2118, train loss: 1.5175, avg nll: 0.1332, avg wnll: 6.0669, avg kl: 0.0411, mse: 0.268643, wmse: 4.326050, mae: 0.349956
+2119,	Iter: 2119, train loss: 1.4623, avg nll: 0.1031, avg wnll: 5.8531, avg kl: 0.0408, mse: 0.263678, wmse: 4.297015, mae: 0.348051
+2120,	Iter: 2120, train loss: 1.5017, avg nll: 0.1110, avg wnll: 5.9388, avg kl: 0.0395, mse: 0.270223, wmse: 4.385516, mae: 0.351877
+nll: 2.8739, mse: 0.6995, mae: 0.6268, mean_mse: 12.2461, mean_mae: 0.6268
+1679440329.7259097
+2121,	Iter: 2121, train loss: 1.6662, avg nll: 0.2062, avg wnll: 7.4219, avg kl: 0.0415, mse: 0.283701, wmse: 4.568719, mae: 0.363928
+2122,	Iter: 2122, train loss: 1.5093, avg nll: 0.1294, avg wnll: 6.0827, avg kl: 0.0401, mse: 0.267961, wmse: 4.348858, mae: 0.351666
+2123,	Iter: 2123, train loss: 1.5797, avg nll: 0.1388, avg wnll: 6.1619, avg kl: 0.0422, mse: 0.279746, wmse: 4.529214, mae: 0.360031
+2124,	Iter: 2124, train loss: 1.5942, avg nll: 0.1570, avg wnll: 6.3078, avg kl: 0.0403, mse: 0.279381, wmse: 4.556101, mae: 0.359991
+2125,	Iter: 2125, train loss: 1.5281, avg nll: 0.1228, avg wnll: 5.6498, avg kl: 0.0422, mse: 0.272617, wmse: 4.400493, mae: 0.354684
+2126,	Iter: 2126, train loss: 1.4989, avg nll: 0.1140, avg wnll: 5.9588, avg kl: 0.0411, mse: 0.268770, wmse: 4.351566, mae: 0.350976
+2127,	Iter: 2127, train loss: 1.5395, avg nll: 0.1165, avg wnll: 5.7343, avg kl: 0.0429, mse: 0.276036, wmse: 4.445352, mae: 0.355919
+2128,	Iter: 2128, train loss: 1.5100, avg nll: 0.1261, avg wnll: 6.0761, avg kl: 0.0410, mse: 0.268572, wmse: 4.325165, mae: 0.349746
+2129,	Iter: 2129, train loss: 1.4546, avg nll: 0.0957, avg wnll: 5.8471, avg kl: 0.0408, mse: 0.263624, wmse: 4.296459, mae: 0.347866
+2130,	Iter: 2130, train loss: 1.4948, avg nll: 0.1046, avg wnll: 5.9590, avg kl: 0.0395, mse: 0.270148, wmse: 4.384442, mae: 0.351691
+nll: 2.9550, mse: 0.6995, mae: 0.6269, mean_mse: 12.2468, mean_mae: 0.6269
+1679440554.000288
+saving.................
+done
+2131,	Iter: 2131, train loss: 1.6574, avg nll: 0.1983, avg wnll: 7.4066, avg kl: 0.0415, mse: 0.283522, wmse: 4.565920, mae: 0.363624
+2132,	Iter: 2132, train loss: 1.5011, avg nll: 0.1218, avg wnll: 6.0774, avg kl: 0.0401, mse: 0.267842, wmse: 4.347037, mae: 0.351436
+2133,	Iter: 2133, train loss: 1.5715, avg nll: 0.1313, avg wnll: 6.1562, avg kl: 0.0422, mse: 0.279602, wmse: 4.527183, mae: 0.359745
+2134,	Iter: 2134, train loss: 1.5862, avg nll: 0.1497, avg wnll: 6.3015, avg kl: 0.0403, mse: 0.279238, wmse: 4.553919, mae: 0.359721
+2135,	Iter: 2135, train loss: 1.5212, avg nll: 0.1165, avg wnll: 5.6548, avg kl: 0.0422, mse: 0.272494, wmse: 4.398664, mae: 0.354451
+2136,	Iter: 2136, train loss: 1.4897, avg nll: 0.1056, avg wnll: 5.9449, avg kl: 0.0411, mse: 0.268604, wmse: 4.349113, mae: 0.350663
+2137,	Iter: 2137, train loss: 1.5320, avg nll: 0.1094, avg wnll: 5.7331, avg kl: 0.0429, mse: 0.275931, wmse: 4.443822, mae: 0.355685
+2138,	Iter: 2138, train loss: 1.5033, avg nll: 0.1196, avg wnll: 6.0834, avg kl: 0.0410, mse: 0.268522, wmse: 4.324582, mae: 0.349570
+2139,	Iter: 2139, train loss: 1.4472, avg nll: 0.0887, avg wnll: 5.8420, avg kl: 0.0408, mse: 0.263555, wmse: 4.295516, mae: 0.347681
+2140,	Iter: 2140, train loss: 1.4881, avg nll: 0.0983, avg wnll: 5.9793, avg kl: 0.0395, mse: 0.270064, wmse: 4.383233, mae: 0.351499
+nll: 3.0378, mse: 0.6995, mae: 0.6268, mean_mse: 12.2471, mean_mae: 0.6268
+1679440783.8741176
+2141,	Iter: 2141, train loss: 1.6488, avg nll: 0.1906, avg wnll: 7.3905, avg kl: 0.0415, mse: 0.283326, wmse: 4.562917, mae: 0.363298
+2142,	Iter: 2142, train loss: 1.4936, avg nll: 0.1148, avg wnll: 6.0738, avg kl: 0.0401, mse: 0.267744, wmse: 4.345530, mae: 0.351227
+2143,	Iter: 2143, train loss: 1.5639, avg nll: 0.1243, avg wnll: 6.1511, avg kl: 0.0422, mse: 0.279481, wmse: 4.525512, mae: 0.359486
+2144,	Iter: 2144, train loss: 1.5790, avg nll: 0.1431, avg wnll: 6.2996, avg kl: 0.0403, mse: 0.279118, wmse: 4.552143, mae: 0.359492
+2145,	Iter: 2145, train loss: 1.5143, avg nll: 0.1104, avg wnll: 5.6566, avg kl: 0.0422, mse: 0.272349, wmse: 4.396495, mae: 0.354203
+2146,	Iter: 2146, train loss: 1.4810, avg nll: 0.0978, avg wnll: 5.9278, avg kl: 0.0411, mse: 0.268442, wmse: 4.346717, mae: 0.350370
+2147,	Iter: 2147, train loss: 1.5250, avg nll: 0.1030, avg wnll: 5.7333, avg kl: 0.0429, mse: 0.275821, wmse: 4.442345, mae: 0.355466
+2148,	Iter: 2148, train loss: 1.4967, avg nll: 0.1134, avg wnll: 6.0866, avg kl: 0.0410, mse: 0.268466, wmse: 4.323880, mae: 0.349392
+2149,	Iter: 2149, train loss: 1.4402, avg nll: 0.0820, avg wnll: 5.8333, avg kl: 0.0407, mse: 0.263489, wmse: 4.294658, mae: 0.347506
+2150,	Iter: 2150, train loss: 1.4817, avg nll: 0.0924, avg wnll: 5.9915, avg kl: 0.0394, mse: 0.269982, wmse: 4.382037, mae: 0.351320
+nll: 3.1202, mse: 0.6996, mae: 0.6269, mean_mse: 12.2477, mean_mae: 0.6269
+1679441012.6226737
+2151,	Iter: 2151, train loss: 1.6410, avg nll: 0.1837, avg wnll: 7.3756, avg kl: 0.0414, mse: 0.283171, wmse: 4.560431, mae: 0.363017
+2152,	Iter: 2152, train loss: 1.4864, avg nll: 0.1081, avg wnll: 6.0690, avg kl: 0.0401, mse: 0.267642, wmse: 4.343898, mae: 0.351026
+2153,	Iter: 2153, train loss: 1.5566, avg nll: 0.1177, avg wnll: 6.1447, avg kl: 0.0421, mse: 0.279360, wmse: 4.523766, mae: 0.359243
+2154,	Iter: 2154, train loss: 1.5719, avg nll: 0.1366, avg wnll: 6.2924, avg kl: 0.0403, mse: 0.279002, wmse: 4.550491, mae: 0.359264
+2155,	Iter: 2155, train loss: 1.5081, avg nll: 0.1047, avg wnll: 5.6589, avg kl: 0.0422, mse: 0.272244, wmse: 4.394987, mae: 0.354001
+2156,	Iter: 2156, train loss: 1.4731, avg nll: 0.0906, avg wnll: 5.9155, avg kl: 0.0410, mse: 0.268306, wmse: 4.344763, mae: 0.350119
+2157,	Iter: 2157, train loss: 1.5182, avg nll: 0.0967, avg wnll: 5.7310, avg kl: 0.0429, mse: 0.275715, wmse: 4.440968, mae: 0.355259
+2158,	Iter: 2158, train loss: 1.4900, avg nll: 0.1071, avg wnll: 6.0843, avg kl: 0.0410, mse: 0.268389, wmse: 4.322890, mae: 0.349189
+2159,	Iter: 2159, train loss: 1.4334, avg nll: 0.0756, avg wnll: 5.8273, avg kl: 0.0407, mse: 0.263427, wmse: 4.293833, mae: 0.347340
+2160,	Iter: 2160, train loss: 1.4756, avg nll: 0.0867, avg wnll: 6.0076, avg kl: 0.0394, mse: 0.269910, wmse: 4.381028, mae: 0.351152
+nll: 3.2068, mse: 0.6995, mae: 0.6268, mean_mse: 12.2477, mean_mae: 0.6268
+1679441245.0052054
+saving.................
+done
+2161,	Iter: 2161, train loss: 1.6331, avg nll: 0.1768, avg wnll: 7.3616, avg kl: 0.0414, mse: 0.282985, wmse: 4.557627, mae: 0.362725
+2162,	Iter: 2162, train loss: 1.4793, avg nll: 0.1016, avg wnll: 6.0651, avg kl: 0.0400, mse: 0.267536, wmse: 4.342302, mae: 0.350813
+2163,	Iter: 2163, train loss: 1.5496, avg nll: 0.1113, avg wnll: 6.1394, avg kl: 0.0421, mse: 0.279240, wmse: 4.522147, mae: 0.359008
+2164,	Iter: 2164, train loss: 1.5650, avg nll: 0.1304, avg wnll: 6.2885, avg kl: 0.0402, mse: 0.278880, wmse: 4.548726, mae: 0.359038
+2165,	Iter: 2165, train loss: 1.5017, avg nll: 0.0990, avg wnll: 5.6580, avg kl: 0.0422, mse: 0.272114, wmse: 4.393087, mae: 0.353781
+2166,	Iter: 2166, train loss: 1.4652, avg nll: 0.0834, avg wnll: 5.9015, avg kl: 0.0410, mse: 0.268159, wmse: 4.342637, mae: 0.349852
+2167,	Iter: 2167, train loss: 1.5119, avg nll: 0.0909, avg wnll: 5.7328, avg kl: 0.0428, mse: 0.275639, wmse: 4.439967, mae: 0.355082
+2168,	Iter: 2168, train loss: 1.4840, avg nll: 0.1013, avg wnll: 6.0859, avg kl: 0.0409, mse: 0.268336, wmse: 4.322176, mae: 0.349024
+2169,	Iter: 2169, train loss: 1.4268, avg nll: 0.0694, avg wnll: 5.8178, avg kl: 0.0407, mse: 0.263365, wmse: 4.292967, mae: 0.347177
+2170,	Iter: 2170, train loss: 1.4696, avg nll: 0.0811, avg wnll: 6.0162, avg kl: 0.0393, mse: 0.269840, wmse: 4.380033, mae: 0.350992
+nll: 3.2942, mse: 0.6996, mae: 0.6269, mean_mse: 12.2482, mean_mae: 0.6269
+1679441469.8608944
+2171,	Iter: 2171, train loss: 1.6263, avg nll: 0.1706, avg wnll: 7.3534, avg kl: 0.0414, mse: 0.282857, wmse: 4.555581, mae: 0.362475
+2172,	Iter: 2172, train loss: 1.4730, avg nll: 0.0957, avg wnll: 6.0646, avg kl: 0.0400, mse: 0.267457, wmse: 4.341028, mae: 0.350643
+2173,	Iter: 2173, train loss: 1.5432, avg nll: 0.1054, avg wnll: 6.1359, avg kl: 0.0421, mse: 0.279144, wmse: 4.520777, mae: 0.358807
+2174,	Iter: 2174, train loss: 1.5585, avg nll: 0.1244, avg wnll: 6.2814, avg kl: 0.0402, mse: 0.278786, wmse: 4.547345, mae: 0.358848
+2175,	Iter: 2175, train loss: 1.4959, avg nll: 0.0937, avg wnll: 5.6602, avg kl: 0.0421, mse: 0.272014, wmse: 4.391608, mae: 0.353596
+2176,	Iter: 2176, train loss: 1.4585, avg nll: 0.0772, avg wnll: 5.8940, avg kl: 0.0410, mse: 0.268073, wmse: 4.341347, mae: 0.349658
+2177,	Iter: 2177, train loss: 1.5053, avg nll: 0.0849, avg wnll: 5.7264, avg kl: 0.0428, mse: 0.275521, wmse: 4.438260, mae: 0.354861
+2178,	Iter: 2178, train loss: 1.4774, avg nll: 0.0953, avg wnll: 6.0810, avg kl: 0.0409, mse: 0.268254, wmse: 4.321038, mae: 0.348828
+2179,	Iter: 2179, train loss: 1.4203, avg nll: 0.0632, avg wnll: 5.8112, avg kl: 0.0406, mse: 0.263296, wmse: 4.291893, mae: 0.347006
+2180,	Iter: 2180, train loss: 1.4638, avg nll: 0.0757, avg wnll: 6.0276, avg kl: 0.0393, mse: 0.269767, wmse: 4.378999, mae: 0.350832
+nll: 3.3855, mse: 0.6996, mae: 0.6268, mean_mse: 12.2484, mean_mae: 0.6268
+1679441697.9343722
+2181,	Iter: 2181, train loss: 1.6190, avg nll: 0.1643, avg wnll: 7.3406, avg kl: 0.0413, mse: 0.282677, wmse: 4.552829, mae: 0.362192
+2182,	Iter: 2182, train loss: 1.4664, avg nll: 0.0896, avg wnll: 6.0614, avg kl: 0.0399, mse: 0.267365, wmse: 4.339636, mae: 0.350456
+2183,	Iter: 2183, train loss: 1.5370, avg nll: 0.0996, avg wnll: 6.1345, avg kl: 0.0420, mse: 0.279069, wmse: 4.519788, mae: 0.358631
+2184,	Iter: 2184, train loss: 1.5524, avg nll: 0.1188, avg wnll: 6.2769, avg kl: 0.0402, mse: 0.278695, wmse: 4.546025, mae: 0.358658
+2185,	Iter: 2185, train loss: 1.4903, avg nll: 0.0885, avg wnll: 5.6627, avg kl: 0.0421, mse: 0.271926, wmse: 4.390341, mae: 0.353427
+2186,	Iter: 2186, train loss: 1.4518, avg nll: 0.0710, avg wnll: 5.8865, avg kl: 0.0409, mse: 0.267971, wmse: 4.339932, mae: 0.349457
+2187,	Iter: 2187, train loss: 1.4992, avg nll: 0.0793, avg wnll: 5.7252, avg kl: 0.0428, mse: 0.275435, wmse: 4.437120, mae: 0.354680
+2188,	Iter: 2188, train loss: 1.4716, avg nll: 0.0898, avg wnll: 6.0815, avg kl: 0.0408, mse: 0.268193, wmse: 4.320201, mae: 0.348662
+2189,	Iter: 2189, train loss: 1.4140, avg nll: 0.0572, avg wnll: 5.7997, avg kl: 0.0406, mse: 0.263226, wmse: 4.290882, mae: 0.346840
+2190,	Iter: 2190, train loss: 1.4580, avg nll: 0.0703, avg wnll: 6.0367, avg kl: 0.0392, mse: 0.269687, wmse: 4.377798, mae: 0.350669
+nll: 3.4781, mse: 0.6996, mae: 0.6268, mean_mse: 12.2487, mean_mae: 0.6268
+1679441927.1175349
+saving.................
+done
+2191,	Iter: 2191, train loss: 1.6126, avg nll: 0.1585, avg wnll: 7.3329, avg kl: 0.0413, mse: 0.282554, wmse: 4.550931, mae: 0.361957
+2192,	Iter: 2192, train loss: 1.4606, avg nll: 0.0842, avg wnll: 6.0601, avg kl: 0.0399, mse: 0.267303, wmse: 4.338673, mae: 0.350304
+2193,	Iter: 2193, train loss: 1.5309, avg nll: 0.0940, avg wnll: 6.1298, avg kl: 0.0420, mse: 0.278981, wmse: 4.518607, mae: 0.358442
+2194,	Iter: 2194, train loss: 1.5466, avg nll: 0.1134, avg wnll: 6.2747, avg kl: 0.0401, mse: 0.278625, wmse: 4.545045, mae: 0.358499
+2195,	Iter: 2195, train loss: 1.4847, avg nll: 0.0835, avg wnll: 5.6628, avg kl: 0.0421, mse: 0.271829, wmse: 4.388845, mae: 0.353254
+2196,	Iter: 2196, train loss: 1.4452, avg nll: 0.0649, avg wnll: 5.8757, avg kl: 0.0409, mse: 0.267868, wmse: 4.338441, mae: 0.349246
+2197,	Iter: 2197, train loss: 1.4933, avg nll: 0.0738, avg wnll: 5.7210, avg kl: 0.0427, mse: 0.275350, wmse: 4.435848, mae: 0.354506
+2198,	Iter: 2198, train loss: 1.4661, avg nll: 0.0845, avg wnll: 6.0823, avg kl: 0.0408, mse: 0.268150, wmse: 4.319675, mae: 0.348513
+2199,	Iter: 2199, train loss: 1.4082, avg nll: 0.0517, avg wnll: 5.7949, avg kl: 0.0406, mse: 0.263181, wmse: 4.290193, mae: 0.346710
+2200,	Iter: 2200, train loss: 1.4525, avg nll: 0.0653, avg wnll: 6.0464, avg kl: 0.0392, mse: 0.269599, wmse: 4.376527, mae: 0.350501
+nll: 3.5730, mse: 0.6996, mae: 0.6268, mean_mse: 12.2489, mean_mae: 0.6268
+1679442156.5106685
+2201,	Iter: 2201, train loss: 1.6058, avg nll: 0.1527, avg wnll: 7.3236, avg kl: 0.0412, mse: 0.282390, wmse: 4.548471, mae: 0.361691
+2202,	Iter: 2202, train loss: 1.4546, avg nll: 0.0786, avg wnll: 6.0560, avg kl: 0.0399, mse: 0.267236, wmse: 4.337603, mae: 0.350145
+2203,	Iter: 2203, train loss: 1.5250, avg nll: 0.0886, avg wnll: 6.1255, avg kl: 0.0420, mse: 0.278898, wmse: 4.517381, mae: 0.358266
+2204,	Iter: 2204, train loss: 1.5409, avg nll: 0.1081, avg wnll: 6.2701, avg kl: 0.0401, mse: 0.278545, wmse: 4.543841, mae: 0.358334
+2205,	Iter: 2205, train loss: 1.4794, avg nll: 0.0786, avg wnll: 5.6639, avg kl: 0.0420, mse: 0.271754, wmse: 4.387781, mae: 0.353107
+2206,	Iter: 2206, train loss: 1.4391, avg nll: 0.0593, avg wnll: 5.8692, avg kl: 0.0409, mse: 0.267777, wmse: 4.337160, mae: 0.349069
+2207,	Iter: 2207, train loss: 1.4876, avg nll: 0.0686, avg wnll: 5.7208, avg kl: 0.0427, mse: 0.275270, wmse: 4.434761, mae: 0.354340
+2208,	Iter: 2208, train loss: 1.4603, avg nll: 0.0791, avg wnll: 6.0794, avg kl: 0.0408, mse: 0.268078, wmse: 4.318635, mae: 0.348341
+2209,	Iter: 2209, train loss: 1.4021, avg nll: 0.0460, avg wnll: 5.7869, avg kl: 0.0405, mse: 0.263109, wmse: 4.289129, mae: 0.346550
+2210,	Iter: 2210, train loss: 1.4472, avg nll: 0.0603, avg wnll: 6.0559, avg kl: 0.0392, mse: 0.269548, wmse: 4.375742, mae: 0.350368
+nll: 3.6696, mse: 0.6996, mae: 0.6268, mean_mse: 12.2491, mean_mae: 0.6268
+1679442380.5970986
+2211,	Iter: 2211, train loss: 1.5996, avg nll: 0.1471, avg wnll: 7.3146, avg kl: 0.0412, mse: 0.282257, wmse: 4.546460, mae: 0.361457
+2212,	Iter: 2212, train loss: 1.4488, avg nll: 0.0732, avg wnll: 6.0526, avg kl: 0.0398, mse: 0.267163, wmse: 4.336474, mae: 0.349982
+2213,	Iter: 2213, train loss: 1.5192, avg nll: 0.0832, avg wnll: 6.1214, avg kl: 0.0419, mse: 0.278808, wmse: 4.516075, mae: 0.358083
+2214,	Iter: 2214, train loss: 1.5351, avg nll: 0.1027, avg wnll: 6.2652, avg kl: 0.0400, mse: 0.278469, wmse: 4.542764, mae: 0.358168
+2215,	Iter: 2215, train loss: 1.4742, avg nll: 0.0738, avg wnll: 5.6634, avg kl: 0.0420, mse: 0.271670, wmse: 4.386468, mae: 0.352947
+2216,	Iter: 2216, train loss: 1.4329, avg nll: 0.0536, avg wnll: 5.8594, avg kl: 0.0408, mse: 0.267680, wmse: 4.335736, mae: 0.348876
+2217,	Iter: 2217, train loss: 1.4819, avg nll: 0.0633, avg wnll: 5.7173, avg kl: 0.0427, mse: 0.275190, wmse: 4.433626, mae: 0.354173
+2218,	Iter: 2218, train loss: 1.4550, avg nll: 0.0741, avg wnll: 6.0782, avg kl: 0.0407, mse: 0.268034, wmse: 4.318101, mae: 0.348197
+2219,	Iter: 2219, train loss: 1.3964, avg nll: 0.0406, avg wnll: 5.7792, avg kl: 0.0405, mse: 0.263051, wmse: 4.288256, mae: 0.346406
+2220,	Iter: 2220, train loss: 1.4418, avg nll: 0.0554, avg wnll: 6.0638, avg kl: 0.0391, mse: 0.269461, wmse: 4.374464, mae: 0.350205
+nll: 3.7686, mse: 0.6996, mae: 0.6268, mean_mse: 12.2493, mean_mae: 0.6268
+1679442613.465939
+saving.................
+done
+2221,	Iter: 2221, train loss: 1.5934, avg nll: 0.1417, avg wnll: 7.3084, avg kl: 0.0412, mse: 0.282115, wmse: 4.544343, mae: 0.361218
+2222,	Iter: 2222, train loss: 1.4431, avg nll: 0.0678, avg wnll: 6.0491, avg kl: 0.0398, mse: 0.267088, wmse: 4.335293, mae: 0.349816
+2223,	Iter: 2223, train loss: 1.5133, avg nll: 0.0779, avg wnll: 6.1158, avg kl: 0.0419, mse: 0.278713, wmse: 4.514745, mae: 0.357898
+2224,	Iter: 2224, train loss: 1.5295, avg nll: 0.0975, avg wnll: 6.2593, avg kl: 0.0400, mse: 0.278391, wmse: 4.541652, mae: 0.358003
+2225,	Iter: 2225, train loss: 1.4691, avg nll: 0.0691, avg wnll: 5.6645, avg kl: 0.0420, mse: 0.271597, wmse: 4.385330, mae: 0.352803
+2226,	Iter: 2226, train loss: 1.4271, avg nll: 0.0482, avg wnll: 5.8527, avg kl: 0.0408, mse: 0.267610, wmse: 4.334743, mae: 0.348715
+2227,	Iter: 2227, train loss: 1.4766, avg nll: 0.0584, avg wnll: 5.7166, avg kl: 0.0426, mse: 0.275123, wmse: 4.432684, mae: 0.354018
+2228,	Iter: 2228, train loss: 1.4495, avg nll: 0.0689, avg wnll: 6.0750, avg kl: 0.0407, mse: 0.267974, wmse: 4.317249, mae: 0.348044
+2229,	Iter: 2229, train loss: 1.3907, avg nll: 0.0353, avg wnll: 5.7731, avg kl: 0.0405, mse: 0.262999, wmse: 4.287490, mae: 0.346264
+2230,	Iter: 2230, train loss: 1.4368, avg nll: 0.0506, avg wnll: 6.0730, avg kl: 0.0391, mse: 0.269409, wmse: 4.373691, mae: 0.350076
+nll: 3.8709, mse: 0.6996, mae: 0.6268, mean_mse: 12.2493, mean_mae: 0.6268
+1679442840.7131584
+2231,	Iter: 2231, train loss: 1.5874, avg nll: 0.1364, avg wnll: 7.2995, avg kl: 0.0411, mse: 0.281981, wmse: 4.542274, mae: 0.360983
+2232,	Iter: 2232, train loss: 1.4375, avg nll: 0.0626, avg wnll: 6.0431, avg kl: 0.0398, mse: 0.267031, wmse: 4.334423, mae: 0.349667
+2233,	Iter: 2233, train loss: 1.5078, avg nll: 0.0728, avg wnll: 6.1121, avg kl: 0.0419, mse: 0.278640, wmse: 4.513643, mae: 0.357740
+2234,	Iter: 2234, train loss: 1.5239, avg nll: 0.0924, avg wnll: 6.2544, avg kl: 0.0400, mse: 0.278312, wmse: 4.540558, mae: 0.357845
+2235,	Iter: 2235, train loss: 1.4640, avg nll: 0.0645, avg wnll: 5.6654, avg kl: 0.0419, mse: 0.271516, wmse: 4.384130, mae: 0.352649
+2236,	Iter: 2236, train loss: 1.4211, avg nll: 0.0428, avg wnll: 5.8445, avg kl: 0.0408, mse: 0.267514, wmse: 4.333361, mae: 0.348529
+2237,	Iter: 2237, train loss: 1.4714, avg nll: 0.0535, avg wnll: 5.7168, avg kl: 0.0426, mse: 0.275066, wmse: 4.431946, mae: 0.353873
+2238,	Iter: 2238, train loss: 1.4443, avg nll: 0.0640, avg wnll: 6.0759, avg kl: 0.0407, mse: 0.267929, wmse: 4.316680, mae: 0.347904
+2239,	Iter: 2239, train loss: 1.3855, avg nll: 0.0303, avg wnll: 5.7681, avg kl: 0.0404, mse: 0.262962, wmse: 4.287002, mae: 0.346146
+2240,	Iter: 2240, train loss: 1.4317, avg nll: 0.0460, avg wnll: 6.0802, avg kl: 0.0391, mse: 0.269333, wmse: 4.372585, mae: 0.349923
+nll: 3.9755, mse: 0.6996, mae: 0.6268, mean_mse: 12.2494, mean_mae: 0.6268
+1679443070.846891
+2241,	Iter: 2241, train loss: 1.5816, avg nll: 0.1312, avg wnll: 7.2937, avg kl: 0.0411, mse: 0.281848, wmse: 4.540324, mae: 0.360759
+2242,	Iter: 2242, train loss: 1.4320, avg nll: 0.0574, avg wnll: 6.0395, avg kl: 0.0397, mse: 0.266961, wmse: 4.333349, mae: 0.349508
+2243,	Iter: 2243, train loss: 1.5027, avg nll: 0.0680, avg wnll: 6.1122, avg kl: 0.0418, mse: 0.278582, wmse: 4.512807, mae: 0.357601
+2244,	Iter: 2244, train loss: 1.5188, avg nll: 0.0876, avg wnll: 6.2517, avg kl: 0.0399, mse: 0.278252, wmse: 4.539723, mae: 0.357703
+2245,	Iter: 2245, train loss: 1.4591, avg nll: 0.0600, avg wnll: 5.6643, avg kl: 0.0419, mse: 0.271435, wmse: 4.382935, mae: 0.352502
+2246,	Iter: 2246, train loss: 1.4156, avg nll: 0.0376, avg wnll: 5.8380, avg kl: 0.0407, mse: 0.267440, wmse: 4.332223, mae: 0.348369
+2247,	Iter: 2247, train loss: 1.4661, avg nll: 0.0486, avg wnll: 5.7149, avg kl: 0.0426, mse: 0.274992, wmse: 4.430893, mae: 0.353717
+2248,	Iter: 2248, train loss: 1.4388, avg nll: 0.0589, avg wnll: 6.0696, avg kl: 0.0406, mse: 0.267859, wmse: 4.315682, mae: 0.347737
+2249,	Iter: 2249, train loss: 1.3800, avg nll: 0.0251, avg wnll: 5.7603, avg kl: 0.0404, mse: 0.262907, wmse: 4.286126, mae: 0.346007
+2250,	Iter: 2250, train loss: 1.3875, avg nll: 0.0414, avg wnll: 6.0820, avg kl: 0.0393, mse: 0.269227, wmse: 4.370965, mae: 0.349761
+nll: 4.0832, mse: 0.6996, mae: 0.6268, mean_mse: 12.2498, mean_mae: 0.6268
+1679443294.3155506
+saving.................
+done
+2251,	Iter: 2251, train loss: 1.5348, avg nll: 0.1261, avg wnll: 7.2800, avg kl: 0.0418, mse: 0.281698, wmse: 4.537768, mae: 0.360521
+2252,	Iter: 2252, train loss: 1.3867, avg nll: 0.0522, avg wnll: 6.0250, avg kl: 0.0406, mse: 0.266811, wmse: 4.330790, mae: 0.349280
+2253,	Iter: 2253, train loss: 1.4554, avg nll: 0.0626, avg wnll: 6.0939, avg kl: 0.0430, mse: 0.278406, wmse: 4.509856, mae: 0.357369
+2254,	Iter: 2254, train loss: 1.4735, avg nll: 0.0822, avg wnll: 6.2349, avg kl: 0.0413, mse: 0.278074, wmse: 4.536503, mae: 0.357451
+2255,	Iter: 2255, train loss: 1.4129, avg nll: 0.0554, avg wnll: 5.6542, avg kl: 0.0435, mse: 0.271262, wmse: 4.379618, mae: 0.352304
+2256,	Iter: 2256, train loss: 1.3705, avg nll: 0.0327, avg wnll: 5.8320, avg kl: 0.0424, mse: 0.267286, wmse: 4.329634, mae: 0.348180
+2257,	Iter: 2257, train loss: 1.4193, avg nll: 0.0438, avg wnll: 5.7085, avg kl: 0.0444, mse: 0.274766, wmse: 4.427286, mae: 0.353502
+2258,	Iter: 2258, train loss: 1.3946, avg nll: 0.0540, avg wnll: 6.0582, avg kl: 0.0425, mse: 0.267768, wmse: 4.313890, mae: 0.347627
+2259,	Iter: 2259, train loss: 1.3354, avg nll: 0.0199, avg wnll: 5.7494, avg kl: 0.0424, mse: 0.262690, wmse: 4.282284, mae: 0.345771
+2260,	Iter: 2260, train loss: 1.3833, avg nll: 0.0365, avg wnll: 6.0853, avg kl: 0.0410, mse: 0.268908, wmse: 4.365971, mae: 0.349458
+nll: 4.2009, mse: 0.6997, mae: 0.6268, mean_mse: 12.2518, mean_mae: 0.6268
+1679443523.5801873
+2261,	Iter: 2261, train loss: 1.5313, avg nll: 0.1211, avg wnll: 7.2729, avg kl: 0.0433, mse: 0.281520, wmse: 4.534695, mae: 0.360279
+2262,	Iter: 2262, train loss: 1.3831, avg nll: 0.0472, avg wnll: 6.0243, avg kl: 0.0419, mse: 0.266646, wmse: 4.327828, mae: 0.349046
+2263,	Iter: 2263, train loss: 1.4516, avg nll: 0.0574, avg wnll: 6.0860, avg kl: 0.0443, mse: 0.278231, wmse: 4.506821, mae: 0.357123
+2264,	Iter: 2264, train loss: 1.4701, avg nll: 0.0773, avg wnll: 6.2345, avg kl: 0.0424, mse: 0.277936, wmse: 4.533895, mae: 0.357255
+2265,	Iter: 2265, train loss: 1.4100, avg nll: 0.0509, avg wnll: 5.6577, avg kl: 0.0445, mse: 0.271126, wmse: 4.377213, mae: 0.352127
+2266,	Iter: 2266, train loss: 1.3672, avg nll: 0.0277, avg wnll: 5.8338, avg kl: 0.0434, mse: 0.267163, wmse: 4.327610, mae: 0.347997
+2267,	Iter: 2267, train loss: 1.4164, avg nll: 0.0391, avg wnll: 5.7150, avg kl: 0.0453, mse: 0.274648, wmse: 4.425345, mae: 0.353335
+2268,	Iter: 2268, train loss: 1.3919, avg nll: 0.0494, avg wnll: 6.0697, avg kl: 0.0434, mse: 0.267678, wmse: 4.312390, mae: 0.347480
+2269,	Iter: 2269, train loss: 1.3324, avg nll: 0.0150, avg wnll: 5.7491, avg kl: 0.0432, mse: 0.262608, wmse: 4.280805, mae: 0.345614
+2270,	Iter: 2270, train loss: 1.3805, avg nll: 0.0321, avg wnll: 6.0953, avg kl: 0.0417, mse: 0.268797, wmse: 4.364123, mae: 0.349280
+nll: 4.3137, mse: 0.6997, mae: 0.6268, mean_mse: 12.2523, mean_mae: 0.6268
+1679443753.1964655
+2271,	Iter: 2271, train loss: 1.5281, avg nll: 0.1164, avg wnll: 7.2686, avg kl: 0.0440, mse: 0.281366, wmse: 4.532229, mae: 0.360051
+2272,	Iter: 2272, train loss: 1.3799, avg nll: 0.0423, avg wnll: 6.0206, avg kl: 0.0425, mse: 0.266529, wmse: 4.325920, mae: 0.348846
+2273,	Iter: 2273, train loss: 1.4486, avg nll: 0.0525, avg wnll: 6.0829, avg kl: 0.0449, mse: 0.278110, wmse: 4.504943, mae: 0.356938
+2274,	Iter: 2274, train loss: 1.4673, avg nll: 0.0726, avg wnll: 6.2339, avg kl: 0.0430, mse: 0.277839, wmse: 4.532238, mae: 0.357094
+2275,	Iter: 2275, train loss: 1.4077, avg nll: 0.0465, avg wnll: 5.6604, avg kl: 0.0451, mse: 0.271026, wmse: 4.375580, mae: 0.351975
+2276,	Iter: 2276, train loss: 1.3640, avg nll: 0.0227, avg wnll: 5.8291, avg kl: 0.0439, mse: 0.267048, wmse: 4.325771, mae: 0.347803
+2277,	Iter: 2277, train loss: 1.4134, avg nll: 0.0342, avg wnll: 5.7119, avg kl: 0.0459, mse: 0.274532, wmse: 4.423493, mae: 0.353148
+2278,	Iter: 2278, train loss: 1.3884, avg nll: 0.0441, avg wnll: 6.0610, avg kl: 0.0438, mse: 0.267559, wmse: 4.310556, mae: 0.347277
+2279,	Iter: 2279, train loss: 1.3293, avg nll: 0.0099, avg wnll: 5.7421, avg kl: 0.0436, mse: 0.262526, wmse: 4.279373, mae: 0.345459
+2280,	Iter: 2280, train loss: 1.3778, avg nll: 0.0276, avg wnll: 6.1029, avg kl: 0.0422, mse: 0.268687, wmse: 4.362324, mae: 0.349104
+nll: 4.4270, mse: 0.6997, mae: 0.6268, mean_mse: 12.2524, mean_mae: 0.6268
+1679443981.3840005
+saving.................
+done
+2281,	Iter: 2281, train loss: 1.5247, avg nll: 0.1114, avg wnll: 7.2617, avg kl: 0.0444, mse: 0.281191, wmse: 4.529515, mae: 0.359800
+2282,	Iter: 2282, train loss: 1.3768, avg nll: 0.0374, avg wnll: 6.0246, avg kl: 0.0429, mse: 0.266421, wmse: 4.324121, mae: 0.348656
+2283,	Iter: 2283, train loss: 1.4458, avg nll: 0.0479, avg wnll: 6.0936, avg kl: 0.0453, mse: 0.277989, wmse: 4.503051, mae: 0.356750
+2284,	Iter: 2284, train loss: 1.4647, avg nll: 0.0681, avg wnll: 6.2316, avg kl: 0.0434, mse: 0.277753, wmse: 4.530767, mae: 0.356937
+2285,	Iter: 2285, train loss: 1.4053, avg nll: 0.0422, avg wnll: 5.6601, avg kl: 0.0455, mse: 0.270925, wmse: 4.373980, mae: 0.351816
+2286,	Iter: 2286, train loss: 1.3610, avg nll: 0.0178, avg wnll: 5.8194, avg kl: 0.0443, mse: 0.266947, wmse: 4.324224, mae: 0.347631
+2287,	Iter: 2287, train loss: 1.4109, avg nll: 0.0295, avg wnll: 5.7084, avg kl: 0.0462, mse: 0.274439, wmse: 4.422011, mae: 0.352986
+2288,	Iter: 2288, train loss: 1.3859, avg nll: 0.0395, avg wnll: 6.0525, avg kl: 0.0442, mse: 0.267489, wmse: 4.309493, mae: 0.347131
+2289,	Iter: 2289, train loss: 1.3266, avg nll: 0.0052, avg wnll: 5.7282, avg kl: 0.0439, mse: 0.262457, wmse: 4.278206, mae: 0.345329
+2290,	Iter: 2290, train loss: 1.3754, avg nll: 0.0233, avg wnll: 6.1087, avg kl: 0.0424, mse: 0.268601, wmse: 4.360906, mae: 0.348948
+nll: 4.5434, mse: 0.6997, mae: 0.6268, mean_mse: 12.2525, mean_mae: 0.6268
+1679444214.315452
+2291,	Iter: 2291, train loss: 1.5219, avg nll: 0.1068, avg wnll: 7.2599, avg kl: 0.0447, mse: 0.281058, wmse: 4.527462, mae: 0.359583
+2292,	Iter: 2292, train loss: 1.3742, avg nll: 0.0328, avg wnll: 6.0199, avg kl: 0.0432, mse: 0.266348, wmse: 4.322944, mae: 0.348502
+2293,	Iter: 2293, train loss: 1.4434, avg nll: 0.0434, avg wnll: 6.0788, avg kl: 0.0455, mse: 0.277918, wmse: 4.502034, mae: 0.356614
+2294,	Iter: 2294, train loss: 1.4620, avg nll: 0.0634, avg wnll: 6.2288, avg kl: 0.0436, mse: 0.277673, wmse: 4.529505, mae: 0.356788
+2295,	Iter: 2295, train loss: 1.4033, avg nll: 0.0381, avg wnll: 5.6600, avg kl: 0.0458, mse: 0.270852, wmse: 4.372841, mae: 0.351690
+2296,	Iter: 2296, train loss: 1.3583, avg nll: 0.0131, avg wnll: 5.8164, avg kl: 0.0445, mse: 0.266863, wmse: 4.322866, mae: 0.347473
+2297,	Iter: 2297, train loss: 1.4086, avg nll: 0.0251, avg wnll: 5.7088, avg kl: 0.0465, mse: 0.274371, wmse: 4.420928, mae: 0.352847
+2298,	Iter: 2298, train loss: 1.3832, avg nll: 0.0348, avg wnll: 6.0510, avg kl: 0.0444, mse: 0.267406, wmse: 4.308276, mae: 0.346973
+2299,	Iter: 2299, train loss: 1.3240, avg nll: 0.0005, avg wnll: 5.7248, avg kl: 0.0442, mse: 0.262386, wmse: 4.276969, mae: 0.345185
+2300,	Iter: 2300, train loss: 1.3734, avg nll: 0.0193, avg wnll: 6.1201, avg kl: 0.0426, mse: 0.268546, wmse: 4.360030, mae: 0.348831
+nll: 4.6610, mse: 0.6996, mae: 0.6268, mean_mse: 12.2526, mean_mae: 0.6268
+1679444441.3870997
+2301,	Iter: 2301, train loss: 1.5197, avg nll: 0.1028, avg wnll: 7.2620, avg kl: 0.0449, mse: 0.280944, wmse: 4.525734, mae: 0.359407
+2302,	Iter: 2302, train loss: 1.3721, avg nll: 0.0287, avg wnll: 6.0228, avg kl: 0.0434, mse: 0.266286, wmse: 4.321980, mae: 0.348376
+2303,	Iter: 2303, train loss: 1.4411, avg nll: 0.0390, avg wnll: 6.0766, avg kl: 0.0457, mse: 0.277823, wmse: 4.500607, mae: 0.356459
+2304,	Iter: 2304, train loss: 1.4598, avg nll: 0.0591, avg wnll: 6.2300, avg kl: 0.0438, mse: 0.277614, wmse: 4.528553, mae: 0.356661
+2305,	Iter: 2305, train loss: 1.4013, avg nll: 0.0340, avg wnll: 5.6623, avg kl: 0.0459, mse: 0.270769, wmse: 4.371583, mae: 0.351534
+2306,	Iter: 2306, train loss: 1.3557, avg nll: 0.0085, avg wnll: 5.8088, avg kl: 0.0447, mse: 0.266766, wmse: 4.321376, mae: 0.347307
+2307,	Iter: 2307, train loss: 1.4062, avg nll: 0.0206, avg wnll: 5.7036, avg kl: 0.0466, mse: 0.274283, wmse: 4.419489, mae: 0.352686
+2308,	Iter: 2308, train loss: 1.3805, avg nll: 0.0301, avg wnll: 6.0424, avg kl: 0.0446, mse: 0.267326, wmse: 4.307017, mae: 0.346815
+2309,	Iter: 2309, train loss: 1.3214, avg nll: -0.0042, avg wnll: 5.7134, avg kl: 0.0443, mse: 0.262329, wmse: 4.276102, mae: 0.345057
+2310,	Iter: 2310, train loss: 1.3713, avg nll: 0.0153, avg wnll: 6.1239, avg kl: 0.0427, mse: 0.268469, wmse: 4.358838, mae: 0.348677
+nll: 4.7783, mse: 0.6997, mae: 0.6268, mean_mse: 12.2525, mean_mae: 0.6268
+1679444664.5638943
+saving.................
+done
+2311,	Iter: 2311, train loss: 1.5176, avg nll: 0.0990, avg wnll: 7.2665, avg kl: 0.0450, mse: 0.280799, wmse: 4.523495, mae: 0.359195
+2312,	Iter: 2312, train loss: 1.3702, avg nll: 0.0246, avg wnll: 6.0294, avg kl: 0.0435, mse: 0.266230, wmse: 4.321164, mae: 0.348239
+2313,	Iter: 2313, train loss: 1.4392, avg nll: 0.0350, avg wnll: 6.0764, avg kl: 0.0458, mse: 0.277771, wmse: 4.500156, mae: 0.356359
+2314,	Iter: 2314, train loss: 1.4575, avg nll: 0.0548, avg wnll: 6.2250, avg kl: 0.0439, mse: 0.277537, wmse: 4.527663, mae: 0.356527
+2315,	Iter: 2315, train loss: 1.3998, avg nll: 0.0303, avg wnll: 5.6623, avg kl: 0.0460, mse: 0.270712, wmse: 4.370703, mae: 0.351442
+2316,	Iter: 2316, train loss: 1.3537, avg nll: 0.0044, avg wnll: 5.8052, avg kl: 0.0448, mse: 0.266704, wmse: 4.320346, mae: 0.347184
+2317,	Iter: 2317, train loss: 1.4047, avg nll: 0.0168, avg wnll: 5.7048, avg kl: 0.0467, mse: 0.274244, wmse: 4.418815, mae: 0.352581
+2318,	Iter: 2318, train loss: 1.3786, avg nll: 0.0261, avg wnll: 6.0426, avg kl: 0.0446, mse: 0.267271, wmse: 4.306134, mae: 0.346693
+2319,	Iter: 2319, train loss: 1.3192, avg nll: -0.0085, avg wnll: 5.7098, avg kl: 0.0444, mse: 0.262265, wmse: 4.274899, mae: 0.344928
+2320,	Iter: 2320, train loss: 1.3696, avg nll: 0.0117, avg wnll: 6.1376, avg kl: 0.0428, mse: 0.268385, wmse: 4.357493, mae: 0.348542
+nll: 4.8943, mse: 0.6996, mae: 0.6268, mean_mse: 12.2532, mean_mae: 0.6268
+1679444894.3700807
+2321,	Iter: 2321, train loss: 1.5165, avg nll: 0.0959, avg wnll: 7.2760, avg kl: 0.0450, mse: 0.280706, wmse: 4.522152, mae: 0.359058
+2322,	Iter: 2322, train loss: 1.3692, avg nll: 0.0214, avg wnll: 6.0435, avg kl: 0.0436, mse: 0.266207, wmse: 4.320860, mae: 0.348180
+2323,	Iter: 2323, train loss: 1.4382, avg nll: 0.0317, avg wnll: 6.0823, avg kl: 0.0459, mse: 0.277725, wmse: 4.499532, mae: 0.356271
+2324,	Iter: 2324, train loss: 1.4565, avg nll: 0.0515, avg wnll: 6.2363, avg kl: 0.0439, mse: 0.277530, wmse: 4.527447, mae: 0.356474
+2325,	Iter: 2325, train loss: 1.3987, avg nll: 0.0269, avg wnll: 5.6685, avg kl: 0.0460, mse: 0.270662, wmse: 4.370105, mae: 0.351325
+2326,	Iter: 2326, train loss: 1.3521, avg nll: 0.0008, avg wnll: 5.7974, avg kl: 0.0448, mse: 0.266622, wmse: 4.319189, mae: 0.347059
+2327,	Iter: 2327, train loss: 1.4032, avg nll: 0.0132, avg wnll: 5.7050, avg kl: 0.0468, mse: 0.274168, wmse: 4.417525, mae: 0.352460
+2328,	Iter: 2328, train loss: 1.3766, avg nll: 0.0220, avg wnll: 6.0298, avg kl: 0.0446, mse: 0.267213, wmse: 4.305040, mae: 0.346567
+2329,	Iter: 2329, train loss: 1.3175, avg nll: -0.0123, avg wnll: 5.7002, avg kl: 0.0444, mse: 0.262223, wmse: 4.274309, mae: 0.344832
+2330,	Iter: 2330, train loss: 1.3686, avg nll: 0.0085, avg wnll: 6.1387, avg kl: 0.0428, mse: 0.268370, wmse: 4.357379, mae: 0.348451
+nll: 5.0033, mse: 0.6997, mae: 0.6268, mean_mse: 12.2527, mean_mae: 0.6268
+1679445123.3019207
+2331,	Iter: 2331, train loss: 1.5157, avg nll: 0.0932, avg wnll: 7.2914, avg kl: 0.0450, mse: 0.280610, wmse: 4.520643, mae: 0.358917
+2332,	Iter: 2332, train loss: 1.3680, avg nll: 0.0181, avg wnll: 6.0486, avg kl: 0.0435, mse: 0.266174, wmse: 4.320431, mae: 0.348081
+2333,	Iter: 2333, train loss: 1.4367, avg nll: 0.0281, avg wnll: 6.0810, avg kl: 0.0458, mse: 0.277675, wmse: 4.499216, mae: 0.356190
+2334,	Iter: 2334, train loss: 1.4545, avg nll: 0.0476, avg wnll: 6.2300, avg kl: 0.0439, mse: 0.277442, wmse: 4.526604, mae: 0.356335
+2335,	Iter: 2335, train loss: 1.3974, avg nll: 0.0235, avg wnll: 5.6650, avg kl: 0.0460, mse: 0.270601, wmse: 4.369158, mae: 0.351238
+2336,	Iter: 2336, train loss: 1.3516, avg nll: -0.0020, avg wnll: 5.8056, avg kl: 0.0448, mse: 0.266627, wmse: 4.319164, mae: 0.347012
+2337,	Iter: 2337, train loss: 1.4032, avg nll: 0.0106, avg wnll: 5.7219, avg kl: 0.0467, mse: 0.274188, wmse: 4.417826, mae: 0.352429
+2338,	Iter: 2338, train loss: 1.3756, avg nll: 0.0188, avg wnll: 6.0331, avg kl: 0.0446, mse: 0.267173, wmse: 4.304330, mae: 0.346476
+2339,	Iter: 2339, train loss: 1.3160, avg nll: -0.0159, avg wnll: 5.6911, avg kl: 0.0444, mse: 0.262169, wmse: 4.273262, mae: 0.344721
+2340,	Iter: 2340, train loss: 1.3677, avg nll: 0.0055, avg wnll: 6.1486, avg kl: 0.0428, mse: 0.268319, wmse: 4.356483, mae: 0.348361
+nll: 5.1101, mse: 0.6997, mae: 0.6268, mean_mse: 12.2541, mean_mae: 0.6268
+1679445348.6643856
+saving.................
+done
+2341,	Iter: 2341, train loss: 1.5146, avg nll: 0.0901, avg wnll: 7.2863, avg kl: 0.0450, mse: 0.280542, wmse: 4.519788, mae: 0.358789
+2342,	Iter: 2342, train loss: 1.3674, avg nll: 0.0152, avg wnll: 6.0585, avg kl: 0.0435, mse: 0.266156, wmse: 4.320117, mae: 0.348028
+2343,	Iter: 2343, train loss: 1.4361, avg nll: 0.0252, avg wnll: 6.0806, avg kl: 0.0458, mse: 0.277644, wmse: 4.498696, mae: 0.356114
+2344,	Iter: 2344, train loss: 1.4539, avg nll: 0.0447, avg wnll: 6.2356, avg kl: 0.0439, mse: 0.277429, wmse: 4.526169, mae: 0.356281
+2345,	Iter: 2345, train loss: 1.3965, avg nll: 0.0205, avg wnll: 5.6730, avg kl: 0.0459, mse: 0.270553, wmse: 4.368755, mae: 0.351114
+2346,	Iter: 2346, train loss: 1.3502, avg nll: -0.0053, avg wnll: 5.7936, avg kl: 0.0447, mse: 0.266513, wmse: 4.317636, mae: 0.346871
+2347,	Iter: 2347, train loss: 1.4017, avg nll: 0.0071, avg wnll: 5.7055, avg kl: 0.0467, mse: 0.274095, wmse: 4.416279, mae: 0.352300
+2348,	Iter: 2348, train loss: 1.3740, avg nll: 0.0151, avg wnll: 6.0248, avg kl: 0.0446, mse: 0.267126, wmse: 4.303491, mae: 0.346370
+2349,	Iter: 2349, train loss: 1.3151, avg nll: -0.0191, avg wnll: 5.6973, avg kl: 0.0443, mse: 0.262162, wmse: 4.273148, mae: 0.344667
+2350,	Iter: 2350, train loss: 1.3673, avg nll: 0.0028, avg wnll: 6.1477, avg kl: 0.0427, mse: 0.268337, wmse: 4.356958, mae: 0.348314
+nll: 5.2089, mse: 0.6997, mae: 0.6268, mean_mse: 12.2533, mean_mae: 0.6268
+1679445575.4097333
+2351,	Iter: 2351, train loss: 1.5139, avg nll: 0.0875, avg wnll: 7.2898, avg kl: 0.0448, mse: 0.280462, wmse: 4.518475, mae: 0.358684
+2352,	Iter: 2352, train loss: 1.3658, avg nll: 0.0117, avg wnll: 6.0461, avg kl: 0.0434, mse: 0.266109, wmse: 4.319511, mae: 0.347906
+2353,	Iter: 2353, train loss: 1.4347, avg nll: 0.0217, avg wnll: 6.0796, avg kl: 0.0457, mse: 0.277582, wmse: 4.498075, mae: 0.356024
+2354,	Iter: 2354, train loss: 1.4517, avg nll: 0.0408, avg wnll: 6.2240, avg kl: 0.0437, mse: 0.277349, wmse: 4.525508, mae: 0.356140
+2355,	Iter: 2355, train loss: 1.3953, avg nll: 0.0172, avg wnll: 5.6651, avg kl: 0.0458, mse: 0.270483, wmse: 4.367530, mae: 0.351021
+2356,	Iter: 2356, train loss: 1.3502, avg nll: -0.0078, avg wnll: 5.8043, avg kl: 0.0446, mse: 0.266553, wmse: 4.318176, mae: 0.346849
+2357,	Iter: 2357, train loss: 1.4019, avg nll: 0.0047, avg wnll: 5.7249, avg kl: 0.0465, mse: 0.274126, wmse: 4.416769, mae: 0.352273
+2358,	Iter: 2358, train loss: 1.3730, avg nll: 0.0119, avg wnll: 6.0303, avg kl: 0.0445, mse: 0.267090, wmse: 4.302888, mae: 0.346280
+2359,	Iter: 2359, train loss: 1.3135, avg nll: -0.0227, avg wnll: 5.6879, avg kl: 0.0442, mse: 0.262099, wmse: 4.272037, mae: 0.344549
+2360,	Iter: 2360, train loss: 1.3662, avg nll: -0.0002, avg wnll: 6.1515, avg kl: 0.0426, mse: 0.268268, wmse: 4.355734, mae: 0.348203
+nll: 5.3153, mse: 0.6997, mae: 0.6268, mean_mse: 12.2549, mean_mae: 0.6268
+1679445803.6214588
+2361,	Iter: 2361, train loss: 1.5131, avg nll: 0.0846, avg wnll: 7.2857, avg kl: 0.0448, mse: 0.280404, wmse: 4.517800, mae: 0.358560
+2362,	Iter: 2362, train loss: 1.3655, avg nll: 0.0091, avg wnll: 6.0616, avg kl: 0.0433, mse: 0.266099, wmse: 4.319159, mae: 0.347867
+2363,	Iter: 2363, train loss: 1.4345, avg nll: 0.0193, avg wnll: 6.0891, avg kl: 0.0456, mse: 0.277555, wmse: 4.497646, mae: 0.355951
+2364,	Iter: 2364, train loss: 1.4514, avg nll: 0.0382, avg wnll: 6.2260, avg kl: 0.0437, mse: 0.277336, wmse: 4.525087, mae: 0.356081
+2365,	Iter: 2365, train loss: 1.3948, avg nll: 0.0145, avg wnll: 5.6744, avg kl: 0.0457, mse: 0.270453, wmse: 4.367492, mae: 0.350927
+2366,	Iter: 2366, train loss: 1.3488, avg nll: -0.0109, avg wnll: 5.7941, avg kl: 0.0445, mse: 0.266443, wmse: 4.316746, mae: 0.346733
+2367,	Iter: 2367, train loss: 1.4006, avg nll: 0.0013, avg wnll: 5.7003, avg kl: 0.0464, mse: 0.274057, wmse: 4.415658, mae: 0.352170
+2368,	Iter: 2368, train loss: 1.3721, avg nll: 0.0089, avg wnll: 6.0175, avg kl: 0.0443, mse: 0.267066, wmse: 4.302411, mae: 0.346208
+2369,	Iter: 2369, train loss: 1.3124, avg nll: -0.0260, avg wnll: 5.6802, avg kl: 0.0440, mse: 0.262080, wmse: 4.271758, mae: 0.344488
+2370,	Iter: 2370, train loss: 1.3657, avg nll: -0.0028, avg wnll: 6.1509, avg kl: 0.0425, mse: 0.268280, wmse: 4.356122, mae: 0.348148
+nll: 5.4113, mse: 0.6998, mae: 0.6268, mean_mse: 12.2544, mean_mae: 0.6268
+1679446035.6131077
+saving.................
+done
+2371,	Iter: 2371, train loss: 1.5125, avg nll: 0.0821, avg wnll: 7.2930, avg kl: 0.0445, mse: 0.280326, wmse: 4.516509, mae: 0.358451
+2372,	Iter: 2372, train loss: 1.3644, avg nll: 0.0059, avg wnll: 6.0507, avg kl: 0.0431, mse: 0.266082, wmse: 4.319057, mae: 0.347785
+2373,	Iter: 2373, train loss: 1.4332, avg nll: 0.0159, avg wnll: 6.0804, avg kl: 0.0454, mse: 0.277506, wmse: 4.497101, mae: 0.355880
+2374,	Iter: 2374, train loss: 1.4496, avg nll: 0.0345, avg wnll: 6.2209, avg kl: 0.0434, mse: 0.277270, wmse: 4.524649, mae: 0.355962
+2375,	Iter: 2375, train loss: 1.3942, avg nll: 0.0118, avg wnll: 5.6682, avg kl: 0.0455, mse: 0.270417, wmse: 4.366808, mae: 0.350873
+2376,	Iter: 2376, train loss: 1.3490, avg nll: -0.0133, avg wnll: 5.8049, avg kl: 0.0443, mse: 0.266500, wmse: 4.317546, mae: 0.346722
+2377,	Iter: 2377, train loss: 1.4008, avg nll: -0.0008, avg wnll: 5.7243, avg kl: 0.0462, mse: 0.274070, wmse: 4.415975, mae: 0.352141
+2378,	Iter: 2378, train loss: 1.3716, avg nll: 0.0061, avg wnll: 6.0183, avg kl: 0.0442, mse: 0.267059, wmse: 4.302277, mae: 0.346140
+2379,	Iter: 2379, train loss: 1.3115, avg nll: -0.0290, avg wnll: 5.6669, avg kl: 0.0439, mse: 0.262048, wmse: 4.271142, mae: 0.344412
+2380,	Iter: 2380, train loss: 1.3650, avg nll: -0.0055, avg wnll: 6.1641, avg kl: 0.0423, mse: 0.268232, wmse: 4.355187, mae: 0.348066
+nll: 5.5251, mse: 0.6998, mae: 0.6268, mean_mse: 12.2552, mean_mae: 0.6268
+1679446261.4548917
+2381,	Iter: 2381, train loss: 1.5122, avg nll: 0.0796, avg wnll: 7.2976, avg kl: 0.0445, mse: 0.280289, wmse: 4.516124, mae: 0.358355
+2382,	Iter: 2382, train loss: 1.3643, avg nll: 0.0036, avg wnll: 6.0644, avg kl: 0.0431, mse: 0.266070, wmse: 4.318686, mae: 0.347746
+2383,	Iter: 2383, train loss: 1.4336, avg nll: 0.0139, avg wnll: 6.0809, avg kl: 0.0453, mse: 0.277517, wmse: 4.497352, mae: 0.355856
+2384,	Iter: 2384, train loss: 1.4496, avg nll: 0.0323, avg wnll: 6.2231, avg kl: 0.0433, mse: 0.277273, wmse: 4.524582, mae: 0.355917
+2385,	Iter: 2385, train loss: 1.3933, avg nll: 0.0088, avg wnll: 5.6740, avg kl: 0.0454, mse: 0.270366, wmse: 4.366481, mae: 0.350763
+2386,	Iter: 2386, train loss: 1.3475, avg nll: -0.0164, avg wnll: 5.7976, avg kl: 0.0442, mse: 0.266382, wmse: 4.316061, mae: 0.346590
+2387,	Iter: 2387, train loss: 1.4001, avg nll: -0.0039, avg wnll: 5.7093, avg kl: 0.0461, mse: 0.274046, wmse: 4.415569, mae: 0.352079
+2388,	Iter: 2388, train loss: 1.3712, avg nll: 0.0036, avg wnll: 6.0136, avg kl: 0.0440, mse: 0.267038, wmse: 4.301856, mae: 0.346094
+2389,	Iter: 2389, train loss: 1.3107, avg nll: -0.0319, avg wnll: 5.6604, avg kl: 0.0437, mse: 0.262038, wmse: 4.271009, mae: 0.344375
+2390,	Iter: 2390, train loss: 1.3648, avg nll: -0.0080, avg wnll: 6.1616, avg kl: 0.0422, mse: 0.268247, wmse: 4.355672, mae: 0.348021
+nll: 5.6169, mse: 0.6998, mae: 0.6268, mean_mse: 12.2549, mean_mae: 0.6268
+1679446490.6487458
+2391,	Iter: 2391, train loss: 1.5118, avg nll: 0.0774, avg wnll: 7.3094, avg kl: 0.0442, mse: 0.280227, wmse: 4.515031, mae: 0.358262
+2392,	Iter: 2392, train loss: 1.3634, avg nll: 0.0007, avg wnll: 6.0592, avg kl: 0.0428, mse: 0.266057, wmse: 4.318602, mae: 0.347671
+2393,	Iter: 2393, train loss: 1.4322, avg nll: 0.0106, avg wnll: 6.0844, avg kl: 0.0450, mse: 0.277461, wmse: 4.496617, mae: 0.355762
+2394,	Iter: 2394, train loss: 1.4483, avg nll: 0.0291, avg wnll: 6.2205, avg kl: 0.0431, mse: 0.277221, wmse: 4.524268, mae: 0.355827
+2395,	Iter: 2395, train loss: 1.3932, avg nll: 0.0065, avg wnll: 5.6733, avg kl: 0.0451, mse: 0.270363, wmse: 4.366287, mae: 0.350740
+2396,	Iter: 2396, train loss: 1.3484, avg nll: -0.0182, avg wnll: 5.8118, avg kl: 0.0440, mse: 0.266467, wmse: 4.317230, mae: 0.346620
+2397,	Iter: 2397, train loss: 1.4001, avg nll: -0.0060, avg wnll: 5.7204, avg kl: 0.0459, mse: 0.274029, wmse: 4.415448, mae: 0.352022
+2398,	Iter: 2398, train loss: 1.3704, avg nll: 0.0007, avg wnll: 6.0106, avg kl: 0.0438, mse: 0.267029, wmse: 4.301763, mae: 0.346010
+2399,	Iter: 2399, train loss: 1.3100, avg nll: -0.0347, avg wnll: 5.6571, avg kl: 0.0436, mse: 0.262018, wmse: 4.270572, mae: 0.344305
+2400,	Iter: 2400, train loss: 1.3640, avg nll: -0.0106, avg wnll: 6.1690, avg kl: 0.0420, mse: 0.268203, wmse: 4.354865, mae: 0.347932
+nll: 5.7315, mse: 0.6998, mae: 0.6268, mean_mse: 12.2558, mean_mae: 0.6268
+1679446722.4326808
+saving.................
+done
+2401,	Iter: 2401, train loss: 1.5117, avg nll: 0.0751, avg wnll: 7.3078, avg kl: 0.0441, mse: 0.280210, wmse: 4.515062, mae: 0.358192
+2402,	Iter: 2402, train loss: 1.3635, avg nll: -0.0014, avg wnll: 6.0711, avg kl: 0.0427, mse: 0.266062, wmse: 4.318584, mae: 0.347651
+2403,	Iter: 2403, train loss: 1.4329, avg nll: 0.0089, avg wnll: 6.0856, avg kl: 0.0448, mse: 0.277469, wmse: 4.496809, mae: 0.355746
+2404,	Iter: 2404, train loss: 1.4480, avg nll: 0.0268, avg wnll: 6.2190, avg kl: 0.0429, mse: 0.277208, wmse: 4.524070, mae: 0.355761
+2405,	Iter: 2405, train loss: 1.3923, avg nll: 0.0036, avg wnll: 5.6748, avg kl: 0.0449, mse: 0.270312, wmse: 4.365854, mae: 0.350636
+2406,	Iter: 2406, train loss: 1.3470, avg nll: -0.0212, avg wnll: 5.8015, avg kl: 0.0438, mse: 0.266349, wmse: 4.315805, mae: 0.346485
+2407,	Iter: 2407, train loss: 1.3996, avg nll: -0.0088, avg wnll: 5.7101, avg kl: 0.0457, mse: 0.274027, wmse: 4.415386, mae: 0.351984
+2408,	Iter: 2408, train loss: 1.3698, avg nll: -0.0019, avg wnll: 6.0132, avg kl: 0.0436, mse: 0.266983, wmse: 4.301029, mae: 0.345947
+2409,	Iter: 2409, train loss: 1.3093, avg nll: -0.0374, avg wnll: 5.6576, avg kl: 0.0433, mse: 0.261993, wmse: 4.270289, mae: 0.344252
+2410,	Iter: 2410, train loss: 1.3641, avg nll: -0.0127, avg wnll: 6.1716, avg kl: 0.0418, mse: 0.268236, wmse: 4.355522, mae: 0.347905
+nll: 5.8137, mse: 0.6998, mae: 0.6268, mean_mse: 12.2552, mean_mae: 0.6268
+1679446949.4307544
+2411,	Iter: 2411, train loss: 1.5114, avg nll: 0.0731, avg wnll: 7.3202, avg kl: 0.0438, mse: 0.280148, wmse: 4.513856, mae: 0.358101
+2412,	Iter: 2412, train loss: 1.3627, avg nll: -0.0041, avg wnll: 6.0664, avg kl: 0.0424, mse: 0.266043, wmse: 4.318323, mae: 0.347570
+2413,	Iter: 2413, train loss: 1.4318, avg nll: 0.0058, avg wnll: 6.0909, avg kl: 0.0446, mse: 0.277428, wmse: 4.496416, mae: 0.355670
+2414,	Iter: 2414, train loss: 1.4475, avg nll: 0.0243, avg wnll: 6.2264, avg kl: 0.0427, mse: 0.277188, wmse: 4.524119, mae: 0.355725
+2415,	Iter: 2415, train loss: 1.3927, avg nll: 0.0017, avg wnll: 5.6788, avg kl: 0.0446, mse: 0.270340, wmse: 4.366245, mae: 0.350651
+2416,	Iter: 2416, train loss: 1.3481, avg nll: -0.0227, avg wnll: 5.8160, avg kl: 0.0436, mse: 0.266450, wmse: 4.317230, mae: 0.346533
+2417,	Iter: 2417, train loss: 1.3997, avg nll: -0.0108, avg wnll: 5.7179, avg kl: 0.0454, mse: 0.274009, wmse: 4.415275, mae: 0.351928
+2418,	Iter: 2418, train loss: 1.3692, avg nll: -0.0046, avg wnll: 6.0119, avg kl: 0.0434, mse: 0.266991, wmse: 4.301220, mae: 0.345886
+2419,	Iter: 2419, train loss: 1.3089, avg nll: -0.0399, avg wnll: 5.6590, avg kl: 0.0431, mse: 0.262000, wmse: 4.270223, mae: 0.344206
+2420,	Iter: 2420, train loss: 1.3639, avg nll: -0.0148, avg wnll: 6.1835, avg kl: 0.0416, mse: 0.268207, wmse: 4.355075, mae: 0.347851
+nll: 5.9309, mse: 0.6998, mae: 0.6268, mean_mse: 12.2561, mean_mae: 0.6268
+1679447178.0996687
+2421,	Iter: 2421, train loss: 1.5115, avg nll: 0.0709, avg wnll: 7.3131, avg kl: 0.0436, mse: 0.280147, wmse: 4.514237, mae: 0.358060
+2422,	Iter: 2422, train loss: 1.3631, avg nll: -0.0059, avg wnll: 6.0828, avg kl: 0.0422, mse: 0.266058, wmse: 4.318546, mae: 0.347569
+2423,	Iter: 2423, train loss: 1.4324, avg nll: 0.0043, avg wnll: 6.1012, avg kl: 0.0444, mse: 0.277426, wmse: 4.496417, mae: 0.355640
+2424,	Iter: 2424, train loss: 1.4474, avg nll: 0.0221, avg wnll: 6.2207, avg kl: 0.0424, mse: 0.277186, wmse: 4.524281, mae: 0.355662
+2425,	Iter: 2425, train loss: 1.3918, avg nll: -0.0011, avg wnll: 5.6765, avg kl: 0.0444, mse: 0.270295, wmse: 4.365893, mae: 0.350561
+2426,	Iter: 2426, train loss: 1.3470, avg nll: -0.0254, avg wnll: 5.8036, avg kl: 0.0433, mse: 0.266344, wmse: 4.316020, mae: 0.346416
+2427,	Iter: 2427, train loss: 1.3998, avg nll: -0.0130, avg wnll: 5.7152, avg kl: 0.0452, mse: 0.274031, wmse: 4.415556, mae: 0.351922
+2428,	Iter: 2428, train loss: 1.3690, avg nll: -0.0068, avg wnll: 6.0103, avg kl: 0.0432, mse: 0.266963, wmse: 4.300708, mae: 0.345839
+2429,	Iter: 2429, train loss: 1.3082, avg nll: -0.0425, avg wnll: 5.6512, avg kl: 0.0429, mse: 0.261967, wmse: 4.269917, mae: 0.344157
+2430,	Iter: 2430, train loss: 1.3641, avg nll: -0.0168, avg wnll: 6.1886, avg kl: 0.0413, mse: 0.268254, wmse: 4.355824, mae: 0.347834
+nll: 6.0090, mse: 0.6999, mae: 0.6268, mean_mse: 12.2557, mean_mae: 0.6268
+1679447407.4695535
+saving.................
+done
+2431,	Iter: 2431, train loss: 1.5114, avg nll: 0.0691, avg wnll: 7.3335, avg kl: 0.0433, mse: 0.280090, wmse: 4.513050, mae: 0.357969
+2432,	Iter: 2432, train loss: 1.3625, avg nll: -0.0083, avg wnll: 6.0783, avg kl: 0.0419, mse: 0.266029, wmse: 4.318137, mae: 0.347484
+2433,	Iter: 2433, train loss: 1.4315, avg nll: 0.0014, avg wnll: 6.0932, avg kl: 0.0441, mse: 0.277419, wmse: 4.496574, mae: 0.355607
+2434,	Iter: 2434, train loss: 1.4469, avg nll: 0.0196, avg wnll: 6.2307, avg kl: 0.0422, mse: 0.277174, wmse: 4.524398, mae: 0.355639
+2435,	Iter: 2435, train loss: 1.3923, avg nll: -0.0028, avg wnll: 5.6813, avg kl: 0.0441, mse: 0.270323, wmse: 4.366354, mae: 0.350586
+2436,	Iter: 2436, train loss: 1.3479, avg nll: -0.0270, avg wnll: 5.8214, avg kl: 0.0431, mse: 0.266434, wmse: 4.317261, mae: 0.346449
+2437,	Iter: 2437, train loss: 1.3996, avg nll: -0.0152, avg wnll: 5.7195, avg kl: 0.0449, mse: 0.274005, wmse: 4.415397, mae: 0.351846
+2438,	Iter: 2438, train loss: 1.3683, avg nll: -0.0095, avg wnll: 6.0045, avg kl: 0.0429, mse: 0.266964, wmse: 4.300893, mae: 0.345773
+2439,	Iter: 2439, train loss: 1.3078, avg nll: -0.0447, avg wnll: 5.6476, avg kl: 0.0426, mse: 0.261975, wmse: 4.269690, mae: 0.344124
+2440,	Iter: 2440, train loss: 1.3635, avg nll: -0.0187, avg wnll: 6.2002, avg kl: 0.0411, mse: 0.268226, wmse: 4.355512, mae: 0.347793
+nll: 6.1298, mse: 0.6998, mae: 0.6268, mean_mse: 12.2565, mean_mae: 0.6268
+1679447638.5024803
+2441,	Iter: 2441, train loss: 1.5103, avg nll: 0.0668, avg wnll: 7.3238, avg kl: 0.0431, mse: 0.280066, wmse: 4.513142, mae: 0.357908
+2442,	Iter: 2442, train loss: 1.3628, avg nll: -0.0095, avg wnll: 6.0952, avg kl: 0.0417, mse: 0.266110, wmse: 4.319354, mae: 0.347550
+2443,	Iter: 2443, train loss: 1.4311, avg nll: -0.0000, avg wnll: 6.0893, avg kl: 0.0439, mse: 0.277443, wmse: 4.496871, mae: 0.355613
+2444,	Iter: 2444, train loss: 1.4449, avg nll: 0.0173, avg wnll: 6.2233, avg kl: 0.0420, mse: 0.277141, wmse: 4.524065, mae: 0.355545
+2445,	Iter: 2445, train loss: 1.3896, avg nll: -0.0057, avg wnll: 5.6793, avg kl: 0.0439, mse: 0.270262, wmse: 4.365664, mae: 0.350464
+2446,	Iter: 2446, train loss: 1.3450, avg nll: -0.0295, avg wnll: 5.8119, avg kl: 0.0428, mse: 0.266341, wmse: 4.316264, mae: 0.346340
+2447,	Iter: 2447, train loss: 1.3975, avg nll: -0.0173, avg wnll: 5.7218, avg kl: 0.0447, mse: 0.274019, wmse: 4.415586, mae: 0.351842
+2448,	Iter: 2448, train loss: 1.3659, avg nll: -0.0115, avg wnll: 6.0128, avg kl: 0.0427, mse: 0.266933, wmse: 4.300364, mae: 0.345731
+2449,	Iter: 2449, train loss: 1.3050, avg nll: -0.0472, avg wnll: 5.6495, avg kl: 0.0424, mse: 0.261950, wmse: 4.269674, mae: 0.344069
+2450,	Iter: 2450, train loss: 1.3619, avg nll: -0.0204, avg wnll: 6.2042, avg kl: 0.0409, mse: 0.268285, wmse: 4.356384, mae: 0.347790
+nll: 6.2021, mse: 0.6999, mae: 0.6268, mean_mse: 12.2561, mean_mae: 0.6268
+1679447863.9330232
+2451,	Iter: 2451, train loss: 1.5082, avg nll: 0.0652, avg wnll: 7.3417, avg kl: 0.0429, mse: 0.280017, wmse: 4.511981, mae: 0.357828
+2452,	Iter: 2452, train loss: 1.3596, avg nll: -0.0121, avg wnll: 6.0928, avg kl: 0.0415, mse: 0.266038, wmse: 4.318195, mae: 0.347420
+2453,	Iter: 2453, train loss: 1.4277, avg nll: -0.0030, avg wnll: 6.0954, avg kl: 0.0437, mse: 0.277395, wmse: 4.496439, mae: 0.355531
+2454,	Iter: 2454, train loss: 1.4428, avg nll: 0.0152, avg wnll: 6.2333, avg kl: 0.0418, mse: 0.277153, wmse: 4.524518, mae: 0.355550
+2455,	Iter: 2455, train loss: 1.3880, avg nll: -0.0071, avg wnll: 5.6839, avg kl: 0.0437, mse: 0.270293, wmse: 4.366159, mae: 0.350500
+2456,	Iter: 2456, train loss: 1.3442, avg nll: -0.0307, avg wnll: 5.8252, avg kl: 0.0427, mse: 0.266436, wmse: 4.317531, mae: 0.346388
+2457,	Iter: 2457, train loss: 1.3951, avg nll: -0.0194, avg wnll: 5.7197, avg kl: 0.0445, mse: 0.273989, wmse: 4.415264, mae: 0.351765
+2458,	Iter: 2458, train loss: 1.3631, avg nll: -0.0141, avg wnll: 5.9985, avg kl: 0.0426, mse: 0.266933, wmse: 4.300476, mae: 0.345671
+2459,	Iter: 2459, train loss: 1.3025, avg nll: -0.0495, avg wnll: 5.6417, avg kl: 0.0423, mse: 0.261943, wmse: 4.269028, mae: 0.344019
+2460,	Iter: 2460, train loss: 1.3593, avg nll: -0.0226, avg wnll: 6.2092, avg kl: 0.0408, mse: 0.268226, wmse: 4.355588, mae: 0.347727
+nll: 6.3246, mse: 0.6998, mae: 0.6268, mean_mse: 12.2571, mean_mae: 0.6268
+1679448098.0292852
+saving.................
+done
+2461,	Iter: 2461, train loss: 1.5057, avg nll: 0.0629, avg wnll: 7.3255, avg kl: 0.0428, mse: 0.279997, wmse: 4.512139, mae: 0.357780
+2462,	Iter: 2462, train loss: 1.3586, avg nll: -0.0134, avg wnll: 6.1013, avg kl: 0.0414, mse: 0.266108, wmse: 4.319281, mae: 0.347478
+2463,	Iter: 2463, train loss: 1.4264, avg nll: -0.0042, avg wnll: 6.0862, avg kl: 0.0436, mse: 0.277422, wmse: 4.496730, mae: 0.355547
+2464,	Iter: 2464, train loss: 1.4400, avg nll: 0.0128, avg wnll: 6.2231, avg kl: 0.0417, mse: 0.277106, wmse: 4.523808, mae: 0.355439
+2465,	Iter: 2465, train loss: 1.3849, avg nll: -0.0099, avg wnll: 5.6790, avg kl: 0.0436, mse: 0.270237, wmse: 4.365437, mae: 0.350385
+2466,	Iter: 2466, train loss: 1.3410, avg nll: -0.0333, avg wnll: 5.8168, avg kl: 0.0426, mse: 0.266336, wmse: 4.316360, mae: 0.346281
+2467,	Iter: 2467, train loss: 1.3932, avg nll: -0.0212, avg wnll: 5.7299, avg kl: 0.0444, mse: 0.274000, wmse: 4.415392, mae: 0.351771
+2468,	Iter: 2468, train loss: 1.3610, avg nll: -0.0159, avg wnll: 6.0090, avg kl: 0.0424, mse: 0.266906, wmse: 4.299956, mae: 0.345634
+2469,	Iter: 2469, train loss: 1.3002, avg nll: -0.0516, avg wnll: 5.6455, avg kl: 0.0422, mse: 0.261933, wmse: 4.269336, mae: 0.343991
+2470,	Iter: 2470, train loss: 1.3581, avg nll: -0.0241, avg wnll: 6.2127, avg kl: 0.0407, mse: 0.268300, wmse: 4.356675, mae: 0.347741
+nll: 6.3919, mse: 0.6999, mae: 0.6268, mean_mse: 12.2567, mean_mae: 0.6268
+1679448325.8968525
+2471,	Iter: 2471, train loss: 1.5040, avg nll: 0.0616, avg wnll: 7.3466, avg kl: 0.0426, mse: 0.279957, wmse: 4.511072, mae: 0.357709
+2472,	Iter: 2472, train loss: 1.3561, avg nll: -0.0154, avg wnll: 6.1017, avg kl: 0.0412, mse: 0.266056, wmse: 4.318419, mae: 0.347378
+2473,	Iter: 2473, train loss: 1.4235, avg nll: -0.0068, avg wnll: 6.0900, avg kl: 0.0434, mse: 0.277382, wmse: 4.496303, mae: 0.355474
+2474,	Iter: 2474, train loss: 1.4381, avg nll: 0.0110, avg wnll: 6.2424, avg kl: 0.0415, mse: 0.277106, wmse: 4.524141, mae: 0.355445
+2475,	Iter: 2475, train loss: 1.3834, avg nll: -0.0113, avg wnll: 5.6893, avg kl: 0.0434, mse: 0.270257, wmse: 4.365758, mae: 0.350412
+2476,	Iter: 2476, train loss: 1.3403, avg nll: -0.0343, avg wnll: 5.8299, avg kl: 0.0425, mse: 0.266426, wmse: 4.317569, mae: 0.346324
+2477,	Iter: 2477, train loss: 1.3914, avg nll: -0.0228, avg wnll: 5.7299, avg kl: 0.0443, mse: 0.274005, wmse: 4.415619, mae: 0.351732
+2478,	Iter: 2478, train loss: 1.3585, avg nll: -0.0183, avg wnll: 5.9943, avg kl: 0.0423, mse: 0.266899, wmse: 4.299968, mae: 0.345577
+2479,	Iter: 2479, train loss: 1.2985, avg nll: -0.0533, avg wnll: 5.6405, avg kl: 0.0421, mse: 0.261942, wmse: 4.268905, mae: 0.343971
+2480,	Iter: 2480, train loss: 1.3555, avg nll: -0.0262, avg wnll: 6.2124, avg kl: 0.0406, mse: 0.268238, wmse: 4.355793, mae: 0.347677
+nll: 6.5177, mse: 0.6999, mae: 0.6268, mean_mse: 12.2577, mean_mae: 0.6268
+1679448557.455394
+2481,	Iter: 2481, train loss: 1.5014, avg nll: 0.0592, avg wnll: 7.3301, avg kl: 0.0426, mse: 0.279930, wmse: 4.511203, mae: 0.357660
+2482,	Iter: 2482, train loss: 1.3548, avg nll: -0.0169, avg wnll: 6.1097, avg kl: 0.0412, mse: 0.266100, wmse: 4.319112, mae: 0.347410
+2483,	Iter: 2483, train loss: 1.4225, avg nll: -0.0079, avg wnll: 6.0906, avg kl: 0.0433, mse: 0.277415, wmse: 4.496745, mae: 0.355500
+2484,	Iter: 2484, train loss: 1.4356, avg nll: 0.0087, avg wnll: 6.2230, avg kl: 0.0414, mse: 0.277087, wmse: 4.523766, mae: 0.355362
+2485,	Iter: 2485, train loss: 1.3809, avg nll: -0.0135, avg wnll: 5.6858, avg kl: 0.0434, mse: 0.270214, wmse: 4.365248, mae: 0.350321
+2486,	Iter: 2486, train loss: 1.3367, avg nll: -0.0372, avg wnll: 5.8236, avg kl: 0.0424, mse: 0.266313, wmse: 4.316185, mae: 0.346207
+2487,	Iter: 2487, train loss: 1.3895, avg nll: -0.0246, avg wnll: 5.7408, avg kl: 0.0442, mse: 0.273988, wmse: 4.415295, mae: 0.351713
+2488,	Iter: 2488, train loss: 1.3566, avg nll: -0.0200, avg wnll: 6.0038, avg kl: 0.0422, mse: 0.266889, wmse: 4.299655, mae: 0.345551
+2489,	Iter: 2489, train loss: 1.2964, avg nll: -0.0552, avg wnll: 5.6461, avg kl: 0.0419, mse: 0.261930, wmse: 4.269110, mae: 0.343935
+2490,	Iter: 2490, train loss: 1.3546, avg nll: -0.0275, avg wnll: 6.2129, avg kl: 0.0405, mse: 0.268329, wmse: 4.357149, mae: 0.347714
+nll: 6.5741, mse: 0.7000, mae: 0.6268, mean_mse: 12.2571, mean_mae: 0.6268
+1679448785.0437288
+saving.................
+done
+2491,	Iter: 2491, train loss: 1.5001, avg nll: 0.0582, avg wnll: 7.3525, avg kl: 0.0424, mse: 0.279907, wmse: 4.510299, mae: 0.357605
+2492,	Iter: 2492, train loss: 1.3525, avg nll: -0.0187, avg wnll: 6.1150, avg kl: 0.0410, mse: 0.266052, wmse: 4.318274, mae: 0.347329
+2493,	Iter: 2493, train loss: 1.4193, avg nll: -0.0105, avg wnll: 6.0918, avg kl: 0.0432, mse: 0.277337, wmse: 4.495646, mae: 0.355388
+2494,	Iter: 2494, train loss: 1.4335, avg nll: 0.0069, avg wnll: 6.2381, avg kl: 0.0413, mse: 0.277063, wmse: 4.523731, mae: 0.355347
+2495,	Iter: 2495, train loss: 1.3793, avg nll: -0.0150, avg wnll: 5.6914, avg kl: 0.0432, mse: 0.270218, wmse: 4.365321, mae: 0.350319
+2496,	Iter: 2496, train loss: 1.3361, avg nll: -0.0382, avg wnll: 5.8197, avg kl: 0.0423, mse: 0.266412, wmse: 4.317614, mae: 0.346251
+2497,	Iter: 2497, train loss: 1.3879, avg nll: -0.0261, avg wnll: 5.7382, avg kl: 0.0441, mse: 0.273982, wmse: 4.415418, mae: 0.351667
+2498,	Iter: 2498, train loss: 1.3547, avg nll: -0.0218, avg wnll: 5.9949, avg kl: 0.0421, mse: 0.266875, wmse: 4.299646, mae: 0.345505
+2499,	Iter: 2499, train loss: 1.2949, avg nll: -0.0567, avg wnll: 5.6383, avg kl: 0.0419, mse: 0.261935, wmse: 4.268609, mae: 0.343924
+2500,	Iter: 2500, train loss: 1.3522, avg nll: -0.0295, avg wnll: 6.2142, avg kl: 0.0404, mse: 0.268257, wmse: 4.356021, mae: 0.347641
+nll: 6.7053, mse: 0.6999, mae: 0.6268, mean_mse: 12.2577, mean_mae: 0.6268
+1679449013.6822717
+2501,	Iter: 2501, train loss: 1.4977, avg nll: 0.0559, avg wnll: 7.3399, avg kl: 0.0424, mse: 0.279885, wmse: 4.510465, mae: 0.357565
+2502,	Iter: 2502, train loss: 1.3512, avg nll: -0.0202, avg wnll: 6.1235, avg kl: 0.0410, mse: 0.266087, wmse: 4.318809, mae: 0.347346
+2503,	Iter: 2503, train loss: 1.4185, avg nll: -0.0116, avg wnll: 6.0893, avg kl: 0.0431, mse: 0.277392, wmse: 4.496497, mae: 0.355439
+2504,	Iter: 2504, train loss: 1.4314, avg nll: 0.0049, avg wnll: 6.2267, avg kl: 0.0412, mse: 0.277056, wmse: 4.523549, mae: 0.355275
+2505,	Iter: 2505, train loss: 1.3771, avg nll: -0.0169, avg wnll: 5.6912, avg kl: 0.0432, mse: 0.270181, wmse: 4.364973, mae: 0.350250
+2506,	Iter: 2506, train loss: 1.3330, avg nll: -0.0408, avg wnll: 5.8304, avg kl: 0.0422, mse: 0.266311, wmse: 4.316366, mae: 0.346155
+2507,	Iter: 2507, train loss: 1.3860, avg nll: -0.0279, avg wnll: 5.7462, avg kl: 0.0440, mse: 0.273962, wmse: 4.415071, mae: 0.351647
+2508,	Iter: 2508, train loss: 1.3534, avg nll: -0.0231, avg wnll: 6.0030, avg kl: 0.0420, mse: 0.266891, wmse: 4.299637, mae: 0.345503
+2509,	Iter: 2509, train loss: 1.2925, avg nll: -0.0589, avg wnll: 5.6414, avg kl: 0.0417, mse: 0.261932, wmse: 4.268941, mae: 0.343888
+2510,	Iter: 2510, train loss: 1.3512, avg nll: -0.0307, avg wnll: 6.2131, avg kl: 0.0403, mse: 0.268321, wmse: 4.356996, mae: 0.347655
+nll: 6.7562, mse: 0.7000, mae: 0.6268, mean_mse: 12.2578, mean_mae: 0.6268
+1679449240.411157
+2511,	Iter: 2511, train loss: 1.4961, avg nll: 0.0548, avg wnll: 7.3559, avg kl: 0.0422, mse: 0.279835, wmse: 4.509175, mae: 0.357479
+2512,	Iter: 2512, train loss: 1.3489, avg nll: -0.0221, avg wnll: 6.1225, avg kl: 0.0408, mse: 0.266034, wmse: 4.317871, mae: 0.347264
+2513,	Iter: 2513, train loss: 1.4154, avg nll: -0.0142, avg wnll: 6.0810, avg kl: 0.0430, mse: 0.277319, wmse: 4.495397, mae: 0.355328
+2514,	Iter: 2514, train loss: 1.4295, avg nll: 0.0032, avg wnll: 6.2451, avg kl: 0.0411, mse: 0.277030, wmse: 4.523484, mae: 0.355256
+2515,	Iter: 2515, train loss: 1.3754, avg nll: -0.0185, avg wnll: 5.6990, avg kl: 0.0430, mse: 0.270193, wmse: 4.365083, mae: 0.350248
+2516,	Iter: 2516, train loss: 1.3323, avg nll: -0.0419, avg wnll: 5.8189, avg kl: 0.0421, mse: 0.266404, wmse: 4.317621, mae: 0.346192
+2517,	Iter: 2517, train loss: 1.3843, avg nll: -0.0294, avg wnll: 5.7457, avg kl: 0.0439, mse: 0.273968, wmse: 4.415336, mae: 0.351610
+2518,	Iter: 2518, train loss: 1.3507, avg nll: -0.0256, avg wnll: 5.9949, avg kl: 0.0420, mse: 0.266852, wmse: 4.299311, mae: 0.345435
+2519,	Iter: 2519, train loss: 1.2908, avg nll: -0.0606, avg wnll: 5.6307, avg kl: 0.0418, mse: 0.261920, wmse: 4.268241, mae: 0.343864
+2520,	Iter: 2520, train loss: 1.3490, avg nll: -0.0324, avg wnll: 6.2190, avg kl: 0.0402, mse: 0.268241, wmse: 4.355762, mae: 0.347580
+nll: 6.8868, mse: 0.6999, mae: 0.6268, mean_mse: 12.2582, mean_mae: 0.6268
+1679449471.9898584
+saving.................
+done
+2521,	Iter: 2521, train loss: 1.4942, avg nll: 0.0529, avg wnll: 7.3471, avg kl: 0.0422, mse: 0.279824, wmse: 4.509555, mae: 0.357456
+2522,	Iter: 2522, train loss: 1.3476, avg nll: -0.0235, avg wnll: 6.1325, avg kl: 0.0408, mse: 0.266077, wmse: 4.318602, mae: 0.347285
+2523,	Iter: 2523, train loss: 1.4143, avg nll: -0.0153, avg wnll: 6.0849, avg kl: 0.0429, mse: 0.277355, wmse: 4.496048, mae: 0.355362
+2524,	Iter: 2524, train loss: 1.4273, avg nll: 0.0012, avg wnll: 6.2251, avg kl: 0.0410, mse: 0.277011, wmse: 4.523031, mae: 0.355171
+2525,	Iter: 2525, train loss: 1.3732, avg nll: -0.0205, avg wnll: 5.6959, avg kl: 0.0430, mse: 0.270143, wmse: 4.364500, mae: 0.350163
+2526,	Iter: 2526, train loss: 1.3291, avg nll: -0.0444, avg wnll: 5.8296, avg kl: 0.0421, mse: 0.266297, wmse: 4.316313, mae: 0.346095
+2527,	Iter: 2527, train loss: 1.3826, avg nll: -0.0310, avg wnll: 5.7495, avg kl: 0.0439, mse: 0.273955, wmse: 4.415101, mae: 0.351604
+2528,	Iter: 2528, train loss: 1.3496, avg nll: -0.0267, avg wnll: 6.0025, avg kl: 0.0419, mse: 0.266879, wmse: 4.299539, mae: 0.345443
+2529,	Iter: 2529, train loss: 1.2888, avg nll: -0.0624, avg wnll: 5.6398, avg kl: 0.0416, mse: 0.261920, wmse: 4.268680, mae: 0.343835
+2530,	Iter: 2530, train loss: 1.3488, avg nll: -0.0331, avg wnll: 6.2216, avg kl: 0.0401, mse: 0.268339, wmse: 4.357318, mae: 0.347636
+nll: 6.9284, mse: 0.7001, mae: 0.6268, mean_mse: 12.2583, mean_mae: 0.6268
+1679449708.1798828
+2531,	Iter: 2531, train loss: 1.4929, avg nll: 0.0520, avg wnll: 7.3610, avg kl: 0.0420, mse: 0.279787, wmse: 4.508469, mae: 0.357395
+2532,	Iter: 2532, train loss: 1.3454, avg nll: -0.0253, avg wnll: 6.1319, avg kl: 0.0406, mse: 0.266024, wmse: 4.317667, mae: 0.347215
+2533,	Iter: 2533, train loss: 1.4115, avg nll: -0.0178, avg wnll: 6.0771, avg kl: 0.0428, mse: 0.277291, wmse: 4.494956, mae: 0.355267
+2534,	Iter: 2534, train loss: 1.4258, avg nll: -0.0003, avg wnll: 6.2461, avg kl: 0.0410, mse: 0.277005, wmse: 4.523392, mae: 0.355180
+2535,	Iter: 2535, train loss: 1.3719, avg nll: -0.0218, avg wnll: 5.7049, avg kl: 0.0428, mse: 0.270166, wmse: 4.364800, mae: 0.350184
+2536,	Iter: 2536, train loss: 1.3288, avg nll: -0.0451, avg wnll: 5.8224, avg kl: 0.0420, mse: 0.266385, wmse: 4.317508, mae: 0.346130
+2537,	Iter: 2537, train loss: 1.3812, avg nll: -0.0323, avg wnll: 5.7582, avg kl: 0.0437, mse: 0.273957, wmse: 4.415339, mae: 0.351572
+2538,	Iter: 2538, train loss: 1.3471, avg nll: -0.0289, avg wnll: 6.0002, avg kl: 0.0419, mse: 0.266840, wmse: 4.299195, mae: 0.345377
+2539,	Iter: 2539, train loss: 1.2874, avg nll: -0.0639, avg wnll: 5.6297, avg kl: 0.0417, mse: 0.261918, wmse: 4.268035, mae: 0.343823
+2540,	Iter: 2540, train loss: 1.3468, avg nll: -0.0347, avg wnll: 6.2323, avg kl: 0.0401, mse: 0.268281, wmse: 4.356390, mae: 0.347585
+nll: 7.0625, mse: 0.7000, mae: 0.6268, mean_mse: 12.2585, mean_mae: 0.6268
+1679449936.1385186
+2541,	Iter: 2541, train loss: 1.4912, avg nll: 0.0502, avg wnll: 7.3528, avg kl: 0.0421, mse: 0.279787, wmse: 4.508948, mae: 0.357382
+2542,	Iter: 2542, train loss: 1.3441, avg nll: -0.0268, avg wnll: 6.1368, avg kl: 0.0406, mse: 0.266062, wmse: 4.318291, mae: 0.347225
+2543,	Iter: 2543, train loss: 1.4107, avg nll: -0.0186, avg wnll: 6.0840, avg kl: 0.0428, mse: 0.277324, wmse: 4.495573, mae: 0.355297
+2544,	Iter: 2544, train loss: 1.4237, avg nll: -0.0022, avg wnll: 6.2236, avg kl: 0.0409, mse: 0.276990, wmse: 4.522900, mae: 0.355099
+2545,	Iter: 2545, train loss: 1.3695, avg nll: -0.0239, avg wnll: 5.6950, avg kl: 0.0428, mse: 0.270113, wmse: 4.364231, mae: 0.350096
+2546,	Iter: 2546, train loss: 1.3261, avg nll: -0.0473, avg wnll: 5.8336, avg kl: 0.0420, mse: 0.266292, wmse: 4.316392, mae: 0.346048
+2547,	Iter: 2547, train loss: 1.3795, avg nll: -0.0339, avg wnll: 5.7564, avg kl: 0.0437, mse: 0.273933, wmse: 4.414876, mae: 0.351547
+2548,	Iter: 2548, train loss: 1.3461, avg nll: -0.0301, avg wnll: 6.0023, avg kl: 0.0418, mse: 0.266873, wmse: 4.299528, mae: 0.345387
+2549,	Iter: 2549, train loss: 1.2855, avg nll: -0.0656, avg wnll: 5.6371, avg kl: 0.0414, mse: 0.261918, wmse: 4.268518, mae: 0.343796
+2550,	Iter: 2550, train loss: 1.3463, avg nll: -0.0355, avg wnll: 6.2254, avg kl: 0.0400, mse: 0.268361, wmse: 4.357672, mae: 0.347624
+nll: 7.0965, mse: 0.7001, mae: 0.6268, mean_mse: 12.2590, mean_mae: 0.6268
+1679450165.9212935
+saving.................
+done
+2551,	Iter: 2551, train loss: 1.4896, avg nll: 0.0491, avg wnll: 7.3595, avg kl: 0.0419, mse: 0.279738, wmse: 4.507636, mae: 0.357309
+2552,	Iter: 2552, train loss: 1.3424, avg nll: -0.0283, avg wnll: 6.1405, avg kl: 0.0405, mse: 0.266032, wmse: 4.317695, mae: 0.347185
+2553,	Iter: 2553, train loss: 1.4084, avg nll: -0.0206, avg wnll: 6.0806, avg kl: 0.0426, mse: 0.277282, wmse: 4.494874, mae: 0.355227
+2554,	Iter: 2554, train loss: 1.4222, avg nll: -0.0035, avg wnll: 6.2485, avg kl: 0.0408, mse: 0.276976, wmse: 4.523151, mae: 0.355108
+2555,	Iter: 2555, train loss: 1.3684, avg nll: -0.0250, avg wnll: 5.7065, avg kl: 0.0427, mse: 0.270145, wmse: 4.364602, mae: 0.350123
+2556,	Iter: 2556, train loss: 1.3258, avg nll: -0.0479, avg wnll: 5.8274, avg kl: 0.0419, mse: 0.266371, wmse: 4.317430, mae: 0.346073
+2557,	Iter: 2557, train loss: 1.3783, avg nll: -0.0351, avg wnll: 5.7671, avg kl: 0.0436, mse: 0.273959, wmse: 4.415577, mae: 0.351552
+2558,	Iter: 2558, train loss: 1.3440, avg nll: -0.0320, avg wnll: 6.0029, avg kl: 0.0417, mse: 0.266847, wmse: 4.299393, mae: 0.345347
+2559,	Iter: 2559, train loss: 1.2842, avg nll: -0.0669, avg wnll: 5.6290, avg kl: 0.0415, mse: 0.261919, wmse: 4.267918, mae: 0.343792
+2560,	Iter: 2560, train loss: 1.3442, avg nll: -0.0372, avg wnll: 6.2355, avg kl: 0.0400, mse: 0.268295, wmse: 4.356589, mae: 0.347560
+nll: 7.2315, mse: 0.7000, mae: 0.6268, mean_mse: 12.2585, mean_mae: 0.6268
+1679450394.239426
+2561,	Iter: 2561, train loss: 1.4881, avg nll: 0.0474, avg wnll: 7.3547, avg kl: 0.0419, mse: 0.279743, wmse: 4.508286, mae: 0.357305
+2562,	Iter: 2562, train loss: 1.3409, avg nll: -0.0298, avg wnll: 6.1373, avg kl: 0.0405, mse: 0.266045, wmse: 4.317951, mae: 0.347168
+2563,	Iter: 2563, train loss: 1.4074, avg nll: -0.0216, avg wnll: 6.0832, avg kl: 0.0426, mse: 0.277285, wmse: 4.495052, mae: 0.355225
+2564,	Iter: 2564, train loss: 1.4200, avg nll: -0.0056, avg wnll: 6.2219, avg kl: 0.0408, mse: 0.276966, wmse: 4.522757, mae: 0.355026
+2565,	Iter: 2565, train loss: 1.3658, avg nll: -0.0272, avg wnll: 5.6922, avg kl: 0.0427, mse: 0.270074, wmse: 4.363754, mae: 0.350016
+2566,	Iter: 2566, train loss: 1.3235, avg nll: -0.0498, avg wnll: 5.8346, avg kl: 0.0418, mse: 0.266297, wmse: 4.316636, mae: 0.346010
+2567,	Iter: 2567, train loss: 1.3764, avg nll: -0.0369, avg wnll: 5.7638, avg kl: 0.0436, mse: 0.273927, wmse: 4.414926, mae: 0.351514
+2568,	Iter: 2568, train loss: 1.3428, avg nll: -0.0332, avg wnll: 6.0047, avg kl: 0.0417, mse: 0.266858, wmse: 4.299337, mae: 0.345335
+2569,	Iter: 2569, train loss: 1.2825, avg nll: -0.0684, avg wnll: 5.6399, avg kl: 0.0413, mse: 0.261912, wmse: 4.268326, mae: 0.343767
+2570,	Iter: 2570, train loss: 1.3436, avg nll: -0.0382, avg wnll: 6.2257, avg kl: 0.0399, mse: 0.268371, wmse: 4.357838, mae: 0.347597
+nll: 7.2643, mse: 0.7001, mae: 0.6268, mean_mse: 12.2592, mean_mae: 0.6268
+1679450623.9765239
+2571,	Iter: 2571, train loss: 1.4866, avg nll: 0.0465, avg wnll: 7.3652, avg kl: 0.0418, mse: 0.279681, wmse: 4.506761, mae: 0.357211
+2572,	Iter: 2572, train loss: 1.3391, avg nll: -0.0313, avg wnll: 6.1430, avg kl: 0.0404, mse: 0.266009, wmse: 4.317221, mae: 0.347121
+2573,	Iter: 2573, train loss: 1.4052, avg nll: -0.0236, avg wnll: 6.0788, avg kl: 0.0425, mse: 0.277245, wmse: 4.494339, mae: 0.355158
+2574,	Iter: 2574, train loss: 1.4184, avg nll: -0.0070, avg wnll: 6.2427, avg kl: 0.0407, mse: 0.276951, wmse: 4.523011, mae: 0.355034
+2575,	Iter: 2575, train loss: 1.3650, avg nll: -0.0281, avg wnll: 5.7113, avg kl: 0.0425, mse: 0.270116, wmse: 4.364304, mae: 0.350061
+2576,	Iter: 2576, train loss: 1.3231, avg nll: -0.0505, avg wnll: 5.8362, avg kl: 0.0417, mse: 0.266376, wmse: 4.317612, mae: 0.346032
+2577,	Iter: 2577, train loss: 1.3749, avg nll: -0.0382, avg wnll: 5.7745, avg kl: 0.0434, mse: 0.273932, wmse: 4.415293, mae: 0.351504
+2578,	Iter: 2578, train loss: 1.3406, avg nll: -0.0351, avg wnll: 6.0064, avg kl: 0.0416, mse: 0.266819, wmse: 4.299008, mae: 0.345276
+2579,	Iter: 2579, train loss: 1.2816, avg nll: -0.0695, avg wnll: 5.6335, avg kl: 0.0414, mse: 0.261916, wmse: 4.267710, mae: 0.343758
+2580,	Iter: 2580, train loss: 1.3416, avg nll: -0.0398, avg wnll: 6.2346, avg kl: 0.0399, mse: 0.268311, wmse: 4.356793, mae: 0.347542
+nll: 7.3949, mse: 0.7000, mae: 0.6268, mean_mse: 12.2589, mean_mae: 0.6268
+1679450855.1144137
+saving.................
+done
+2581,	Iter: 2581, train loss: 1.4854, avg nll: 0.0450, avg wnll: 7.3572, avg kl: 0.0418, mse: 0.279702, wmse: 4.507576, mae: 0.357222
+2582,	Iter: 2582, train loss: 1.3383, avg nll: -0.0323, avg wnll: 6.1447, avg kl: 0.0404, mse: 0.266055, wmse: 4.317975, mae: 0.347141
+2583,	Iter: 2583, train loss: 1.4045, avg nll: -0.0244, avg wnll: 6.0829, avg kl: 0.0425, mse: 0.277268, wmse: 4.494846, mae: 0.355182
+2584,	Iter: 2584, train loss: 1.4162, avg nll: -0.0091, avg wnll: 6.2150, avg kl: 0.0407, mse: 0.276923, wmse: 4.522291, mae: 0.354939
+2585,	Iter: 2585, train loss: 1.3623, avg nll: -0.0304, avg wnll: 5.6923, avg kl: 0.0425, mse: 0.270027, wmse: 4.363166, mae: 0.349934
+2586,	Iter: 2586, train loss: 1.3208, avg nll: -0.0523, avg wnll: 5.8407, avg kl: 0.0417, mse: 0.266267, wmse: 4.316270, mae: 0.345949
+2587,	Iter: 2587, train loss: 1.3731, avg nll: -0.0400, avg wnll: 5.7693, avg kl: 0.0435, mse: 0.273922, wmse: 4.414917, mae: 0.351476
+2588,	Iter: 2588, train loss: 1.3399, avg nll: -0.0358, avg wnll: 6.0146, avg kl: 0.0415, mse: 0.266847, wmse: 4.299264, mae: 0.345291
+2589,	Iter: 2589, train loss: 1.2799, avg nll: -0.0709, avg wnll: 5.6425, avg kl: 0.0412, mse: 0.261900, wmse: 4.267967, mae: 0.343734
+2590,	Iter: 2590, train loss: 1.3414, avg nll: -0.0405, avg wnll: 6.2243, avg kl: 0.0399, mse: 0.268401, wmse: 4.358372, mae: 0.347593
+nll: 7.4241, mse: 0.7001, mae: 0.6268, mean_mse: 12.2595, mean_mae: 0.6268
+1679451084.692053
+2591,	Iter: 2591, train loss: 1.4839, avg nll: 0.0441, avg wnll: 7.3628, avg kl: 0.0416, mse: 0.279648, wmse: 4.506310, mae: 0.357147
+2592,	Iter: 2592, train loss: 1.3363, avg nll: -0.0340, avg wnll: 6.1462, avg kl: 0.0403, mse: 0.265997, wmse: 4.316976, mae: 0.347068
+2593,	Iter: 2593, train loss: 1.4021, avg nll: -0.0265, avg wnll: 6.0742, avg kl: 0.0424, mse: 0.277229, wmse: 4.494174, mae: 0.355114
+2594,	Iter: 2594, train loss: 1.4147, avg nll: -0.0105, avg wnll: 6.2346, avg kl: 0.0406, mse: 0.276917, wmse: 4.522721, mae: 0.354953
+2595,	Iter: 2595, train loss: 1.3618, avg nll: -0.0310, avg wnll: 5.7124, avg kl: 0.0424, mse: 0.270079, wmse: 4.363840, mae: 0.349986
+2596,	Iter: 2596, train loss: 1.3207, avg nll: -0.0529, avg wnll: 5.8415, avg kl: 0.0416, mse: 0.266385, wmse: 4.317915, mae: 0.346000
+2597,slurmstepd: error: *** JOB 247825 ON gpu0 CANCELLED AT 2023-03-22T02:14:07 ***

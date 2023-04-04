@@ -1,0 +1,13 @@
+Namespace(n_union_tp=3500, data_folder='datasets/ZTF_gr', checkpoint='ZTF_gr0.9500744938850403.h5', start_col=1, inc_errors=False, print_at=1, embed_time=128, enc_num_heads=16, latent_dim=64, mixing='concat', num_ref_points=16, rec_hidden=128, width=512, save_at=30, patience=100, early_stopping=False, niters=20000, frac=0.5, batch_size=2, mse_weight=5.0, dropout=0.0, num_resamples=0, lr=0.0005, scheduler=False, warmup=4000, kl_zero=False, kl_annealing=True, net='hetvae', device='cuda', const_var=False, var_per_dim=False, std=0.1, seed=2, save=True, k_iwae=1) 2876770
+validated 3407 files out of 3407 for band='r'
+3407 3407
+(2614, 1, 2011, 3)
+created union_tp attribute of length 3500
+dataset created w/ shape (2614, 1, 2011, 3)
+train size: 2352, valid size: 236, test size: 262
+datasets/ZTF_gr
+=> loading checkpoint 'ZTF_gr0.9500744938850403.h5'
+Namespace(n_union_tp=3500, data_folder='datasets/ZTF_gr', checkpoint='', start_col=1, inc_errors=False, print_at=1, embed_time=128, enc_num_heads=16, latent_dim=64, mixing='concat', num_ref_points=16, rec_hidden=128, width=512, save_at=30, patience=100, early_stopping=False, niters=20000, frac=0.5, batch_size=2, mse_weight=5.0, dropout=0.0, num_resamples=0, lr=0.0001, scheduler=False, warmup=4000, kl_zero=False, kl_annealing=True, net='hetvae', device='cuda', const_var=False, var_per_dim=False, std=0.1, seed=2, save=True, k_iwae=1)
+loaded checkpoint w/ loss=3.3459354601547022
+model_size=498882
+391,nan in loss,,,,,,,,, stopping

@@ -96,7 +96,7 @@ class DataSet:
                 if lc[:,1].any():
                     lc[:,0] = lc[:,0] - min_t
                     #lc[:,0] = lc[:,0] / 365
-                    lcs[:,0] = lc[:,0] / np.max(lc[:,0])
+                    #lc[:,0] = lc[:,0] / np.max(lc[:,0])
                     lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
                     lc[:,2] = lc[:,2] / np.std(lc[:,1])
                  
@@ -263,10 +263,11 @@ class DataSet:
                 except Exception:
                     object_lcs.append(np.zeros((1,3)))
                     zero_count += 1
+                    continue
                     
                 ##### filtering ZTF error codes #########
                 if self.name.lower().find('ztf') > 0:
-                    try:
+                    try: # might be that its not original 8 columns from ztf api 
                         lc = lc[np.where(lc[:,4] == 0)[0]]
                     except Exception:
                         pass
@@ -363,9 +364,10 @@ class DataSet:
         
         
         self.union_tp = np.unique(self.dataset[:,:,:,0].flatten()) 
+        print(np.max(self.union_tp))
         if uniform: 
             step = np.ptp(self.union_tp) / n 
-            self.union_tp = np.arange(np.min(self.union_tp), np.max(self.union_tp), step)    
+            self.union_tp = np.arange(np.min(self.union_tp), np.max(self.union_tp), step) 
         self.union_tp = self.union_tp.astype('float32')
         print(f'created union_tp attribute of length {len(self.union_tp)}')
     

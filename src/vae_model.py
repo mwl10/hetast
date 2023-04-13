@@ -53,7 +53,7 @@ class HeTVAE(nn.Module):
         self.num_heads = num_heads
         self.width = width
         self.num_ref_points = num_ref_points
-        self.query = torch.linspace(0, 1, num_ref_points)
+        self.query = torch.linspace(0, 1687.1367, num_ref_points)
         self.std = std
         self.is_constant = is_constant
         self.is_bounded = is_bounded
@@ -105,7 +105,7 @@ class HeTVAE(nn.Module):
             dropout=self.dropout,
         )
         self.decoder = UnTAN(
-            input_dim=2 * self.latent_dim,
+            input_dim=2 * self.latent_dim, # self.latent_dim
             nhidden=self.nhidden,
             embed_time=self.embed_time,
             num_heads=self.num_heads,
@@ -189,6 +189,13 @@ class HeTVAE(nn.Module):
             
         px = self.decode(z, target_x)
         return px, qz
+   
+
+#      def get_reconstruction(self, context_x, context_y, target_x, num_samples=1):
+#         qz = self.encode(context_x, context_y)
+#         z = self.sample(qz, num_samples)
+#         px = self.decode(z, target_x)
+#         return px, qz
     
 
     def compute_logvar(self, sigma):

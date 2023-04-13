@@ -52,7 +52,7 @@ def train(args):
     patience_counter = 0
     ######################################## 
     if args.kl_annealing:
-        kl_coefs = utils.frange_cycle_linear(6000, n_cycle=8)
+        kl_coefs = utils.frange_cycle_linear(6000, n_cycle=16)
     ##################
     for itr in range(epoch, epoch+args.niters):
         train_loss = 0

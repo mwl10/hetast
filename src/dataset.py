@@ -95,7 +95,8 @@ class DataSet:
             for lc in object_lcs:
                 if lc[:,1].any():
                     lc[:,0] = lc[:,0] - min_t
-                    #lc[:,0] = lc[:,0] / (np.max(lc[:,0]))
+                    #lc[:,0] = lc[:,0] / 365
+                    lcs[:,0] = lc[:,0] / np.max(lc[:,0])
                     lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
                     lc[:,2] = lc[:,2] / np.std(lc[:,1])
                  
@@ -259,36 +260,41 @@ class DataSet:
             for j,band_file in enumerate(object_files):
                 try: 
                     lc = pd.read_csv(band_file, sep=self.sep).to_numpy()
-                    ##### filtering ZTF error codes #########
-                    if self.name.lower().find('ztf') > 0:
-                        lc = lc[np.where(lc[:,4] == 0)[0]]     
-                    #########################################
-                    if len(lc) > min_length:
-                        lc = lc[:, self.start_col:self.start_col+3]
-                        lc = lc[lc[:,0].argsort()].astype(np.float32)
-#                         excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) \
-#                         / np.mean(lc[:,1])
-                        mean_mag = np.mean(lc[:,1])
-                        ### ZTF limiting mags: g = 20.8, r = 20.6, i = 19.9 mag
-                        if self.name.lower().find('ztf') > 0: 
-                            if self.bands[j] == 'r' and mean_mag <= 20.4 and mean_mag >= 13.5:   ###### filter r mags
-                                object_lcs.append(lc)
-                            elif self.bands[j] == 'i' and mean_mag <= 19.7 and mean_mag >= 13.5: ###### filter i mags
-                                object_lcs.append(lc)
-                            elif self.bands[j] == 'g' and mean_mag<= 20.6 and mean_mag >= 13.5:  ###### filter g mags 
-                                object_lcs.append(lc)
-                            else:
-                                object_lcs.append(np.zeros((1,3)))
-                                zero_count += 1
-                        else:
-                            object_lcs.append(lc)
-                            
-                    elif len(lc) == 0:
-                        object_lcs.append(np.zeros((1,3)))
-                        zero_count += 1      
                 except Exception:
                     object_lcs.append(np.zeros((1,3)))
                     zero_count += 1
+                    
+                ##### filtering ZTF error codes #########
+                if self.name.lower().find('ztf') > 0:
+                    try:
+                        lc = lc[np.where(lc[:,4] == 0)[0]]
+                    except Exception:
+                        pass
+                #########################################
+                if len(lc) > min_length:
+                    lc = lc[:, self.start_col:self.start_col+3]
+                    lc = lc[lc[:,0].argsort()].astype(np.float32)
+#                         excess_var = ((np.std(lc[:,1]) ** 2) - (np.mean(lc[:,2]) ** 2)) \
+#                         / np.mean(lc[:,1])
+                    mean_mag = np.mean(lc[:,1])
+                    ### ZTF limiting mags: g = 20.8, r = 20.6, i = 19.9 mag
+                    if self.name.lower().find('ztf') > 0: 
+                        if self.bands[j] == 'r' and mean_mag <= 20.4 and mean_mag >= 13.5:   ###### filter r mags
+                            object_lcs.append(lc)
+                        elif self.bands[j] == 'i' and mean_mag <= 19.7 and mean_mag >= 13.5: ###### filter i mags
+                            object_lcs.append(lc)
+                        elif self.bands[j] == 'g' and mean_mag<= 20.6 and mean_mag >= 13.5:  ###### filter g mags 
+                            object_lcs.append(lc)
+                        else:
+                            object_lcs.append(np.zeros((1,3)))
+                            zero_count += 1
+                    else:
+                        object_lcs.append(lc)
+
+                elif len(lc) == 0:
+                    object_lcs.append(np.zeros((1,3)))
+                    zero_count += 1      
+                
             # make sure we have three bands, and not all of them are missing
             if (len(object_lcs) == len(self.bands)) and (zero_count != len(self.bands)):
                   dataset.append(object_lcs)
@@ -439,28 +445,3 @@ class DataSet:
         fn = lambda lc: np.median(lc[1:,0]-lc[:-1,0])
         med_cadence = [fn(lc) for object_lcs in self.dataset for lc in object_lcs]
         self.med_cadence = np.array(med_cadence).reshape(-1,len(self.bands))
-
-    def set_segment_counts(self, sep_std=2, plot=False, index=1, figsize=(15,15)):
-        epoch_counts = np.zeros((len(self.dataset), len(self.bands)))
-        if plot==True:
-            fig, ax = plt.subplots(len(self.bands),1, figsize=figsize, squeeze=False)
-        for i, object_lcs in enumerate(self.dataset):
-            for j, lc in enumerate(object_lcs):
-                if lc[:,1].sum() == 0:
-                    epochs.append(0)
-                    continue
-                dt = lc[1:,0] - lc[:-1,0]
-                dt_std = np.std(dt)
-                dt_mean = np.mean(dt)
-                seps = np.where(dt > (dt_mean + dt_std*sep_std))[0]
-                if plot == True and i == index:
-                    ax[j][0].scatter(lc[:,0], lc[:,1], label='observed points')
-                    for sep in seps:
-                        ax[j][0].axvline(x=(lc[sep, 0] + lc[sep+1,0])/2, linestyle=':', label='epoch separation')
-                num_epochs = len(seps) + 1
-                epoch_counts[i,j] = num_epochs
-        self.epoch_counts = epoch_counts
-        if plot == True:
-            lines_labels = ax[0][0].get_legend_handles_labels()
-            lines,labels = lines_labels[0], lines_labels[1]
-            fig.legend(lines[:2], labels[:2], bbox_to_anchor=(0.12, 0.92), loc='upper left')

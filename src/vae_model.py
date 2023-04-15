@@ -191,12 +191,6 @@ class HeTVAE(nn.Module):
         return px, qz
    
 
-#      def get_reconstruction(self, context_x, context_y, target_x, num_samples=1):
-#         qz = self.encode(context_x, context_y)
-#         z = self.sample(qz, num_samples)
-#         px = self.decode(z, target_x)
-#         return px, qz
-    
 
     def compute_logvar(self, sigma):
         if self.is_constant:
@@ -281,3 +275,31 @@ class HeTVAE(nn.Module):
         return loss_info
 
     
+    
+class HeTVAE_nodet(HeTVAE):
+    '''Heteroscedastic Temporal Variational Autoencoder, no det pathway'''
+    def __init__(
+        self, *args, **kwargs
+    ):
+        super(HeTVAE_nodet, self).__init__(*args, **kwargs)
+        
+        self.decoder = UnTAN(
+            input_dim=self.latent_dim,
+            nhidden=self.nhidden,
+            embed_time=self.embed_time,
+            num_heads=self.num_heads,
+            dropout=self.dropout,
+            device=self.device
+        )
+ 
+    def encode(self, context_x, context_y):
+        mask = context_y[:, :, self.dim:]
+        value = context_y[:, :, :self.dim]
+        hidden = self.encoder(self.query, context_x, value, mask)
+        return self.h2z_mixing(hidden)
+
+    def get_reconstruction(self, context_x, context_y, target_x, num_samples=1, qz_mean=False):
+        qz = self.encode(context_x, context_y)
+        z = self.sample(qz, num_samples)
+        px = self.decode(z, target_x)
+        return px, qz

@@ -15,10 +15,11 @@ from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand, gpSimFull
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+from torch.optim import lr_scheduler
 
 
 ## creates an array for kl annealing schedule, credits to: https://github.com/haofuml/cyclical_annealing
-def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
+def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5) -> np.ndarray:
     L = np.ones(n_iter) * stop
     period = n_iter/n_cycle
     step = (stop-start)/(period*ratio) # linear schedule
@@ -29,6 +30,7 @@ def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5):
             v += step
             i += 1
     return L 
+
 
 
 def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True,chop=False,correct_z=False,split=0.9,seed=2):
@@ -98,12 +100,16 @@ def load_checkpoint(filename, data_obj, device='mps'):
         net.load_state_dict(cp['state_dict'])
         params = list(net.parameters())
         optimizer = optim.Adam(params)
+        scheduler = lr_scheduler.ReduceLROnPlateau(optimizer)
         optimizer.load_state_dict(cp['optimizer_state_dict'])
-        return net,optimizer, cp['args'], cp['epoch'], cp['loss'], cp['train_losses'], cp['test_losses']
+        scheduler.load_state_dict(cp['scheduler_state_dict'])
+
+        return net,optimizer,scheduler,cp['lrs'], cp['args'], cp['epoch'], \
+            cp['loss'], cp['train_losses'], cp['test_losses'],cp['val_losses']
 
     
 
-def make_masks(batch, frac=0.5, forecast=False):
+def make_masks(batch, frac=0.5, forecast=False) -> torch.Tensor:
     """
     method to subsample a fraction of observed points in a light curve for
     training
@@ -114,7 +120,6 @@ def make_masks(batch, frac=0.5, forecast=False):
         frac  (float)  0.5  --> 0 to 1, dictates the fraction of points we mask off for training
     """
     subsampled_mask = torch.zeros_like(batch[:,:, :, 1])
-    recon_mask = torch.zeros_like(batch[:, :,:, 1])
     for i, object_lcs in enumerate(batch):
         for j, lc in enumerate(object_lcs):
             
@@ -131,6 +136,7 @@ def make_masks(batch, frac=0.5, forecast=False):
             subsampled_mask[i,j,subsampled_points] = 1
    
     return subsampled_mask
+
 
  # astromer scheduler... 
 def update_lr(model_size, itr, warmup):
@@ -158,7 +164,7 @@ def evaluate_hetvae(
     indy_nlls = []
     mses= []
     with torch.no_grad():
-        for batch in tqdm(dataloader):
+        for batch in dataloader:
             batch_len = batch.shape[0]
             # forecasting if this mask is set to first section of points only, not random selection
             subsampled_mask = make_masks(batch, frac=frac, forecast=forecast)
@@ -201,6 +207,12 @@ def evaluate_hetvae(
 
     avg_nll =  -avg_loglik / train_n
     avg_mse = -avg_loglik / train_n
+    
+#     print(
+#         'nll: {:.4f}, mse: {:.4f}'.format(
+#             avg_nll,
+#             avg_mse)
+#     )
 
     return avg_nll, avg_mse, -1 * np.concatenate(individual_nlls, axis=1)[0]
 

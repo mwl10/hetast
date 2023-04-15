@@ -36,9 +36,10 @@ class DataSet:
         ########################################################################################################
         splindex = int(np.floor(split*len(self.dataset)))
         training, test = np.split(self.dataset, [splindex])
-        valid_splindex = int(np.floor(split*len(training)))
+        valid_splindex = int(np.floor(0.8*len(training)))
         _, valid = np.split(training, [valid_splindex])
-        self.split_index = splindex # keep this for denormalizing later
+        self.test_split_index = splindex # keep this for denormalizing later
+        self.valid_split_index = valid_splindex
         print(f'train size: {len(training)}, valid size: {len(valid)}, test size: {len(test)}')
         train_loader = torch.utils.data.DataLoader(training, batch_size=batch_size)
         valid_loader = torch.utils.data.DataLoader(valid, batch_size=batch_size)
@@ -82,7 +83,7 @@ class DataSet:
         make time start at 0,
         normalize y to have mean 0, std 1
         normalize yerr as yerr/std(y),
-        skip if light curve is missing for a particular multivariate dimension  
+        skip if light curve is missing for a particular dimension  
         """
         self.unnormalized_data = copy.deepcopy(self.dataset)
         for object_lcs in self.dataset:
@@ -364,7 +365,7 @@ class DataSet:
         
         
         self.union_tp = np.unique(self.dataset[:,:,:,0].flatten()) 
-        print(np.max(self.union_tp))
+        print('max time: ', np.max(self.union_tp))
         if uniform: 
             step = np.ptp(self.union_tp) / n 
             self.union_tp = np.arange(np.min(self.union_tp), np.max(self.union_tp), step) 

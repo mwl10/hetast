@@ -1,0 +1,2 @@
+- data_folder=../../datasets/ZTF_g_test
+- training.regularization.dropout=0.1

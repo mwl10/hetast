@@ -8,6 +8,12 @@ import utils
 import warnings
 import time
 from torch.optim import lr_scheduler
+import hydra
+from omegaconf import DictConfig,OmegaConf
+import sys
+import pickle 
+import os
+import argparse
 
 
 def train(args):
@@ -21,10 +27,14 @@ def train(args):
     np.random.seed(seed)
     torch.cuda.manual_seed(seed)
     ##################################
-    
     device = torch.device(args.device)
-    lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, n_union_tp=args.n_union_tp, \
-                         num_resamples=args.num_resamples, batch_size=args.batch_size)
+    if args.data_folder.split('.')[-1] == 'pkl':
+        lcs = utils.load_obj(args.data_folder)
+    else:
+        lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, 
+                             n_union_tp=args.n_union_tp, num_resamples=args.num_resamples,
+                             batch_size=args.batch_size)
+    
     data_obj = lcs.data_obj
     train_loader = data_obj["train_loader"]
     test_loader = data_obj["test_loader"]
@@ -33,11 +43,11 @@ def train(args):
     union_tp = data_obj['union_tp']
     
     if args.checkpoint:
-        net,optimizer,scheduler,lrs, _, epoch, loss, train_losses, test_losses, val_losses = utils.load_checkpoint(
-            args.checkpoint, 
-            data_obj, 
-            device=args.device
-        )
+        net,optimizer,scheduler,lrs, _,epoch, losses = \
+        utils.load_checkpoint(args.checkpoint, data_obj, device=args.device)
+        train_losses = losses[0]
+        val_losses = losses[1]
+        test_losses = losses[2]
         epoch+=1
 #         for g in optimizer.param_groups:
 #                 ## update learning rate for checkpoint 
@@ -47,8 +57,10 @@ def train(args):
     else:
         net = load_network(args, dim, union_tp)
         params = list(net.parameters())
-        optimizer = optim.Adam(params, lr=args.lr)
-        scheduler = lr_scheduler.ReduceLROnPlateau(optimizer,factor=0.5) #factor=0.1, patience=10, threshold=0.0001, threshold_mode='rel',  eps=1e-08,)
+        optimizer = optim.Adam(params, lr=args.lr, betas=(args.beta1,args.beta2))
+        scheduler = lr_scheduler.ReduceLROnPlateau(optimizer,factor=args.factor,
+                                                   threshold=args.threshold, 
+                                                   patience=args.lr_patience) #factor=0.1, patience=10, threshold=0.0001, threshold_mode='rel',  eps=1e-08,)
         epoch = 1
         loss = 1000000
         train_losses = []
@@ -67,7 +79,6 @@ def train(args):
     ##################
     for itr in range(epoch, epoch+args.niters):
         print(f'{itr},', end='', flush=True)
-        
         train_loss = 0
         train_n = 0
         avg_loglik, avg_wloglik, avg_kl, mse, wmse, mae = 0, 0, 0, 0, 0, 0  
@@ -80,7 +91,6 @@ def train(args):
         ###################################################################  
         for train_batch in train_loader:
             batch_len = train_batch.shape[0]
-            
             ### including obs error ##############################
             errorbars = torch.swapaxes(train_batch[:,:,:,2], 2,1)
             weights = errorbars.clone()
@@ -88,7 +98,7 @@ def train(args):
             errorbars[errorbars!=0] = torch.log(errorbars[errorbars!=0]**2)
             logerr = errorbars.to(device) # log variance on observations 
             weights = weights.to(device)
-            
+
             ############################################################
             subsampled_mask = utils.make_masks(train_batch, frac=args.frac)
             train_batch = train_batch.to(device)
@@ -110,14 +120,14 @@ def train(args):
                 beta=kl_coef,
             )
             optimizer.zero_grad()
-            
+
             if args.inc_errors:
                 loss_info.weighted_comp_loss.backward()
             else:
                 loss_info.composite_loss.backward()
-                
+
             optimizer.step()
-            
+
             ########### train loss ##################################
             train_loss += loss_info.composite_loss.item() * batch_len
             avg_loglik += loss_info.loglik * batch_len
@@ -128,27 +138,19 @@ def train(args):
             mae += loss_info.mae * batch_len
             train_n += batch_len
             #########################################################
-        
-    
+
         ####### nan, stop training #############
         if np.isnan(train_loss / train_n):
             print('nan in loss,,,,,,,,, stopping')
             break
-        
+
         #### validation loss
-        val_nll, val_mse, val_indiv_nlls = utils.evaluate_hetvae(
-            net,
-            dim,
-            val_loader, 
-            0.5,
-            device=args.device
-        )
-        
+        val_nll, val_mse, val_indiv_nlls = utils.evaluate_hetvae(net,dim,val_loader,device=args.device)
+
         lrs.append(optimizer.param_groups[0]['lr'])
-        
-        if scheduler:
-            scheduler.step(val_nll) 
-        
+
+        if scheduler: scheduler.step(val_nll) 
+
         ######## print train / valid losses ########
         if itr % args.print_at == 0:
             print(
@@ -164,22 +166,16 @@ def train(args):
                     mae / train_n,
                     val_nll,
                     val_mse))
-                
+
         ####### test loss every 10 itrs, save losses too #############
         if itr % 10 == 0:
-            test_nll, test_mse, indiv_nlls = utils.evaluate_hetvae(
-                net,
-                dim,
-                test_loader, 
-                0.5,
-                device=args.device
-                )
-            
-            train_losses.append([(-avg_loglik / train_n).item(),(mse / train_n).item(),(avg_kl / train_n).item()])
+            test_nll, test_mse, indiv_nlls = utils.evaluate_hetvae(net,dim,test_loader,device=args.device)
+            train_losses.append([(-avg_loglik / train_n).item(),(mse / train_n).item(), \
+                                 (avg_kl / train_n).item()])
             test_losses.append([test_nll.item(),test_mse.item()])
             val_losses.append([val_nll.item(),val_mse.item()])
             print('test nll: {:.4f}, test mse: {:.4f}'.format(test_nll,test_mse))
-            
+
         ########### save model checkpoint ##############
         if itr % args.save_at == 0:
             print('saving.................')
@@ -189,13 +185,10 @@ def train(args):
                 'state_dict': net.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'scheduler_state_dict':scheduler.state_dict(),
-                'loss' : train_loss / train_n,
-                'train_losses': train_losses,
-                'test_losses':test_losses,
-                'val_losses':val_losses,
+                'losses': (train_losses,val_losses,test_losses)
             }, lcs.name + str((-avg_loglik / train_n).item()) + '.h5')
             print('done')
-            
+
         ############# patience ####################
         if best_loss > (train_loss / train_n): 
             patience_counter += 1
@@ -210,72 +203,22 @@ def train(args):
                 'epoch': itr,
                 'state_dict': net.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
-                'loss' : train_loss / train_n,
-                'train_losses': train_losses,
-                'test_losses':test_losses,
+                'scheduler_state_dict':scheduler.state_dict(),
+                'losses': (train_losses,val_losses,test_losses)
             }, lcs.name + str((-avg_loglik / train_n).item()) + '.h5')
+            print('done')
             break
-
+            
+    return val_nll # return for optuna 
     
-def main():
+@hydra.main(config_name='config', config_path='/Users/mattlowery/Desktop/Desko/code/astro/hetast/src/conf')
+def main(cfg: DictConfig) -> None:
+    leaf_cfg = utils.get_leaf_nodes(cfg)
+    args = argparse.Namespace(**leaf_cfg)
+    args.data_folder = os.path.join(hydra.utils.get_original_cwd(), args.data_folder)
+    val_nll = train(args)
+    return val_nll
     
-    warnings.simplefilter('ignore', np.RankWarning) # set warning for polynomial fitting
-    parser = argparse.ArgumentParser()
-    
-    parser.add_argument('--n-union-tp', type=int, default='3500')
-    
-    ## dataset stuff
-    parser.add_argument('--data-folder', type=str, required=True)
-    parser.add_argument('--checkpoint', type=str, default='')
-    parser.add_argument('--start-col', type=int, default='0')
-    parser.add_argument('--inc-errors', action='store_true')
-    parser.add_argument('--print-at', type=int, default='1')
-    
-    
-    ##### model architecture hypers 
-    parser.add_argument('--embed-time', type=int, default=128)  
-    parser.add_argument('--enc-num-heads', type=int, default=4) 
-    parser.add_argument('--latent-dim', type=int, default=128)  
-    parser.add_argument('--mixing', type=str, default='concat') 
-    parser.add_argument('--num-ref-points', type=int, default=16) 
-    parser.add_argument('--rec-hidden', type=int, default=128) 
-    parser.add_argument('--width', type=int, default=512)
-    
-    ##### training hypers
-    parser.add_argument('--save-at', type=int, default='1000000')
-    parser.add_argument('--patience', type=int, default='1000')
-    parser.add_argument('--early-stopping', action='store_true')
-    parser.add_argument('--niters', type=int, default=1500)
-    parser.add_argument('--frac', type=float, default=0.5)
-    parser.add_argument('--batch-size', type=int, default=128) 
-    parser.add_argument('--mse-weight', type=float, default=5.0)  
-    parser.add_argument('--dropout', type=float, default=0.0)
-    parser.add_argument('--num-resamples', type=int, default=0)
-    ## learning rate
-    parser.add_argument('--lr', type=float, default=0.0003)
-    parser.add_argument('--scheduler', action='store_true')
-    parser.add_argument('--warmup', type=int, default='4000')
-    
-    ## no need to mess with 
-    parser.add_argument('--kl-zero', action='store_true')
-    parser.add_argument('--kl-annealing', action='store_true')
-    parser.add_argument('--net', type=str, default='hetvae')
-    parser.add_argument('--device', type=str, default='cuda')
-
-    parser.add_argument('--const-var', action='store_true') 
-    parser.add_argument('--var-per-dim', action='store_true')
-    parser.add_argument('--std', type=float, default=0.1)
-    parser.add_argument('--seed', type=int, default=2) 
-    parser.add_argument('--k-iwae', type=int, default=1) 
-    
-    # remove deterministic pathway for true VAE
-    parser.add_argument('--nodet', action='store_true')
-
-    args = parser.parse_args()
-    train(args)
-    return args
-
 if __name__ == '__main__':
     main()
-    
     

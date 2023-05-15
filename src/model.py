@@ -2,13 +2,13 @@
 from vae_model import HeTVAE, HeTVAE_nodet
 
 def load_network(args, dim, union_tp=None):
-    if args.nodet:
+    if args.net == 'HeTVAE_nodet':
         net = HeTVAE_nodet(
             input_dim=dim,
             nhidden=args.rec_hidden,
             latent_dim=args.latent_dim,
             embed_time=args.embed_time,
-            num_heads=args.enc_num_heads,
+            num_heads=args.num_heads,
             intensity=True,
             union_tp=union_tp,
             width=args.width,
@@ -25,13 +25,13 @@ def load_network(args, dim, union_tp=None):
             dropout=args.dropout,
         ).to(args.device)
         
-    else: 
+    elif args.net == 'HeTVAE': 
         net = HeTVAE(
             input_dim=dim,
             nhidden=args.rec_hidden,
             latent_dim=args.latent_dim,
             embed_time=args.embed_time,
-            num_heads=args.enc_num_heads,
+            num_heads=args.num_heads,
             intensity=True,
             union_tp=union_tp,
             width=args.width,

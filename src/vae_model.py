@@ -189,8 +189,6 @@ class HeTVAE(nn.Module):
             
         px = self.decode(z, target_x)
         return px, qz
-   
-
 
     def compute_logvar(self, sigma):
         if self.is_constant:
@@ -271,17 +269,17 @@ class HeTVAE(nn.Module):
         loss_info.composite_loss = self.elbo_weight * loss_info.elbo \
             + self.mse_weight * loss_info.mse
         loss_info.weighted_comp_loss = self.elbo_weight * loss_info.welbo \
-            + self.mse_weight * loss_info.wmse
+            + self.mse_weight * loss_info.wmse 
+        
+        print('scaled wmse:', loss_info.wmse / 4, 'scaled_wnll:', wloglik / 180)
         return loss_info
 
     
     
 class HeTVAE_nodet(HeTVAE):
     '''Heteroscedastic Temporal Variational Autoencoder, no det pathway'''
-    def __init__(
-        self, *args, **kwargs
-    ):
-        super(HeTVAE_nodet, self).__init__(*args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
         self.decoder = UnTAN(
             input_dim=self.latent_dim,

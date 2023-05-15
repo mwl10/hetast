@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from glob import glob
-from dataset import DataSet
+from dataset import DataSet, ZtfDataSet
 from eztao.carma import DRW_term, DHO_term
 from eztao.ts import gpSimRand
 import os
@@ -16,8 +16,11 @@ from eztao.ts import gpSimRand, gpSimFull
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from torch.optim import lr_scheduler
+import pickle
+import warnings
+ 
 
-
+    
 ## creates an array for kl annealing schedule, credits to: https://github.com/haofuml/cyclical_annealing
 def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5) -> np.ndarray:
     L = np.ones(n_iter) * stop
@@ -31,9 +34,22 @@ def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5) -> n
             i += 1
     return L 
 
+def save_obj(obj, filename):
+    with open(filename, 'wb') as outp:  # Overwrites any existing file.
+        pickle.dump(obj, outp)
+
+def load_obj(filename):
+    with open(filename, 'rb') as inp:
+        obj = pickle.load(inp)
+    return obj
 
 
-def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_tp=3500, num_resamples=0,shuffle=True,chop=False,correct_z=False,split=0.9,seed=2):
+def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_tp=3500,
+             num_resamples=0,shuffle=True,chop=False,test_split=0.1,
+             seed=2, keep_missing=True):
+    
+    warnings.filterwarnings('ignore', category=RuntimeWarning, module='numpy') # mean of empty slice
+ 
     """
     This function provides a way to create & format a dataset for training hetvae. 
     It expects a folder containing folders for each band you would like to add to the dataset.
@@ -62,28 +78,20 @@ def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_t
     returns:
         the DataSet object we created containing the dictionary of pytorch dataloaders for the network
     """
-    np.random.seed(seed=seed) ## keep same shuffled as was trained on 
+    np.random.seed(seed=seed) 
     torch.manual_seed(seed=seed)
-
-    if not os.path.isdir(folder):
-        raise Exception(f"{folder} is not a directory")
-    ##################################
-    # initializing the DataSet objects 
-    ##################################
-    lcs = DataSet(folder, sep=sep, start_col=start_col)
-    [lcs.add_band(os.path.join(folder, band_folder)) for band_folder in os.listdir(folder)]
-    ### preprocessing functions ####################################################################
-    lcs.filter(min_length=min_length) # filter short light curves; points w/ bad catflags 
-    lcs.prune_outliers()    # filter points outside 10 std
-    if chop: lcs.chop_lcs() # points past 1 std beyon mean of lengths
-    lcs.resample_lcs(num_resamples=num_resamples)
-    if correct_z: lcs.correct_z()
+    if folder.lower().find('ztf') > 0: lcs = ZtfDataSet(folder)
+    else: lcs = DataSet(folder)
+    lcs.files_to_df()
+    lcs.read(sep=sep)
+    lcs.prune(min_length=min_length, start_col=start_col, keep_missing=keep_missing)     
+    if chop: lcs.chop_lcs() 
+    lcs.resample_lcs(num_resamples=num_resamples, seed=seed)
     lcs.normalize()
-    lcs.format()
+    lcs.format_()
     lcs.set_union_tp(uniform=True,n=n_union_tp)
-    print(f'dataset created w/ shape {lcs.dataset.shape}')
-    ######## done preprocessing ######################################################################
-    lcs.set_data_obj(batch_size=batch_size, shuffle=shuffle,split=split)
+    print(f'dataset created, {lcs.dataset.shape=}')
+    lcs.set_data_obj(batch_size=batch_size, shuffle=shuffle,test_split=test_split, seed=seed)
     return lcs
 
             
@@ -103,10 +111,27 @@ def load_checkpoint(filename, data_obj, device='mps'):
         scheduler = lr_scheduler.ReduceLROnPlateau(optimizer)
         optimizer.load_state_dict(cp['optimizer_state_dict'])
         scheduler.load_state_dict(cp['scheduler_state_dict'])
+        return net,optimizer,scheduler,cp['lrs'], cp['args'], cp['epoch'], cp['losses']
 
-        return net,optimizer,scheduler,cp['lrs'], cp['args'], cp['epoch'], \
-            cp['loss'], cp['train_losses'], cp['test_losses'],cp['val_losses']
-
+    
+# old...    
+def load_checkpoint(filename, data_obj, device='mps'):
+    """
+    loads a model checkpoint 
+    """
+    if os.path.isfile(filename):
+        print("=> loading checkpoint '{}'".format(filename))
+        cp = torch.load(filename, map_location=torch.device(device))
+        cp['args'].device = device
+        cp['args'].net = 'HeTVAE'
+        cp['args'].num_heads = cp['args'].enc_num_heads
+        print(cp['args'])
+        net = model.load_network(cp['args'], data_obj['input_dim'], data_obj['union_tp'])
+        net.load_state_dict(cp['state_dict'])
+        params = list(net.parameters())
+        optimizer = optim.Adam(params)
+        optimizer.load_state_dict(cp['optimizer_state_dict'])
+        return net,optimizer, cp['args'], cp['epoch'], cp['loss'], cp['train_losses'], cp['test_losses']
     
 
 def make_masks(batch, frac=0.5, forecast=False) -> torch.Tensor:
@@ -122,9 +147,8 @@ def make_masks(batch, frac=0.5, forecast=False) -> torch.Tensor:
     subsampled_mask = torch.zeros_like(batch[:,:, :, 1])
     for i, object_lcs in enumerate(batch):
         for j, lc in enumerate(object_lcs):
-            
             indexes = lc[:,1].nonzero()[:,0] # where the observations are
-            length = int(np.round(len(indexes) * frac)) # take a fraction of those
+            length = int(len(indexes) * frac)
             if forecast:
                 # take first section of the points explicitly
                 subsampled_points = indexes[:length]
@@ -138,10 +162,9 @@ def make_masks(batch, frac=0.5, forecast=False) -> torch.Tensor:
     return subsampled_mask
 
 
- # astromer scheduler... 
 def update_lr(model_size, itr, warmup):
     """
-    helper function to update the learning rate according to the scheduler
+    update the learning rate according to the scheduler from astromer (Donoso-Oliva et al. 2022)
     """
     lr = (model_size ** -0.5) * min(itr**-0.5, itr * warmup**-0.5)
     return lr
@@ -166,7 +189,7 @@ def evaluate_hetvae(
     with torch.no_grad():
         for batch in dataloader:
             batch_len = batch.shape[0]
-            # forecasting if this mask is set to first section of points only, not random selection
+            # forecasting if this mask is set to first section of points only, not random sub-selection
             subsampled_mask = make_masks(batch, frac=frac, forecast=forecast)
             ######################
             errorbars = torch.swapaxes(batch[:,:,:,2], 2,1)
@@ -206,7 +229,7 @@ def evaluate_hetvae(
             
 
     avg_nll =  -avg_loglik / train_n
-    avg_mse = -avg_loglik / train_n
+    avg_mse = mse / train_n
     
 #     print(
 #         'nll: {:.4f}, mse: {:.4f}'.format(
@@ -330,7 +353,6 @@ def predict(dataloader, net,target_x=None,device='mps',forecast=False,k_iwae=1,f
     return recon_info
 
 
-
 def plot_recons(examples, recons, N=7, figsize=(35,5)):
     target_tp = recons['target_tp']
     pred_mean = recons['pred_mean']
@@ -349,10 +371,14 @@ def plot_recons(examples, recons, N=7, figsize=(35,5)):
             std = pred_std[ex,pred_t,band]
             # preds plotting
             ax[ex,band].plot(target_tp[ex, pred_t],pred_mean[ex,pred_t,band])
-            ax[ex,band].fill_between(target_tp[ex,pred_t],pred_mean[ex,pred_t,band]-std ,pred_mean[ex,pred_t,band]+std, label='error envelope',color='lightcoral')
-            ax[ex,band].errorbar(target_tp[ex,pred_t], pred_mean[ex,pred_t,band], yerr=std, c='blue', ecolor='#65c9f7', label='prediction')
+            ax[ex,band].fill_between(target_tp[ex,pred_t],pred_mean[ex,pred_t,band]-std \
+                                     ,pred_mean[ex,pred_t,band]+std, label='error envelope' \
+                                     ,color='lightcoral')
+            ax[ex,band].errorbar(target_tp[ex,pred_t], pred_mean[ex,pred_t,band], \
+                                 yerr=std, c='blue', ecolor='#65c9f7', label='prediction')
             # inputs the preds are conditioned on
-            ax[ex,band].scatter(tp[ex,input_t], inputs[ex,input_t,band], c='black', marker='x', zorder=30, label='conditioned on', s=25)
+            ax[ex,band].scatter(tp[ex,input_t], inputs[ex,input_t,band], \
+                                c='black', marker='x', zorder=30, label='conditioned on', s=25)
             #ax[ex,band].set_ylim([-2,2])
             
             
@@ -369,7 +395,8 @@ def preview_lcs(lcs, n=1, figsize=(15,15), fs=15):
             y = lcs.dataset[i,band,:,1]
             yerr = lcs.dataset[i,band,:,2]
             pts = y.nonzero()[0]
-            ax[i][band].errorbar(t[pts],y[pts], yerr=yerr[pts], c='blue', fmt='.', markersize=4, ecolor='red', elinewidth=1, capsize=2)
+            ax[i][band].errorbar(t[pts],y[pts], yerr=yerr[pts], c='blue', fmt='.', \
+                                 markersize=4, ecolor='red', elinewidth=1, capsize=2)
     lines_labels = ax[0][0].get_legend_handles_labels()
     lines,labels = lines_labels[0], lines_labels[1]
     fig.legend(lines, labels, loc='upper left')
@@ -418,3 +445,18 @@ def mean_absolute_error(orig, pred, mask):
     error = error * mask
     return error.sum() / mask.sum()
 
+import omegaconf
+def get_leaf_nodes(cfg: omegaconf.DictConfig):
+    leaf_nodes = {}
+    for key, value in cfg.items():
+        if isinstance(value, omegaconf.DictConfig):
+            leaf_nodes.update(get_leaf_nodes(value))
+        elif isinstance(value, list):
+            for i, item in enumerate(value):
+                if isinstance(item, omegaconf.DictConfig):
+                    leaf_nodes.update(get_leaf_nodes(item))
+                else:
+                    leaf_nodes[f"{key}[{i}]"] = item
+        else:
+            leaf_nodes[key] = value
+    return leaf_nodes

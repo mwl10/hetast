@@ -98,6 +98,7 @@ class UnTAN(nn.Module):
             un_key = self.linears[1](self.time_emb(self.union_tp)).view(
                 1, self.h, -1, self.embed_time_k)
             un_scores = torch.matmul(
+                
                 query, un_key.transpose(-2, -1)) / math.sqrt(d_k)
             # normalizer = torch.logsumexp(un_scores.unsqueeze(-1), dim=-2)
             # intensity = torch.exp(torch.logsumexp(scores, dim=-2) - normalizer)

@@ -186,7 +186,7 @@ def train(args):
                 'optimizer_state_dict': optimizer.state_dict(),
                 'scheduler_state_dict':scheduler.state_dict(),
                 'losses': (train_losses,val_losses,test_losses)
-            }, lcs.name + str((-avg_loglik / train_n).item()) + '.h5')
+            }, lcs.folder + str((-avg_loglik / train_n).item()) + '.h5')
             print('done')
 
         ############# patience ####################
@@ -205,7 +205,7 @@ def train(args):
                 'optimizer_state_dict': optimizer.state_dict(),
                 'scheduler_state_dict':scheduler.state_dict(),
                 'losses': (train_losses,val_losses,test_losses)
-            }, lcs.name + str((-avg_loglik / train_n).item()) + '.h5')
+            }, lcs.folder + str((-avg_loglik / train_n).item()) + '.h5')
             print('done')
             break
             

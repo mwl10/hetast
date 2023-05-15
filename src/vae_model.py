@@ -271,7 +271,7 @@ class HeTVAE(nn.Module):
         loss_info.weighted_comp_loss = self.elbo_weight * loss_info.welbo \
             + self.mse_weight * loss_info.wmse 
         
-        print('scaled wmse:', loss_info.wmse / 4, 'scaled_wnll:', wloglik / 180)
+        #print('scaled wmse:', loss_info.wmse / 4, 'scaled_wnll:', wloglik / 180)
         return loss_info
 
     

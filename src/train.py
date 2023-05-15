@@ -209,15 +209,13 @@ def train(args):
             print('done')
             break
             
-    return val_nll # return for optuna 
     
 @hydra.main(config_name='config', config_path='conf')
 def main(cfg: DictConfig) -> None:
     leaf_cfg = utils.get_leaf_nodes(cfg)
     args = argparse.Namespace(**leaf_cfg)
     args.data_folder = os.path.join(hydra.utils.get_original_cwd(), args.data_folder)
-    val_nll = train(args)
-    return val_nll
+    train(args)
     
 if __name__ == '__main__':
     main()

@@ -11,5 +11,4 @@
 source /etc/profile
 source activate $HOME/miniconda/envs/hetvae
 
-python3 $HOME/astr/hetast/src/train.py 
-
+python3 $HOME/astr/hetast/src/train.py data_folder=datasets/ZTF_g_test training.regularization.dropout=0.1

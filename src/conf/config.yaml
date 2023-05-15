@@ -6,7 +6,7 @@
 defaults:
     - _self_
 
-data_folder: ZTF_g
+data_folder: ./datasets/ZTF_g
         
 start_col: 1
 checkpoint: null

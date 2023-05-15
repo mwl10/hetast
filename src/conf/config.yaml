@@ -11,6 +11,7 @@ data_folder: ./datasets/ZTF_g
 start_col: 1
 checkpoint: null
 seed: 2
+device: cuda
       
 model: 
     net: HeTVAE
@@ -29,7 +30,6 @@ training:
     niters :  6000
     patience :  1000
     batch_size: 2
-    device: mps
     k_iwae: 1
     optimizer: 
         lr :  0.001

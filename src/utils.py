@@ -44,6 +44,15 @@ def load_obj(filename):
     return obj
 
 
+def save_pickle(data_folder, save_folder):
+    lcs = get_data(data_folder)
+    save_file = os.path.basename(data_folder) + '.pkl'
+    with open(os.path.join(save_folder, save_file), 'wb') as outp:  # Overwrites any existing file.
+        pickle.dump(lcs, outp, pickle.HIGHEST_PROTOCOL)
+    
+
+
+
 def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_tp=3500,
              num_resamples=0,shuffle=True,chop=False,test_split=0.1,
              seed=2, keep_missing=True):

@@ -2,7 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+src/outputs/
+src/notebooks/misc/outputs/
 # C extensions
 *.so
 src/slurm/old

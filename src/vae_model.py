@@ -53,7 +53,7 @@ class HeTVAE(nn.Module):
         self.num_heads = num_heads
         self.width = width
         self.num_ref_points = num_ref_points
-        self.query = torch.linspace(0, 1687.1367, num_ref_points)
+        self.query = torch.linspace(0, 1, num_ref_points)
         self.std = std
         self.is_constant = is_constant
         self.is_bounded = is_bounded

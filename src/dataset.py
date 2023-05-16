@@ -48,7 +48,6 @@ class DataSet:
         args
         sep: delimiter for files in the dataset
         """
-        self.valid_files_df = self.valid_files_df.dropna()
         for i,object_files in enumerate(self.valid_files_df.values):
             object_lcs = []
             for j,band_file in enumerate(object_files): 
@@ -72,7 +71,9 @@ class DataSet:
                     self.dataset[i][j] = replace
                     continue 
                 '''get columns for t,mag,magerr'''
+                
                 try:
+                    print(lc.shape, 'ztasd!')
                     lc = lc[:, start_col:start_col+3].astype(np.float32)
                     assert lc.shape[1] == 3
                 except Exception:
@@ -95,8 +96,7 @@ class DataSet:
                     self.dataset[i][j] = replace
                     continue
                 self.dataset[i][j] = lc
-            if (replace_count >= len(self.bands)) or \
-            (not keep_missing and replace_count > 0): 
+            if (replace_count >= len(self.bands)) or (not keep_missing and replace_count > 0): 
                 drops.append(i)     
         self.valid_files_df.drop(self.valid_files_df.index[drops], inplace=True)
         self.dataset = [self.dataset[i] for i in range(len(self.dataset)) if i not in drops]

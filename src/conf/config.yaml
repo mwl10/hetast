@@ -21,7 +21,7 @@ model:
     size: 
         embed_time :  128
         num_heads :  16
-        latent_dim :  128
+        latent_dim :  64
         num_ref_points: 16
         rec_hidden: 128
         width: 512 

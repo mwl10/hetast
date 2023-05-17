@@ -313,7 +313,7 @@ class ZtfDataSet(DataSet):
     def __init__(self, folder):
         super().__init__(folder)
         
-    def prune(self,start_col=1, min_length=1, keep_missing=True, std_threshold=10):   
+    def prune(self,start_col=1, min_length=2, keep_missing=True, std_threshold=10):   
         replace = np.zeros((1,3)) # placeholder
         drops = []
         for i,object_lcs in enumerate(self.dataset):

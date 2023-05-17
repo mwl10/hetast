@@ -52,7 +52,7 @@ def save_pickle(data_folder, save_folder):
     
 
 
-def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_tp=3500,
+def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=2, n_union_tp=3500,
              num_resamples=0,shuffle=True,chop=False,test_split=0.1,
              seed=2, keep_missing=True, norm=True):
     
@@ -103,6 +103,27 @@ def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_t
     return lcs
 
             
+
+    
+# old...    
+# def load_checkpoint(filename, data_obj, device='mps'):
+#     """
+#     loads a model checkpoint 
+#     """
+#     if os.path.isfile(filename):
+#         print("=> loading checkpoint '{}'".format(filename))
+#         cp = torch.load(filename, map_location=torch.device(device))
+#         cp['args'].device = device
+#         cp['args'].net = 'HeTVAE'
+#         cp['args'].num_heads = cp['args'].enc_num_heads
+#         print(cp['args'])
+#         net = model.load_network(cp['args'], data_obj['input_dim'], data_obj['union_tp'])
+#         net.load_state_dict(cp['state_dict'])
+#         params = list(net.parameters())
+#         optimizer = optim.Adam(params)
+#         optimizer.load_state_dict(cp['optimizer_state_dict'])
+#         return net,optimizer, cp['args'], cp['epoch'], cp['loss'], cp['train_losses'], cp['test_losses']
+    
 def load_checkpoint(filename, data_obj, device='mps'):
     """
     loads a model checkpoint 
@@ -120,26 +141,7 @@ def load_checkpoint(filename, data_obj, device='mps'):
         optimizer.load_state_dict(cp['optimizer_state_dict'])
         scheduler.load_state_dict(cp['scheduler_state_dict'])
         return net,optimizer,scheduler,cp['lrs'], cp['args'], cp['epoch'], cp['losses']
-
     
-# old...    
-def load_checkpoint(filename, data_obj, device='mps'):
-    """
-    loads a model checkpoint 
-    """
-    if os.path.isfile(filename):
-        print("=> loading checkpoint '{}'".format(filename))
-        cp = torch.load(filename, map_location=torch.device(device))
-        cp['args'].device = device
-        cp['args'].net = 'HeTVAE'
-        cp['args'].num_heads = cp['args'].enc_num_heads
-        print(cp['args'])
-        net = model.load_network(cp['args'], data_obj['input_dim'], data_obj['union_tp'])
-        net.load_state_dict(cp['state_dict'])
-        params = list(net.parameters())
-        optimizer = optim.Adam(params)
-        optimizer.load_state_dict(cp['optimizer_state_dict'])
-        return net,optimizer, cp['args'], cp['epoch'], cp['loss'], cp['train_losses'], cp['test_losses']
     
 
 def make_masks(batch, frac=0.5, forecast=False) -> torch.Tensor:
@@ -195,7 +197,7 @@ def evaluate_hetvae(
     indy_nlls = []
     mses= []
     with torch.no_grad():
-        for batch in dataloader:
+        for batch in tqdm(dataloader):
             batch_len = batch.shape[0]
             # forecasting if this mask is set to first section of points only, not random sub-selection
             subsampled_mask = make_masks(batch, frac=frac, forecast=forecast)

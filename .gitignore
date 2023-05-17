@@ -6,10 +6,12 @@ src/outputs/
 src/notebooks/misc/outputs/
 # C extensions
 *.so
+
 src/slurm/old
 #src/ZTF_DR_data
 src/archive/
 src/datasets/m*
+src/datasets/*.pkl
 src/reverberation_mapping/dho_fit*
 src/notebooks/scratch*
 # Distribution / packaging

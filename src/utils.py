@@ -52,10 +52,9 @@ def save_pickle(data_folder, save_folder):
     
 
 
-
 def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_tp=3500,
              num_resamples=0,shuffle=True,chop=False,test_split=0.1,
-             seed=2, keep_missing=True):
+             seed=2, keep_missing=True, norm=True):
     
     warnings.filterwarnings('ignore', category=RuntimeWarning, module='numpy') # mean of empty slice
  
@@ -96,7 +95,7 @@ def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=1, n_union_t
     lcs.prune(min_length=min_length, start_col=start_col, keep_missing=keep_missing)     
     if chop: lcs.chop_lcs() 
     lcs.resample_lcs(num_resamples=num_resamples, seed=seed)
-    lcs.normalize()
+    if norm: lcs.normalize()
     lcs.format_()
     lcs.set_union_tp(uniform=True,n=n_union_tp)
     print(f'dataset created, {lcs.dataset.shape=}')
@@ -392,24 +391,50 @@ def plot_recons(examples, recons, N=7, figsize=(35,5)):
             
             
 
-def preview_lcs(lcs, n=1, figsize=(15,15), fs=15):
+# def preview_lcs(lcs, n=1, figsize=(15,15), fs=15):
+#     dims = lcs.dataset.shape[1]
+#     fig, ax = plt.subplots(n, dims, figsize=figsize, squeeze=False)
+#     fig.tight_layout(pad=5.0)
+#     for i in range(n):
+#         obj_name = lcs.valid_files_df.index.values[i]
+#         ax[i][0].set_title(obj_name,fontsize=fs)
+#         for band in range(dims):
+#             t = lcs.dataset[i,band,:,0]
+#             y = lcs.dataset[i,band,:,1]
+#             yerr = lcs.dataset[i,band,:,2]
+#             pts = y.nonzero()[0]
+#             ax[i][band].errorbar(t[pts],y[pts], yerr=yerr[pts], c='blue', fmt='.', \
+#                                  markersize=4, ecolor='red', elinewidth=1, capsize=2)
+#     lines_labels = ax[0][0].get_legend_handles_labels()
+#     lines,labels = lines_labels[0], lines_labels[1]
+#     fig.legend(lines, labels, loc='upper left')
+#     [ax[i][index].set_xlabel(lcs.bands[index],fontsize=fs+10) for index in range(len(lcs.bands))]
+    
+
+def preview_lcs(lcs, indexes=[0,1,34,100], figsize=(15,15), fs=30):
+    plt.rcParams['xtick.labelsize'] = 20
+    plt.rcParams['ytick.labelsize'] = 20
     dims = lcs.dataset.shape[1]
-    fig, ax = plt.subplots(n, dims, figsize=figsize, squeeze=False)
+    fig, ax = plt.subplots(len(indexes), dims, figsize=figsize, squeeze=False)
     fig.tight_layout(pad=5.0)
-    for i in range(n):
+    c = 0
+    for i in indexes:
         obj_name = lcs.valid_files_df.index.values[i]
-        ax[i][0].set_title(obj_name,fontsize=fs)
+        ax[c][0].set_title(obj_name,fontsize=fs)
         for band in range(dims):
             t = lcs.dataset[i,band,:,0]
             y = lcs.dataset[i,band,:,1]
             yerr = lcs.dataset[i,band,:,2]
             pts = y.nonzero()[0]
-            ax[i][band].errorbar(t[pts],y[pts], yerr=yerr[pts], c='blue', fmt='.', \
-                                 markersize=4, ecolor='red', elinewidth=1, capsize=2)
+            ax[c][band].errorbar(t[pts],y[pts], yerr=yerr[pts], c='blue', fmt='.', markersize=4, 
+                                 ecolor='red', elinewidth=1, capsize=2)
+        c+= 1
     lines_labels = ax[0][0].get_legend_handles_labels()
     lines,labels = lines_labels[0], lines_labels[1]
     fig.legend(lines, labels, loc='upper left')
-    [ax[i][index].set_xlabel(lcs.bands[index],fontsize=fs+10) for index in range(len(lcs.bands))]
+    [ax[c-1][index].set_xlabel(lcs.bands[index],fontsize=fs+10) for index in range(len(lcs.bands))]
+    
+    
     
     
 def count_parameters(model):

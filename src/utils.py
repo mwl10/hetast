@@ -197,7 +197,7 @@ def evaluate_hetvae(
     indy_nlls = []
     mses= []
     with torch.no_grad():
-        for batch in tqdm(dataloader):
+        for batch in dataloader:
             batch_len = batch.shape[0]
             # forecasting if this mask is set to first section of points only, not random sub-selection
             subsampled_mask = make_masks(batch, frac=frac, forecast=forecast)

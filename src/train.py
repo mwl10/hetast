@@ -138,7 +138,7 @@ def train(args):
             mae += loss_info.mae * batch_len
             train_n += batch_len
             #########################################################
-        print(train_loss, avg_loglik, avg_wloglik, avg_kl, mse, wmse)
+#         print(train_loss, avg_loglik, avg_wloglik, avg_kl, mse, wmse)
         ####### nan, stop training #############
         if np.isnan(train_loss / train_n):
             print('nan in loss,,,,,,,,, stopping')

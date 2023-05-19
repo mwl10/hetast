@@ -171,7 +171,7 @@ def train(args):
         if itr % 10 == 0:
             test_nll, test_mse, indiv_nlls = utils.evaluate_hetvae(net,dim,test_loader,device=args.device)
             train_losses.append([(-avg_loglik / train_n).item(),(mse / train_n).item(), \
-                                 (avg_kl / train_n).item()])
+                                 (avg_kl / train_n).item(),kl_coef])
             test_losses.append([test_nll.item(),test_mse.item()])
             val_losses.append([val_nll.item(),val_mse.item()])
             print('test nll: {:.4f}, test mse: {:.4f}'.format(test_nll,test_mse))

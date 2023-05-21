@@ -73,7 +73,6 @@ class DataSet:
                 '''get columns for t,mag,magerr'''
                 
                 try:
-                    print(lc.shape, 'ztasd!')
                     lc = lc[:, start_col:start_col+3].astype(np.float32)
                     assert lc.shape[1] == 3
                 except Exception:

@@ -8,6 +8,7 @@ src/notebooks/misc/outputs/
 *.so
 
 src/slurm/old
+src/notebooks/checkpoints
 #src/ZTF_DR_data
 src/archive/
 src/datasets/m*

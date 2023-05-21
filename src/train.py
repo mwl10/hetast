@@ -75,7 +75,7 @@ def train(args):
     patience_counter = 0
     ######################################## 
     if args.kl_annealing:
-        kl_coefs = utils.frange_cycle_linear(args.kl_iters, args.n_cycles)
+        kl_coefs = utils.frange_cycle_linear(args.kl_itrs, args.n_cycles)
     ##################
     for itr in range(epoch, epoch+args.niters):
         print(f'{itr},', end='', flush=True)

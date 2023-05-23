@@ -51,6 +51,8 @@ training:
     kl:
         kl_itrs: 6000
         n_cycles: 16
+filter:
+    min_length: 25
 
 print_at:  1
 save_at:  30

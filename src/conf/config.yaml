@@ -50,9 +50,9 @@ training:
         kl_annealing: true
     kl:
         kl_itrs: 6000
-        n_cycles: 16
+        n_cycles: 32
         start: 0.0
-        stop: 1.0
+        stop: 0.1
         ratio: 0.5
         
 filter:

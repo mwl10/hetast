@@ -50,9 +50,9 @@ def train(args):
         val_losses = losses[1]
         test_losses = losses[2]
         epoch+=1
-#         for g in optimizer.param_groups:
-#                 ## update learning rate for checkpoint 
-#                 g['lr'] = args.lr    
+        for g in optimizer.param_groups:
+                ## update learning rate for checkpoint 
+                g['lr'] = args.lr    
         print(f'loaded checkpoint w/ {loss=}')
     
     else:

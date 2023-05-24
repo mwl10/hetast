@@ -2,6 +2,24 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# saves detrended files into epoch_folder + '_det'
+def linear_detrend(epoch_folder, save=False):
+    if save:
+        det_folder = os.path.split(epoch_folder)[0]+'_det'
+        if not os.path.isdir(det_folder): os.mkdir(det_folder)
+    for file in glob.glob(epoch_folder+'/*'): 
+        data = np.loadtxt(file)
+        t = data[:, 0]
+        y = data[:, 1]
+        trend = np.polyfit(t, y, deg=1)
+        trend_line = np.polyval(trend, t)
+        detrended = y - trend_line
+        if save:
+            fn = os.path.join(det_folder, os.path.split(file)[1])
+            np.savetxt(fn, np.column_stack((t, detrended)), delimiter='\t')
+            
+            
+
 def ZDCF(lcf1, lcf2, outfile, acf=False, mcmc=10000, uniform=False, omit_zero_lag=True, min_ppb=0, fortran_dir='/Users/mattlowery/Desktop/Desko/code/astro/hetvae/src/reverberation_mapping/fortran_dir'):
     """
     This function calls the ZDCF program compiled in fortran using the CL 

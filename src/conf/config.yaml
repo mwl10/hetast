@@ -12,6 +12,7 @@ start_col: 1
 checkpoint: null
 seed: 2
 device: cuda
+keep_missing: false
       
 model: 
     net: HeTVAE

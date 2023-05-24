@@ -33,7 +33,8 @@ def train(args):
     else:
         lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, 
                              n_union_tp=args.n_union_tp, num_resamples=args.num_resamples,
-                             batch_size=args.batch_size, min_length=args.min_length)
+                             batch_size=args.batch_size, min_length=args.min_length,
+                             keep_missing=args.keep_missing)
     
     data_obj = lcs.data_obj
     train_loader = data_obj["train_loader"]

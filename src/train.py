@@ -50,7 +50,7 @@ def train(args):
         val_losses = losses[1]
         test_losses = losses[2]
         epoch+=1
-        if args.scheduler=False:
+        if args.scheduler==False:
             for g in optimizer.param_groups:
                     ## update learning rate for checkpoint 
                     g['lr'] = args.lr    

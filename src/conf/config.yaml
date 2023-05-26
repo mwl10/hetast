@@ -66,8 +66,9 @@ fixed:
     kl_zero: false
     const_var: false
     var_per_dim: false
-    std: 0.1
     num_resamples : 0
+    is_bounded: true
+    std: 0.1
     
     
     

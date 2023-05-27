@@ -73,7 +73,7 @@ def train(args):
     model_size = utils.count_parameters(net) 
     print(f'{model_size=}')
     ############### have patience ##########
-    best_loss = loss
+    best_loss = train_losses[-1]
     patience_counter = 0
     ######################################## 
     if args.kl_annealing:

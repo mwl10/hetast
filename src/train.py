@@ -55,7 +55,7 @@ def train(args):
             for g in optimizer.param_groups:
                     ## update learning rate for checkpoint 
                     g['lr'] = args.lr    
-        print(f'loaded checkpoint w/ {train_losses[-1][0]=}')
+        print(f'loaded checkpoint w/ {loss=}')
     
     else:
         net = load_network(args, dim, union_tp)

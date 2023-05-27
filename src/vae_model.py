@@ -240,7 +240,7 @@ class HeTVAE(nn.Module):
         return utils.mean_absolute_error(target, pred.mean(0), mask)
 
     def compute_unsupervised_loss(
-        self, context_x, context_y, target_x, target_y, logerr, weights, num_samples=1, beta=1.,qz_mean=False
+        self, context_x, context_y, target_x, target_y, logerr, weights, num_samples=1, beta=1.,qz_mean=False, f1=100.0,f2=10.0,
     ):
         loss_info = LossInfo()
         px, qz = self.get_reconstruction(
@@ -253,14 +253,13 @@ class HeTVAE(nn.Module):
         loss_info.elbo = -(
             torch.logsumexp(loglik - beta * kl, dim=0).mean(0) - np.log(num_samples))
         loss_info.welbo = -(
-            torch.logsumexp(wloglik - beta * kl, dim=0).mean(0) - np.log(num_samples))
-        
+            torch.logsumexp((wloglik * (1/f1)) - beta * kl, dim=0).mean(0) - np.log(num_samples))
         loss_info.kl = kl.mean()
         loss_info.loglik = loglik.mean()
         loss_info.loglik_per_ex = loglik
-        loss_info.wloglik = wloglik.mean()
+        loss_info.wloglik = wloglik.mean() * (1/f1)
         loss_info.mse = self.compute_mse(target_y, px.mean, 1.)
-        loss_info.wmse = self.compute_mse(target_y, px.mean, weights=weights)
+        loss_info.wmse = (self.compute_mse(target_y, px.mean, weights=weights)) * 1/f2
         loss_info.mae = self.compute_mae(target_y, px.mean)
         loss_info.mean_mse = self.compute_mean_mse(
             target_y, px.mean, weights)
@@ -270,8 +269,6 @@ class HeTVAE(nn.Module):
             + self.mse_weight * loss_info.mse
         loss_info.weighted_comp_loss = self.elbo_weight * loss_info.welbo \
             + self.mse_weight * loss_info.wmse 
-        
-        #print('scaled wmse:', loss_info.wmse / 4, 'scaled_wnll:', wloglik / 180)
         return loss_info
 
     

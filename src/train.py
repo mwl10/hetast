@@ -54,7 +54,7 @@ def train(args):
             for g in optimizer.param_groups:
                     ## update learning rate for checkpoint 
                     g['lr'] = args.lr    
-        print(f'loaded checkpoint w/ {train_losses[-1]=}')
+        print(f'loaded checkpoint w/ {train_losses[-1][0]=}')
     
     else:
         net = load_network(args, dim, union_tp)
@@ -73,7 +73,7 @@ def train(args):
     model_size = utils.count_parameters(net) 
     print(f'{model_size=}')
     ############### have patience ##########
-    best_loss = train_losses[-1]
+    best_loss = train_losses[-1][0]
     patience_counter = 0
     ######################################## 
     if args.kl_annealing:

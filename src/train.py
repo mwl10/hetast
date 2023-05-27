@@ -49,6 +49,7 @@ def train(args):
         train_losses = losses[0]
         val_losses = losses[1]
         test_losses = losses[2]
+        loss = train_losses[-1][0]
         epoch+=1
         if args.scheduler==False:
             for g in optimizer.param_groups:
@@ -73,7 +74,7 @@ def train(args):
     model_size = utils.count_parameters(net) 
     print(f'{model_size=}')
     ############### have patience ##########
-    best_loss = train_losses[-1][0]
+    best_loss = loss
     patience_counter = 0
     ######################################## 
     if args.kl_annealing:

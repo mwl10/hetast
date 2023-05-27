@@ -218,6 +218,7 @@ def train(args):
 def main(cfg: DictConfig) -> None:
     leaf_cfg = utils.get_leaf_nodes(cfg)
     args = argparse.Namespace(**leaf_cfg)
+    if args.checkpoint: args.checkpoint = os.path.join(hydra.utils.get_original_cwd(), args.checkpoint)
     args.data_folder = os.path.join(hydra.utils.get_original_cwd(), args.data_folder)
     train(args)
     

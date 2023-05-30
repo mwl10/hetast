@@ -12,7 +12,7 @@ start_col: 1
 checkpoint: null
 seed: 2
 device: cuda
-keep_missing: false
+
       
 model: 
     net: HeTVAE
@@ -39,24 +39,25 @@ training:
         scheduler :  true
         warmup :  10    
     scheduler: 
-        factor: 0.1
-        lr_patience: 20
+        factor: 0.9
+        lr_patience: 35
         threshold: 0.01   
     regularization: 
-        dropout: 0.0    
+        dropout: 0.1
     loss: 
         inc_errors: false
         frac: 0.5
-        mse_weight: 5.0
+        mse_weight: 10.0
         kl_annealing: true
     kl:
         kl_itrs: 6000
         n_cycles: 32
         start: 0.0
-        stop: 0.15
+        stop: 0.1
         ratio: 0.5
         
 filter:
+    keep_missing: false
     min_length: 25
 
 print_at:  1
@@ -67,7 +68,7 @@ fixed:
     const_var: false
     var_per_dim: false
     num_resamples : 0
-    is_bounded: true
+    is_bounded: false
     
     
     

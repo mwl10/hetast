@@ -99,7 +99,7 @@ def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=2, n_union_t
     lcs.format_()
     lcs.set_union_tp(uniform=True,n=n_union_tp)
     print(f'dataset created, {lcs.dataset.shape=}')
-    lcs.set_data_obj(batch_size=batch_size, shuffle=shuffle,test_split=test_split, seed=seed)
+    lcs.set_data_obj(batch_size=batch_size, shuffle=True,test_split=test_split, seed=seed)
     return lcs
 
             
@@ -447,10 +447,12 @@ def log_normal_pdf(x, mean, logvar, mask, logerr=0.):
     const = torch.log(const)
     logerr = logerr * mask
     logvar = logvar + logerr
-    return -0.5 * (const + torch.log(torch.exp(logerr) + torch.exp(logvar)) \
-            +  (x - mean) ** 2.0 / (torch.exp(logvar)+torch.exp(logerr))) * mask
+#     return -0.5 * (const + torch.log(torch.exp(logerr) + torch.exp(logvar)) \
+#             +  (x - mean) ** 2.0 / (torch.exp(logvar)+torch.exp(logerr))) * mask
     
-    #return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
+    return -0.5 * (const + logvar + (x - mean) ** 2.0 / torch.exp(logvar)) * mask
+
+
 
 
 def mog_log_pdf(x, mean, logvar, mask):

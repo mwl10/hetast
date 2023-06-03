@@ -1,10 +1,8 @@
 ## default 
-
 # ${dataset}_${model} referencing chosen vals
 
 
-defaults:
-    - _self_
+
 
 data_folder: ./datasets/ZTF_g
         
@@ -29,7 +27,7 @@ model:
      
 training: 
     niters :  6000
-    patience :  1000
+    patience :  10000
     batch_size: 2
     k_iwae: 1
     optimizer: 
@@ -47,13 +45,13 @@ training:
     loss: 
         inc_errors: false
         frac: 0.5
-        mse_weight: 10.0
+        mse_weight: 5.0
         kl_annealing: true
     kl:
         kl_itrs: 6000
         n_cycles: 32
         start: 0.0
-        stop: 0.1
+        stop: 0.7
         ratio: 0.5
         
 filter:
@@ -68,7 +66,7 @@ fixed:
     const_var: false
     var_per_dim: false
     num_resamples : 0
-    is_bounded: false
+    is_bounded: true
     
     
     

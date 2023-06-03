@@ -40,7 +40,7 @@ class HeTVAE(nn.Module):
         is_bounded=True,
         is_constant_per_dim=False,
         elbo_weight=1.0,
-        mse_weight=0.0,
+        mse_weight=5.0,
         norm=True,
         mixing='concat',
         device='cuda',
@@ -105,13 +105,15 @@ class HeTVAE(nn.Module):
             dropout=self.dropout,
         )
         self.decoder = UnTAN(
-            input_dim=2 * self.latent_dim, # self.latent_dim
+            input_dim= 2 * self.latent_dim, # self.latent_dim
             nhidden=self.nhidden,
             embed_time=self.embed_time,
             num_heads=self.num_heads,
             device=self.device,
             dropout=self.dropout,
         )
+        
+        
 
     def h2z_mixing(self, hidden):
         qz = Gaussian()
@@ -251,7 +253,8 @@ class HeTVAE(nn.Module):
         
         kl = self.kl_div(qz, mask, self.norm)
         loss_info.elbo = -(
-            torch.logsumexp(loglik - beta * kl, dim=0).mean(0) - np.log(num_samples))
+            torch.logsumexp(loglik- beta * kl, dim=0).mean(0) - np.log(num_samples))
+        
         loss_info.welbo = -(
             torch.logsumexp((wloglik * (1/f1)) - beta * kl, dim=0).mean(0) - np.log(num_samples))
         loss_info.kl = kl.mean()

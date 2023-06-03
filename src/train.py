@@ -34,7 +34,7 @@ def train(args):
         lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, 
                              n_union_tp=args.n_union_tp, num_resamples=args.num_resamples,
                              batch_size=args.batch_size, min_length=args.min_length,
-                             keep_missing=args.keep_missing)
+                             keep_missing=args.keep_missing, sep=' ')
     
     data_obj = lcs.data_obj
     train_loader = data_obj["train_loader"]
@@ -56,11 +56,13 @@ def train(args):
                     ## update learning rate for checkpoint 
                     g['lr'] = args.lr    
         print(f'loaded checkpoint w/ {loss=}')
+        
+        
     
     else:
         net = load_network(args, dim, union_tp)
         params = list(net.parameters())
-        optimizer = optim.Adam(params, lr=args.lr, betas=(args.beta1,args.beta2))
+        optimizer = optim.Adam(params, lr=args.lr)
         scheduler = lr_scheduler.ReduceLROnPlateau(optimizer,factor=args.factor,
                                                    threshold=args.threshold, 
                                                    patience=args.lr_patience) #factor=0.1, patience=10, threshold=0.0001, threshold_mode='rel',  eps=1e-08,)
@@ -122,12 +124,11 @@ def train(args):
                 num_samples=args.k_iwae,
                 beta=kl_coef,
             )
+
             optimizer.zero_grad()
 
-            if args.inc_errors:
-                loss_info.weighted_comp_loss.backward()
-            else:
-                loss_info.composite_loss.backward()
+            if args.inc_errors: loss_info.weighted_comp_loss.backward()
+            else: loss_info.composite_loss.backward()
 
             optimizer.step()
 
@@ -152,13 +153,14 @@ def train(args):
 
         lrs.append(optimizer.param_groups[0]['lr'])
 
-        if scheduler: scheduler.step(val_nll) 
+        if args.scheduler: scheduler.step(val_nll)  
 
+            
         ######## print train / valid losses ########
         if itr % args.print_at == 0:
             print(
                 '\tIter: {}, train loss: {:.4f}, avg nll: {:.4f}, avg wnll: {:.4f}, avg kl: {:.4f}, '
-                'mse: {:.6f}, wmse: {:.6f}, mae: {:.6f}, val nll: {:.4f}, val mse {:.4f}'.format(
+                'mse: {:.6f}, wmse: {:.6f}, mae: {:.6f}, val nll: {:.4f}, val mse {:.4f}, lr {:.9f}'.format(
                     itr,
                     train_loss / train_n,
                     -avg_loglik / train_n,
@@ -168,7 +170,9 @@ def train(args):
                     wmse / train_n,
                     mae / train_n,
                     val_nll,
-                    val_mse))
+                    val_mse,
+                    lrs[-1]
+                ))
 
         ####### test loss every 10 itrs, save losses too #############
         if itr % 10 == 0:

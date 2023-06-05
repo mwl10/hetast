@@ -99,7 +99,7 @@ def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=2, n_union_t
     lcs.format_()
     lcs.set_union_tp(uniform=True,n=n_union_tp)
     print(f'dataset created, {lcs.dataset.shape=}')
-    lcs.set_data_obj(batch_size=batch_size, shuffle=True,test_split=test_split, seed=seed)
+    lcs.set_data_obj(batch_size=batch_size, shuffle=shuffle,test_split=test_split, seed=seed)
     return lcs
 
             
@@ -290,7 +290,6 @@ def decode(net,zs,disc_path,target_x,device='mps',batch_size=2):
             batch = batch.to(device)
             tx = torch.tensor(target_x[i*batch_size:(i*batch_size + batch_size)])[:,0]
             tx = tx.to(device)
-            # zbatch shape should be (1, batch_size,n ref pts, latent_dim * 2)
             px = net.decode(batch.unsqueeze(0), tx) 
             pred_mean.append(px.mean.cpu().numpy())
             pred_std.append(torch.exp(0.5 * px.logvar).cpu().numpy())

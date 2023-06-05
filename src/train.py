@@ -31,10 +31,13 @@ def train(args):
     if args.data_folder.split('.')[-1] == 'pkl':
         lcs = utils.load_obj(args.data_folder)
     else:
+        ### hydra can't parse comma / whitespace, but we need to jump between the two
+        if args.sep == 'whitespace': args.sep=' '
+        elif args.sep == 'comma':args.sep=','
         lcs = utils.get_data(folder=args.data_folder, start_col=args.start_col, 
                              n_union_tp=args.n_union_tp, num_resamples=args.num_resamples,
                              batch_size=args.batch_size, min_length=args.min_length,
-                             keep_missing=args.keep_missing, sep=' ')
+                             keep_missing=args.keep_missing,sep=args.sep,test_split=args.test_split,shuffle=args.shuffle) 
     
     data_obj = lcs.data_obj
     train_loader = data_obj["train_loader"]
@@ -51,7 +54,7 @@ def train(args):
         test_losses = losses[2]
         loss = train_losses[-1][0]
         epoch+=1
-        if args.scheduler==False:
+        if args.scheduler==False or args.reset==True:
             for g in optimizer.param_groups:
                     ## update learning rate for checkpoint 
                     g['lr'] = args.lr    

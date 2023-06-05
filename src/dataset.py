@@ -162,7 +162,8 @@ class DataSet:
                     lc[:,0] = lc[:,0] - min_t
                     #lc[:,0] = lc[:,0] / 365
                     #lc[:,0] = lc[:,0] / np.max(lc[:,0])
-                    lc[:,1] = (lc[:,1] - np.mean(lc[:,1])) / np.std(lc[:,1])  
+                    lc[:,1] = lc[:,1] - np.mean(lc[:,1])
+                    if np.std(lc[:,1]) != 0: lc[:,1] = lc[:,1] / np.std(lc[:,1])  
                     lc[:,2] = lc[:,2] / np.std(lc[:,1])
                     
                     
@@ -266,20 +267,18 @@ class DataSet:
             "input_dim": len(self.bands),
         }
         
+        
     def set_sigma_nxs(self):
         """
         setting the normalized excess variance, as per the definition in Vaughan et al. 2003.
-        
         side effects:
             sets self.sigma_nxs as a numpy array with dimensions as (len(self.dataset), len(self.bands)) 
         """
         sigma_nxs = np.zeros((len(self.dataset),len(self.bands)))
         for i, object_lcs in enumerate(self.dataset):
             for j, lc in enumerate(object_lcs):
-                if len(lc) > 1:
-                    sigma_nxs[i,j] = \
-                    ((1/(len(lc)-1)) * ((lc[:,1] - np.mean(lc[:,1]))**2).sum() - np.mean(lc[:,2]**2)) \
-                    / np.mean(lc[:,1])**2
+                if lc.any() > 0:
+                    sigma_nxs[i,j] = ((1/(len(lc)-1)) * ((lc[:,1] - np.mean(lc[:,1]))**2).sum() - np.mean(lc[:,2]**2)) / np.mean(lc[:,1])**2
                 else:
                     sigma_nxs[i,j] = 0
         self.sigma_nxs =  sigma_nxs      
@@ -287,7 +286,6 @@ class DataSet:
     def set_mean_mag(self):
         """
         setting the mean magnitude of the light curve
-        
         side effects:
             sets self.mean_mag as a numpy array with dimensions as (len(self.dataset), len(self.bands)) 
         """
@@ -297,7 +295,6 @@ class DataSet:
     def set_med_cadence(self):
         """
         setting the median cadence of the light curve
-        
         side effects:
             sets self.med_cadence as a numpy array with dimensions as (len(self.dataset), len(self.bands)) 
         """

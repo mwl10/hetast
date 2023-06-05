@@ -6,12 +6,18 @@
 
 data_folder: ./datasets/ZTF_g
         
-start_col: 1
+
 checkpoint: null
 seed: 2
 device: cuda
 
-      
+dataset:
+    shuffle: True
+    start_col: 1
+    test_split: 0.2
+    sep: comma
+    
+
 model: 
     net: HeTVAE
     mixing: concat
@@ -19,7 +25,7 @@ model:
     seed: 2
     size: 
         embed_time :  128
-        num_heads :  16
+        num_heads :  8
         latent_dim :  64
         num_ref_points: 16
         rec_hidden: 128
@@ -37,6 +43,7 @@ training:
         scheduler :  true
         warmup :  10    
     scheduler: 
+        reset: False
         factor: 0.9
         lr_patience: 35
         threshold: 0.01   

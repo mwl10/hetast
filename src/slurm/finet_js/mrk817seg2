@@ -20,6 +20,7 @@ python3 $HOME/astr/hetast/src/train.py data_folder=datasets/ZTF_rm_segs/Mrk817/X
                                        fixed.num_resamples=12 \
                                        training.optimizer.scheduler=false \
                                        save_at=2000 \
+                                       args.niters=100000 \
                                        print_at=100 \
                                        training.loss.kl_annealing=false \
                                        filter.min_length=1

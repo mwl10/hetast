@@ -17,6 +17,7 @@ python3 $HOME/astr/hetast/src/train.py data_folder=datasets/ZTF_rm_segs/Mrk817/X
                                        dataset.start_col=0 \
                                        dataset.sep=whitespace
                                        dataset.shuffle=false \
+                                       args.niters=100000 \
                                        fixed.num_resamples=12 \
                                        training.optimizer.scheduler=false \
                                        save_at=2000 \

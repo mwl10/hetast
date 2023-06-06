@@ -5,17 +5,17 @@
 #SBATCH -p res-gpu-large
 #SBATCH --qos=long-high-prio
 #SBATCH --job-name=hetvae
-#SBATCH --output="mrk817seg2%j.out"
+#SBATCH --output="mrk817%j.out"
 #SBATCH -t 150:00:0
 
 source /etc/profile
 source activate $HOME/miniconda/envs/hetvae
 
-python3 $HOME/astr/hetast/src/train.py data_folder=datasets/ZTF_rm_segs/Mrk817/X/ZTF_epoch2_ \
+python3 $HOME/astr/hetast/src/train.py data_folder=datasets\ZTF_Mrk817 \
                                        checkpoint=datasets/ZTF_gri0.8933992385864258.h5
                                        training.optimizer.lr=0.0001 \
-                                       dataset.start_col=0 \
-                                       dataset.sep=whitespace \
+                                       dataset.start_col=1 \
+                                       dataset.sep=comma \
                                        dataset.shuffle=false \
                                        fixed.num_resamples=12 \
                                        training.optimizer.scheduler=false \
@@ -24,8 +24,3 @@ python3 $HOME/astr/hetast/src/train.py data_folder=datasets/ZTF_rm_segs/Mrk817/X
                                        print_at=100 \
                                        training.loss.kl_annealing=false \
                                        filter.min_length=1
-                                       
-                                
-                                       
-                                       
-

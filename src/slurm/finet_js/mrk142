@@ -11,8 +11,8 @@
 source /etc/profile
 source activate $HOME/miniconda/envs/hetvae
 
-python3 $HOME/astr/hetast/src/train.py data_folder=datasets\ZTF_Mrk142 \
-                                       checkpoint=datasets/ZTF_gri0.8933992385864258.h5
+python3 $HOME/astr/hetast/src/train.py data_folder=datasets/ZTF_Mrk142 \
+                                       checkpoint=datasets/ZTF_gri0.8933992385864258.h5 \
                                        training.optimizer.lr=0.0001 \
                                        dataset.start_col=1 \
                                        dataset.sep=comma \

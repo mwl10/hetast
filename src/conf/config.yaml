@@ -33,7 +33,7 @@ model:
      
 training: 
     niters :  6000
-    patience :  10000
+    patience :  100000
     batch_size: 2
     k_iwae: 1
     optimizer: 
@@ -45,7 +45,7 @@ training:
     scheduler: 
         reset: False
         factor: 0.9
-        lr_patience: 35
+        lr_patience: 500
         threshold: 0.01   
     regularization: 
         dropout: 0.1

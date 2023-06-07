@@ -5,7 +5,7 @@
 #SBATCH -p res-gpu-large
 #SBATCH --qos=long-high-prio
 #SBATCH --job-name=hetvae
-#SBATCH --output="ngc5548%j.out"
+#SBATCH --output="NGC5548%j.out"
 #SBATCH -t 150:00:0
 
 source /etc/profile
@@ -17,14 +17,10 @@ python3 $HOME/astr/hetast/src/train.py data_folder=datasets/ZTF_NGC5548 \
                                        dataset.start_col=1 \
                                        dataset.sep=comma \
                                        dataset.shuffle=false \
+                                       training.scheduler.reset=true \
                                        fixed.num_resamples=12 \
-                                       training.optimizer.scheduler=false \
                                        save_at=2000 \
                                        training.niters=100000 \
                                        print_at=100 \
                                        training.loss.kl_annealing=false \
                                        filter.min_length=1
-                                       
-                                
-                                       
-                                       

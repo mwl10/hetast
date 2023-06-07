@@ -54,10 +54,15 @@ def train(args):
         test_losses = losses[2]
         loss = train_losses[-1][0]
         epoch+=1
-        if args.scheduler==False or args.reset==True:
+        if args.scheduler==False or args.reset==True: ## reset the learning rate or scheduler params in either case
+            scheduler = lr_scheduler.ReduceLROnPlateau(optimizer,factor=args.factor,
+                                                   threshold=args.threshold, 
+                                                   patience=args.lr_patience) #factor=0.1, patience=10, threshold=0.0001, threshold_mode='rel',  eps=1e-08,)
             for g in optimizer.param_groups:
                     ## update learning rate for checkpoint 
-                    g['lr'] = args.lr    
+                    g['lr'] = args.lr   
+            print(f'reset scheduler to {args.factor=}, {args.threshold=},{args.lr_patience=}, {args.lr=}')
+            
         print(f'loaded checkpoint w/ {loss=}')
         
         
@@ -116,6 +121,8 @@ def train(args):
               train_batch[:,:,:,1] * subsampled_mask, subsampled_mask), 1).transpose(2,1)
             recon_context_y = torch.cat((
                 train_batch[:,:,:,1] * recon_mask, recon_mask), 1).transpose(2,1)
+            
+            ###
             #############################################################
             loss_info = net.compute_unsupervised_loss(
                 train_batch[:, 0, :,0],
@@ -146,10 +153,6 @@ def train(args):
             train_n += batch_len
             #########################################################
 #         print(train_loss, avg_loglik, avg_wloglik, avg_kl, mse, wmse)
-        ####### nan, stop training #############
-        if np.isnan(train_loss / train_n):
-            print('nan in loss,,,,,,,,, stopping')
-            break
 
         #### validation loss
         val_nll, val_mse, val_indiv_nlls = utils.evaluate_hetvae(net,dim,val_loader,device=args.device)
@@ -185,6 +188,11 @@ def train(args):
             test_losses.append([test_nll.item(),test_mse.item()])
             val_losses.append([val_nll.item(),val_mse.item()])
             print('test nll: {:.4f}, test mse: {:.4f}'.format(test_nll,test_mse))
+                ####### nan, stop training #############
+        if np.isnan(train_loss / train_n):
+            print('nan in loss,,,,,,,,, stopping')
+            break
+
 
         ########### save model checkpoint ##############
         if itr % args.save_at == 0:

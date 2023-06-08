@@ -5,7 +5,7 @@ import os
 #hacky ugly, but model is giving screwed up accuracies locally so do it on hpc 
 
 data_folders = ['ZTF_3C273', 
-                'MCG+08-11-011', 
+                'ZTF_MCG+08-11-011', 
                 'ZTF_Mrk142',
                 'ZTF_rm_segs/Mrk142/X/ZTF_epoch3_',
                 'ZTF_NGC5548', 
@@ -24,7 +24,7 @@ cp_files = ['3C273/ZTF_3C273-1.3744778633117676.h5',
             'Mrk817/ZTF_epoch2_-1.4073609113693237.h5']
             
 
-data_folders = [os.path.join('datasets', df) for df in data_folder]
+data_folders = [os.path.join('datasets', df) for df in data_folders]
 cp_files = [os.path.join('datasets','keep_rm', cp) for cp in cp_files]
 
 

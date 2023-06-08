@@ -1,5 +1,6 @@
 from utils import intrp
 import sys
+import os
 
 #hacky ugly, but model is giving screwed up accuracies locally so do it on hpc 
 

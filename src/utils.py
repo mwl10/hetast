@@ -5,14 +5,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from glob import glob
 from dataset import DataSet, ZtfDataSet
-from eztao.carma import DRW_term, DHO_term
-from eztao.ts import gpSimRand
+# from eztao.carma import DRW_term, DHO_term
+# from eztao.ts import gpSimRand
+# from eztao.carma import DRW_term, DHO_term
+# from eztao.ts import gpSimRand, gpSimFull
 import os
 import sys
 import model
 import torch.optim as optim
-from eztao.carma import DRW_term, DHO_term
-from eztao.ts import gpSimRand, gpSimFull
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from torch.optim import lr_scheduler
@@ -20,6 +20,64 @@ import pickle
 import warnings
  
 
+def intrp(data_folder, cp_file, resolution=0.1, save_folder='intrps', device='mps'):
+    np.random.seed(2) 
+    torch.manual_seed(2)
+    if data_folder.lower().find('segs') > 0:
+        lcs = get_data(data_folder, test_split=0.2,shuffle=False, \
+                             num_resamples=12, min_length=10,sep=' ',start_col=0,keep_missing=False)
+    else: 
+        lcs = get_data(data_folder,test_split=0.2, shuffle=False, num_resamples=12, min_length=1)
+
+    net,optimizer,scheduler,lrs, args, epoch, losses = load_checkpoint(cp_file, lcs.data_obj, device=device)
+    #######################################
+    avg_nll, avg_mse, _ = evaluate_hetvae(net,lcs.data_obj['input_dim'],lcs.data_obj['train_loader'],frac=0.5,k_iwae=1,device=device)
+    print(f'evaluated w/ {avg_nll.item()=}, {avg_mse.item()=}')
+    if avg_nll > 0:
+        print('greater than 0 avg nll, not saving')
+        return
+    ##########      
+    qzs,disc_path = encode(lcs.data_obj['train_loader'], net, device=device)
+    n_samples = 10
+    zs = (np.random.randn(n_samples, qzs.shape[0], qzs.shape[2],qzs.shape[3]) * qzs[:,1,:,:] + qzs[:,0,:,:])
+    # choose target time points
+    target_tp = np.arange(0,np.max(lcs.dataset[0,0,:,0]),step=resolution, dtype=np.float32)
+    # format it... want (num exs x num bands x num tps)
+    #target_tp = lcs.dataset[:,0,:,0].flatten()
+    target_tp = target_tp[np.newaxis].repeat(len(lcs.bands),axis=0)[np.newaxis].repeat(lcs.dataset.shape[0],axis=0)
+    interps = np.array([decode(net,z[:10],disc_path[:10],target_tp[:10],device=device) for z in zs])
+    t = interps[0,:,:,:,0]
+    y_avg = interps[:,:,:,:,1].mean(0)
+    yerr_avg = interps[:,:,:,:,2].mean(0)
+    intps = np.concatenate((t[np.newaxis],y_avg[np.newaxis],yerr_avg[np.newaxis]),axis=0).transpose(1,2,3,0)
+    
+    ###### unnormalize #################
+    for i, object_lcs in enumerate(lcs.unnormalized_data[:10]): 
+        min_t = 1000000
+        for lc in object_lcs:
+            if lc[:,1].any():
+                if lc[0,0] < min_t:
+                    min_t = lc[0,0]
+
+        for j, lc in enumerate(object_lcs):
+            if lc[:,1].any():
+                mean = np.mean(lc[:,1])
+                std = np.std(lc[:,1])
+                intps[i,j,:,0] = intps[i,j,:,0] + min_t
+                intps[i,j,:,1] = (intps[i,j,:,1] * std) + mean  
+                intps[i,j,:,2] = (intps[i,j,:,2] * std)
+    #####################################
+    
+    for band in [2,0,1]:
+        t=intps[0,band,:,0]
+        y=intps[:,band,:,1].mean(0)
+        yerr=intps[:,band,:,2].mean(0)
+        if not os.path.isdir(save_folder): os.mkdir(save_folder)
+        save_file = os.path.join(save_folder,f'{os.path.splitext(os.path.basename(cp_file))[0]}_{lcs.bands[band]}.dat')
+        print(f'saving {save_file}')
+        np.savetxt(save_file, np.stack((t,y,yerr)).T)
+       
+          
     
 ## creates an array for kl annealing schedule, credits to: https://github.com/haofuml/cyclical_annealing
 def frange_cycle_linear(n_iter, start=0.0, stop=1.0,  n_cycle=4, ratio=0.5) -> np.ndarray:
@@ -412,7 +470,7 @@ def plot_recons(examples, recons, N=7, figsize=(35,5)):
 #     [ax[i][index].set_xlabel(lcs.bands[index],fontsize=fs+10) for index in range(len(lcs.bands))]
     
 
-def preview_lcs(lcs, indexes=[0,1,34,100], figsize=(15,15), fs=30):
+def preview_lcs(lcs, indexes=[0,1,34,100], figsize=(15,15), fs=30,save=False,filepath=''):
     plt.rcParams['xtick.labelsize'] = 20
     plt.rcParams['ytick.labelsize'] = 20
     dims = lcs.dataset.shape[1]
@@ -434,6 +492,7 @@ def preview_lcs(lcs, indexes=[0,1,34,100], figsize=(15,15), fs=30):
     lines,labels = lines_labels[0], lines_labels[1]
     fig.legend(lines, labels, loc='upper left')
     [ax[c-1][index].set_xlabel(lcs.bands[index],fontsize=fs+10) for index in range(len(lcs.bands))]
+    if save: plt.savefig(filepath)
     
     
     

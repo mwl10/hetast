@@ -5,7 +5,7 @@
 #SBATCH -p res-gpu-large
 #SBATCH --qos=long-high-prio
 #SBATCH --job-name=hetvae
-#SBATCH --output="3C273%j.out"
+#SBATCH --output="intrpz%j.out"
 #SBATCH -t 150:00:0
 
 source /etc/profile

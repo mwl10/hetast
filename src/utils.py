@@ -68,7 +68,7 @@ def intrp(data_folder, cp_file, resolution=0.1, save_folder='intrps', device='mp
                 intps[i,j,:,2] = (intps[i,j,:,2] * std)
     #####################################
     
-    for band in [2,0,1]:
+    for band in [0]:
         t=intps[0,band,:,0]
         y=intps[:,band,:,1].mean(0)
         yerr=intps[:,band,:,2].mean(0)

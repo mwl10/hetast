@@ -2,7 +2,6 @@
 import utils
 import sys
 import os
-
 import sys
 import os
 import torch
@@ -11,7 +10,6 @@ import utils
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 import pickle 
-%load_ext autoreload
 np.random.seed(2) 
 torch.manual_seed(2)
 

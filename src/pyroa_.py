@@ -5,7 +5,7 @@ import pickle
 
 filters = ["g","r","i"] 
 objName = "MCG+08-11-011"
-psi_types = ["LogGaussian"]
+psi_types = ["LogGaussian","LogGaussian"]
 
 ## need the dirs to run this, 
 ## pkl the fit
@@ -33,7 +33,6 @@ if not os.path.isdir('pyroa_fits'): os.mkdir('pyroa_fits')
 
 seg1 = 'notebooks/intrps/MCG+08-11-011/gri_finet_seg1/'
 seg2 = 'notebooks/intrps/MCG+08-11-011/gri_finet_seg2/'
-
 
 fit1 = PyROA.Fit(seg1, objName, filters, default, Nburnin=15000,Nsamples=20000, delay_dist=True, add_var=True, psi_types=psi_types,)# init_delta=20.0)
 

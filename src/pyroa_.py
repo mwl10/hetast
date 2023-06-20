@@ -4,44 +4,28 @@ import pickle
 
 
 filters = ["g","r","i"] 
-objName = "MCG+08-11-011"
+obj_name = "NGC5548"
 psi_types = ["LogGaussian","LogGaussian"]
 
-## need the dirs to run this, 
-## pkl the fit
 
-# for every 500 obs from the interpolation? move over every 250? 
+default = [[0.0, 10.0], [0, 30.0], [0.00, 50.0], [0.01, 10.0], [0.0, 10.0]]
+med = [[0.0, 10.0], [0, 30.0], [0.00, 50.0], [5,15], [0.0, 10.0]]
+high = [[0.0, 10.0], [0.0, 30.0], [0.00, 50.0], [10,30], [0.0, 10.0]]
 
+init_deltas = [1,10,20]
 
-default = [[0.0, 20.0],[0.0, 100.0], [-50.0, 50.0], [0.01, 10.0], [0.0, 10.0]]
-            # rms      # mean       # lag        # width of window  # extra error 
-priors = [[0.0, 20.0], [0.0, 100.0], [-50.0, 50.0], [0.01, 10.0], [0.0, 10.0]]
-
-inc_window = [[0.0, 20.0], [0.0, 100.0], [-50.0, 50.0], [10,30], [0.0, 10.0]]
-
-if not os.path.isdir('pyroa_fits'): os.mkdir('pyroa_fits')
+if not os.path.isdir('pyroa_fits'): 
+    os.mkdir('pyroa_fits')
   
- 
-# segment 1: 
-#     58300
-#     58600
+segments = ['notebooks/intrps/NGC5548/gri_seg3_10_det','notebooks/intrps/NGC5548/gri_seg34_10_det', 'datasets/ZTF_rm_segs/NGC5548/epoch3_det','datasets/ZTF_rm_segs/NGC5548/epoch34_det_det']
+
+     
+for i, prior in enumerate([default,med,high]):
+    for segment in segments:
+        fit = PyROA.Fit(segment + '/', obj_name, filters, prior, Nburnin=25000,Nsamples=35000, delay_dist=True,
+                        add_var=True, psi_types=psi_types,init_delta=init_deltas[i])
+        save_fn = obj_name + '_' i +'_' + segment.split('/')[-1]
+        with open(f'pyroa_fits/{save_fn}', 'wb') as f:
+            pickle.dump(fit, f, pickle.HIGHEST_PROTOCOL)
     
-
-# segment 2:   
-#     58700
-#     59000
-
-seg1 = 'notebooks/intrps/MCG+08-11-011/gri_finet_seg1/'
-seg2 = 'notebooks/intrps/MCG+08-11-011/gri_finet_seg2/'
-
-fit1 = PyROA.Fit(seg1, objName, filters, default, Nburnin=15000,Nsamples=20000, delay_dist=True, add_var=True, psi_types=psi_types,)# init_delta=20.0)
-
-fit2 = PyROA.Fit(seg2, objName, filters, default, Nburnin=15000,Nsamples=20000, delay_dist=True, add_var=True, psi_types=psi_types,)# init_delta=20.0)
-
-
-  
-with open('pyroa_fits/fit1.pkl', 'wb') as f:
-    pickle.dump(fit1, f, pickle.HIGHEST_PROTOCOL)
     
-with open('pyroa_fits/fit2.pkl', 'wb') as f:
-    pickle.dump(fit2, f, pickle.HIGHEST_PROTOCOL)

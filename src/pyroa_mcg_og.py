@@ -3,8 +3,8 @@ import os
 import pickle 
 
 
-filters = ["g","r","i"] 
-obj_name = "NGC5548"
+filters = ["g","r"] 
+obj_name = "MCG+08-11-011"
 psi_types = ["LogGaussian","LogGaussian"]
 
 

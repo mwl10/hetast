@@ -10,4 +10,4 @@
 source /etc/profile
 source activate $HOME/miniconda/envs/hetvae
 
-python3 $HOME/astr/hetast/src/pyroa_mcg_intrp.py
+python3 $HOME/astr/hetast/src/pyroa_mcg_og.py

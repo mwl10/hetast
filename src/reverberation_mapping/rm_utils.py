@@ -1,22 +1,27 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
+import glob
+import numpy as np
 
 # saves detrended files into epoch_folder + '_det'
 def linear_detrend(epoch_folder, save=False):
     if save:
         det_folder = os.path.split(epoch_folder)[0]+'_det'
         if not os.path.isdir(det_folder): os.mkdir(det_folder)
+        print('saving to:', det_folder)
     for file in glob.glob(epoch_folder+'/*'): 
         data = np.loadtxt(file)
-        t = data[:, 0]
+        mn = np.min(data[:,0])
+        t = data[:, 0] - mn
         y = data[:, 1]
+        yerr = data[:,2]
         trend = np.polyfit(t, y, deg=1)
-        trend_line = np.polyval(trend, t)
-        detrended = y - trend_line
+        detrended = y - (t*trend[0])
         if save:
             fn = os.path.join(det_folder, os.path.split(file)[1])
-            np.savetxt(fn, np.column_stack((t, detrended)), delimiter='\t')
+            print('saving: ',fn)
+            np.savetxt(fn, np.column_stack((t+mn, detrended, yerr)), delimiter=' ')
             
             
 

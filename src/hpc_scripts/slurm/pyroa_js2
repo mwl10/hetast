@@ -1,0 +1,13 @@
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -c 1
+#SBATCH -p cpu
+#SBATCH --qos=long-cpu
+#SBATCH --job-name=pyroa
+#SBATCH --output="roa%j.out"
+#SBATCH -t 150:00:0
+
+source /etc/profile
+source activate $HOME/miniconda/envs/hetvae
+
+python3 $HOME/astr/hetast/src/pyroa_mcg_og.py

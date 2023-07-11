@@ -244,7 +244,10 @@ class DataSet:
             torch.manual_seed(seed=seed)
             shuf = np.random.permutation(len(self.dataset)) 
             self.dataset = self.dataset[shuf]
-            self.unnormalized_data = [self.unnormalized_data[i] for i in shuf]
+            try: ## incase we don't normalize the data, unnorm_data wont be set
+                self.unnormalized_data = [self.unnormalized_data[i] for i in shuf]
+            except Exception:
+                pass 
             self.valid_files_df = self.valid_files_df.reindex(self.valid_files_df.index[shuf])
         # val and train set can be the same because light curves are conditioned 
         # on differing subsamples
@@ -268,20 +271,22 @@ class DataSet:
         }
         
         
-    def set_sigma_nxs(self):
+    def set_sigma_xs(self):
         """
-        setting the normalized excess variance, as per the definition in Vaughan et al. 2003.
+        setting the intrinsic variance, as per the definition in Tachibana et al. 2020.
         side effects:
-            sets self.sigma_nxs as a numpy array with dimensions as (len(self.dataset), len(self.bands)) 
+            sets self.sigma_xs as a numpy array with dimensions as (len(self.dataset), len(self.bands)) 
         """
-        sigma_nxs = np.zeros((len(self.dataset),len(self.bands)))
+        sigma_xs = np.zeros((len(self.dataset),len(self.bands)))
         for i, object_lcs in enumerate(self.dataset):
             for j, lc in enumerate(object_lcs):
                 if lc.any() > 0:
-                    sigma_nxs[i,j] = ((1/(len(lc)-1)) * ((lc[:,1] - np.mean(lc[:,1]))**2).sum() - np.mean(lc[:,2]**2)) / np.mean(lc[:,1])**2
+                    sigma_xs[i,j] = ((1/(len(lc)-1))*(((lc[:,1] - np.mean(lc[:,1]))**2).sum()))-((1/len(lc))*(lc[:,2]**2).sum())
+                    
+#                     sigma_nxs[i,j] = ((1/(len(lc)-1)) * ((lc[:,1] - np.mean(lc[:,1]))**2).sum() - np.mean(lc[:,2]**2)) / np.mean(lc[:,1])**2
                 else:
-                    sigma_nxs[i,j] = 0
-        self.sigma_nxs =  sigma_nxs      
+                    sigma_xs[i,j] = 0
+        self.sigma_xs =  sigma_xs      
        
     def set_mean_mag(self):
         """

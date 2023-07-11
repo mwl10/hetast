@@ -160,28 +160,7 @@ def get_data(folder, sep=',', start_col=1, batch_size=2, min_length=2, n_union_t
     lcs.set_data_obj(batch_size=batch_size, shuffle=shuffle,test_split=test_split, seed=seed)
     return lcs
 
-            
-
-    
-# old...    
-# def load_checkpoint(filename, data_obj, device='mps'):
-#     """
-#     loads a model checkpoint 
-#     """
-#     if os.path.isfile(filename):
-#         print("=> loading checkpoint '{}'".format(filename))
-#         cp = torch.load(filename, map_location=torch.device(device))
-#         cp['args'].device = device
-#         cp['args'].net = 'HeTVAE'
-#         cp['args'].num_heads = cp['args'].enc_num_heads
-#         print(cp['args'])
-#         net = model.load_network(cp['args'], data_obj['input_dim'], data_obj['union_tp'])
-#         net.load_state_dict(cp['state_dict'])
-#         params = list(net.parameters())
-#         optimizer = optim.Adam(params)
-#         optimizer.load_state_dict(cp['optimizer_state_dict'])
-#         return net,optimizer, cp['args'], cp['epoch'], cp['loss'], cp['train_losses'], cp['test_losses']
-    
+           
 def load_checkpoint(filename, data_obj, device='mps'):
     """
     loads a model checkpoint 
@@ -189,6 +168,7 @@ def load_checkpoint(filename, data_obj, device='mps'):
     if os.path.isfile(filename):
         print("=> loading checkpoint '{}'".format(filename))
         cp = torch.load(filename, map_location=torch.device(device))
+#         cp['args'].num_heads=8
         cp['args'].device = device
         cp['args'].is_bounded=True
         print(cp['args'])
@@ -449,50 +429,34 @@ def plot_recons(examples, recons, N=7, figsize=(35,5)):
                                 c='black', marker='x', zorder=30, label='conditioned on', s=25)
             #ax[ex,band].set_ylim([-2,2])
             
-            
-
-# def preview_lcs(lcs, n=1, figsize=(15,15), fs=15):
-#     dims = lcs.dataset.shape[1]
-#     fig, ax = plt.subplots(n, dims, figsize=figsize, squeeze=False)
-#     fig.tight_layout(pad=5.0)
-#     for i in range(n):
-#         obj_name = lcs.valid_files_df.index.values[i]
-#         ax[i][0].set_title(obj_name,fontsize=fs)
-#         for band in range(dims):
-#             t = lcs.dataset[i,band,:,0]
-#             y = lcs.dataset[i,band,:,1]
-#             yerr = lcs.dataset[i,band,:,2]
-#             pts = y.nonzero()[0]
-#             ax[i][band].errorbar(t[pts],y[pts], yerr=yerr[pts], c='blue', fmt='.', \
-#                                  markersize=4, ecolor='red', elinewidth=1, capsize=2)
-#     lines_labels = ax[0][0].get_legend_handles_labels()
-#     lines,labels = lines_labels[0], lines_labels[1]
-#     fig.legend(lines, labels, loc='upper left')
-#     [ax[i][index].set_xlabel(lcs.bands[index],fontsize=fs+10) for index in range(len(lcs.bands))]
-    
 
 def preview_lcs(lcs, indexes=[0,1,34,100], figsize=(15,15), fs=30,save=False,filepath=''):
     plt.rcParams['xtick.labelsize'] = 20
     plt.rcParams['ytick.labelsize'] = 20
     dims = lcs.dataset.shape[1]
+    if dims == 3:
+        order = [2,0,1]
+    else:
+        order = range(dims)
     fig, ax = plt.subplots(len(indexes), dims, figsize=figsize, squeeze=False)
     fig.tight_layout(pad=5.0)
     c = 0
     for i in indexes:
         obj_name = lcs.valid_files_df.index.values[i]
         ax[c][0].set_title(obj_name,fontsize=fs)
-        for band in range(dims):
+        for j,band in enumerate(order):
             t = lcs.dataset[i,band,:,0]
             y = lcs.dataset[i,band,:,1]
             yerr = lcs.dataset[i,band,:,2]
             pts = y.nonzero()[0]
-            ax[c][band].errorbar(t[pts],y[pts], yerr=yerr[pts], c='blue', fmt='.', markersize=4, 
+#             ax[c][j].scatter(t[pts],y[pts], c='blue', marker='.', s=10)
+            ax[c][j].errorbar(t[pts],y[pts], yerr=yerr[pts], c='blue', fmt='.', markersize=4, 
                                  ecolor='red', elinewidth=1, capsize=2)
         c+= 1
     lines_labels = ax[0][0].get_legend_handles_labels()
     lines,labels = lines_labels[0], lines_labels[1]
     fig.legend(lines, labels, loc='upper left')
-    [ax[c-1][index].set_xlabel(lcs.bands[index],fontsize=fs+10) for index in range(len(lcs.bands))]
+    [ax[c-1][index].set_xlabel(lcs.bands[order[index]],fontsize=fs+10) for index in range(len(lcs.bands))]
     if save: plt.savefig(filepath)
     
     

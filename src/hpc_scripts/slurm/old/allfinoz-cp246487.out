@@ -1,0 +1,24 @@
+Namespace(n_union_tp=3500, data_folder='datasets/ZTF_all_noz', checkpoint='datasets/ZTF_all_noz0.8412990570068359.h5', start_col=1, inc_errors=False, print_at=1, embed_time=128, enc_num_heads=16, latent_dim=64, mixing='concat', num_ref_points=16, rec_hidden=128, width=512, save_at=30, patience=100, early_stopping=False, niters=20000, frac=0.5, batch_size=2, mse_weight=5.0, dropout=0.0, num_resamples=0, lr=1e-05, scheduler=False, warmup=4000, kl_zero=False, kl_annealing=True, net='hetvae', device='cuda', const_var=False, var_per_dim=False, std=0.1, seed=2, save=True, k_iwae=1) 68349
+validated 3407 files out of 3407 for band='i'
+validated 3407 files out of 3407 for band='g'
+validated 3407 files out of 3407 for band='r'
+3407 3407
+(2683, 3, 4431, 3)
+created union_tp attribute of length 3500
+dataset created w/ shape (2683, 3, 4431, 3)
+train size: 2414, valid size: 242, test size: 269
+datasets/ZTF_all_noz
+=> loading checkpoint 'datasets/ZTF_all_noz0.8412990570068359.h5'
+Namespace(n_union_tp=3500, data_folder='datasets/ZTF_all_noz', checkpoint='datasets/ZTF_all_noz0.8617551326751709.h5', start_col=1, inc_errors=False, print_at=1, embed_time=128, enc_num_heads=16, latent_dim=64, mixing='concat', num_ref_points=16, rec_hidden=128, width=512, save_at=30, patience=100, early_stopping=False, niters=20000, frac=0.5, batch_size=2, mse_weight=5.0, dropout=0.0, num_resamples=0, lr=1e-05, scheduler=False, warmup=4000, kl_zero=False, kl_annealing=True, net='hetvae', device='cuda', const_var=False, var_per_dim=False, std=0.1, seed=2, save=True, k_iwae=1)
+loaded checkpoint w/ loss=2.9394499876327327
+model_size=574662
+2281,	Iter: 2281, train loss: 3.4438, avg nll: 1.0637, avg wnll: 7.7502, avg kl: 0.1147, mse: 0.472241, wmse: 6.211641, mae: 0.499448
+2282,	Iter: 2282, train loss: 3.3718, avg nll: 0.9973, avg wnll: 6.8890, avg kl: 0.1519, mse: 0.469727, wmse: 6.164556, mae: 0.497220
+2283,	Iter: 2283, train loss: 3.3534, avg nll: 0.9849, avg wnll: 6.6937, avg kl: 0.1604, mse: 0.468048, wmse: 6.138874, mae: 0.496047
+2284,	Iter: 2284, train loss: 3.3445, avg nll: 0.9846, avg wnll: 6.6379, avg kl: 0.1578, mse: 0.466263, wmse: 6.099297, mae: 0.495503
+2285,	Iter: 2285, train loss: 3.3525, avg nll: 0.9809, avg wnll: 6.5078, avg kl: 0.1531, mse: 0.468595, wmse: 6.154029, mae: 0.495817
+2286,	Iter: 2286, train loss: 3.3355, avg nll: 0.9773, avg wnll: 6.4772, avg kl: 0.1480, mse: 0.465945, wmse: 6.120878, mae: 0.494944
+2287,	Iter: 2287, train loss: 3.3413, avg nll: 0.9721, avg wnll: 6.4072, avg kl: 0.1446, mse: 0.468134, wmse: 6.134779, mae: 0.496572
+2288,	Iter: 2288, train loss: 3.3395, avg nll: 0.9745, avg wnll: 6.5074, avg kl: 0.1411, mse: 0.467283, wmse: 6.133189, mae: 0.495721
+2289,	Iter: 2289, train loss: 3.3140, avg nll: 0.9698, avg wnll: 6.4047, avg kl: 0.1382, mse: 0.463084, wmse: 6.071932, mae: 0.493492
+2290,slurmstepd: error: *** JOB 246487 ON gpu1 CANCELLED AT 2023-03-16T03:54:45 ***

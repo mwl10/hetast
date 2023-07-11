@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -c 1
+#SBATCH --gres=gpu:1
+#SBATCH -p res-gpu-large
+#SBATCH --qos=long-high-prio
+#SBATCH --job-name=hetvae
+#SBATCH --output="gputype-%j.out"
+#SBATCH -t 20:00:00
+
+source /etc/profile
+source activate $HOME/miniconda/envs/hetvae
+
+nvidia-smi

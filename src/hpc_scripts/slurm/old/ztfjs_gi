@@ -1,0 +1,29 @@
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -c 1
+#SBATCH --gres=gpu:1
+#SBATCH -p res-gpu-large
+#SBATCH --qos=long-high-prio
+#SBATCH --job-name=hetvae
+#SBATCH --output="gi-%j.out"
+#SBATCH -t 100:00:00
+
+source /etc/profile
+source activate $HOME/miniconda/envs/hetvae
+
+python3 $HOME/astr/hetast/src/train.py \
+    --data-folder datasets/ZTF_gi \
+    --device cuda \
+    --batch-size 64 \
+    --niters 3000 \
+    --start-col 1 \
+    --save-at 100 \
+    --kl-annealing \
+    --enc-num-heads 16 \
+    --latent-dim 64 \
+    --n-union-tp 3500 \
+    --lr 0.00025 \
+    --num-ref-points 16 \
+    --print-at 1 \
+    --frac 0.5 \
+    --num-resamples 0

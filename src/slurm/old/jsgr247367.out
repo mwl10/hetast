@@ -1,6 +1,0 @@
-/var/spool/slurmd/job247367/slurm_script: line 12: activate: No such file or directory
-Traceback (most recent call last):
-  File "/home2/fggr82/astr/hetast/src/trainkl.py", line 2, in <module>
-    import torch
-ModuleNotFoundError: No module named 'torch'
-/var/spool/slurmd/job247367/slurm_script: line 17: --device: command not found
